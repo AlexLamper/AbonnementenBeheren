@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/authOptions";
 import { connectDB } from "@/lib/db";
 import { Subscription } from "@/lib/models/Subscription";
 import { toClient } from "@/lib/serialize";
+import { getPresets } from "@/lib/presets/store";
 import { OverviewClient } from "@/components/OverviewClient";
 
 export default async function OverzichtPage() {
@@ -16,7 +17,14 @@ export default async function OverzichtPage() {
   });
   const initial = docs.map(toClient);
 
+  const presets = await getPresets();
   const firstName = session.user.name?.split(" ")[0];
 
-  return <OverviewClient initial={initial} firstName={firstName} />;
+  return (
+    <OverviewClient
+      initial={initial}
+      presets={presets}
+      firstName={firstName}
+    />
+  );
 }

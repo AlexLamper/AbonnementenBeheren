@@ -5,6 +5,7 @@ import { signOut } from "next-auth/react";
 import { Plus, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import type { ClientSubscription } from "@/lib/types";
+import type { Preset } from "@/lib/presets/types";
 import type { SubscriptionInput } from "@/lib/validation";
 import { totals } from "@/lib/money";
 import { ShareButton } from "@/components/ShareButton";
@@ -16,9 +17,11 @@ import { EditSubscriptionDialog } from "@/components/EditSubscriptionDialog";
 
 export function OverviewClient({
   initial,
+  presets,
   firstName,
 }: {
   initial: ClientSubscription[];
+  presets: Preset[];
   firstName?: string;
 }) {
   const [items, setItems] = useState<ClientSubscription[]>(initial);
@@ -124,6 +127,7 @@ export function OverviewClient({
         open={addOpen}
         onClose={() => setAddOpen(false)}
         onAdd={addItem}
+        presets={presets}
       />
       <EditSubscriptionDialog
         subscription={editing}

@@ -13,15 +13,20 @@ export function AddSubscriptionDialog({
   open,
   onClose,
   onAdd,
+  presets,
 }: {
   open: boolean;
   onClose: () => void;
   onAdd: (input: SubscriptionInput) => Promise<boolean>;
+  presets: Preset[];
 }) {
   const [query, setQuery] = useState("");
   const [custom, setCustom] = useState(false);
 
-  const results = useMemo(() => searchPresets(query), [query]);
+  const results = useMemo(
+    () => searchPresets(query, presets),
+    [query, presets]
+  );
 
   function reset() {
     setQuery("");

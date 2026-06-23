@@ -28,19 +28,23 @@ export const PRESETS: Preset[] = [
   odido,
 ].sort((a, b) => a.name.localeCompare(b.name, "nl"));
 
-/** Case-insensitieve zoekfunctie op dienstnaam en categorie. */
-export function searchPresets(query: string): Preset[] {
+/**
+ * Case-insensitieve zoekfunctie op dienstnaam en categorie.
+ * Pure functie: werkt op de meegegeven lijst (uit de database of de
+ * statische `PRESETS`-fallback), zodat dit ook client-side bruikbaar is.
+ */
+export function searchPresets(query: string, presets: Preset[] = PRESETS): Preset[] {
   const q = query.trim().toLowerCase();
-  if (!q) return PRESETS;
-  return PRESETS.filter(
+  if (!q) return presets;
+  return presets.filter(
     (p) =>
       p.name.toLowerCase().includes(q) ||
       p.category.toLowerCase().includes(q)
   );
 }
 
-export function getPreset(id: string): Preset | undefined {
-  return PRESETS.find((p) => p.id === id);
+export function getPreset(id: string, presets: Preset[] = PRESETS): Preset | undefined {
+  return presets.find((p) => p.id === id);
 }
 
 export type { Preset, PresetPlan } from "@/lib/presets/types";
