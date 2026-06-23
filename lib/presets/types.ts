@@ -16,7 +16,7 @@ export interface Preset {
   logoUrl?: string;
   /** Accentkleur voor het lijstitem (hex). */
   color?: string;
-  /** Voorbereid voor affiliate — nog niet getoond in v1. */
+  /** Voorbereid voor affiliate - nog niet getoond in v1. */
   affiliateUrl?: string;
   plans: PresetPlan[];
 }

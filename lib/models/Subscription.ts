@@ -14,7 +14,7 @@ export interface SubscriptionDoc {
   color?: string;
   notes?: string;
   startDate?: Date;
-  // Voorbereid voor latere herinneringen — nog niet actief in v1.
+  // Voorbereid voor latere herinneringen - nog niet actief in v1.
   nextRenewalDate?: Date;
   reminderEnabled: boolean;
   reminderDaysBefore: number;

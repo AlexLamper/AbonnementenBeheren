@@ -9,11 +9,13 @@ import {
   Check,
   ArrowRight,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import { authOptions } from "@/lib/authOptions";
 import { getPresets } from "@/lib/presets/store";
 import { ServiceLogo } from "@/components/ServiceLogo";
 import { ShareButton } from "@/components/ShareButton";
+import { Reveal } from "@/components/Reveal";
 import { formatEUR, totals } from "@/lib/money";
 
 const FEATURES = [
@@ -118,24 +120,36 @@ export default async function Home() {
         />
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-16 sm:py-24 lg:grid-cols-2">
           <div className="text-center lg:text-left">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-sm font-medium text-brand">
-              <ShieldCheck className="h-4 w-4" />
-              Gratis &amp; zonder gedoe
+            <span
+              className="inline-flex animate-fade-in-up items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-sm font-semibold text-brand"
+              style={{ animationDelay: "0ms" }}
+            >
+              <Sparkles className="h-4 w-4" />
+              100% gratis - geen creditcard nodig
             </span>
-            <h1 className="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+            <h1
+              className="mt-6 animate-fade-in-up text-balance text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
+              style={{ animationDelay: "75ms" }}
+            >
               Al je abonnementen op één plek
             </h1>
-            <p className="mx-auto mt-5 max-w-md text-lg text-slate-600 lg:mx-0">
+            <p
+              className="mx-auto mt-5 max-w-md animate-fade-in-up text-pretty text-lg text-slate-600 lg:mx-0"
+              style={{ animationDelay: "150ms" }}
+            >
               De simpelste manier om je abonnementen bij te houden. Voeg in één
               klik diensten toe en zie meteen wat je per maand en per jaar kwijt
-              bent.
+              bent. Helemaal gratis.
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+            <div
+              className="mt-8 flex animate-fade-in-up flex-wrap items-center justify-center gap-3 lg:justify-start"
+              style={{ animationDelay: "225ms" }}
+            >
               <Link
                 href="/login?modus=registreren"
                 className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 font-medium text-white shadow-sm transition hover:opacity-90"
               >
-                Gratis beginnen
+                Maak gratis je account
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
@@ -145,8 +159,11 @@ export default async function Home() {
                 Inloggen
               </Link>
             </div>
-            <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-slate-500 lg:justify-start">
-              {["Geen creditcard nodig", "Direct inzicht", "Nederlands"].map(
+            <ul
+              className="mt-6 flex animate-fade-in-up flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-slate-500 lg:justify-start"
+              style={{ animationDelay: "300ms" }}
+            >
+              {["Voor altijd gratis", "Geen verborgen kosten", "Nederlands"].map(
                 (t) => (
                   <li key={t} className="inline-flex items-center gap-1.5">
                     <Check className="h-4 w-4 text-brand" />
@@ -158,7 +175,10 @@ export default async function Home() {
           </div>
 
           {/* Mock dashboard */}
-          <div className="relative mx-auto w-full max-w-md">
+          <div
+            className="relative mx-auto w-full max-w-md animate-fade-in-up"
+            style={{ animationDelay: "200ms" }}
+          >
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/5">
               <div className="mb-4 grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-brand/5 p-4">
@@ -213,7 +233,7 @@ export default async function Home() {
           <p className="text-center text-sm font-medium text-slate-500">
             Werkt met je favoriete diensten
           </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-5">
+          <Reveal className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-5">
             {logoStrip.map((p) => (
               <div
                 key={p.id}
@@ -230,7 +250,7 @@ export default async function Home() {
                 </span>
               </div>
             ))}
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -246,10 +266,11 @@ export default async function Home() {
           </p>
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map(({ icon: Icon, title, text }) => (
-            <div
+          {FEATURES.map(({ icon: Icon, title, text }, i) => (
+            <Reveal
               key={title}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md"
+              delay={i * 100}
+              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
             >
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/10 text-brand">
                 <Icon className="h-5 w-5" />
@@ -258,7 +279,7 @@ export default async function Home() {
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
                 {text}
               </p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -273,15 +294,17 @@ export default async function Home() {
           </div>
           <ol className="mt-12 grid gap-8 sm:grid-cols-3">
             {STEPS.map((step, i) => (
-              <li key={step.title} className="relative text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand text-lg font-bold text-white shadow-sm">
-                  {i + 1}
-                </div>
-                <h3 className="mt-4 font-semibold text-slate-900">
-                  {step.title}
-                </h3>
-                <p className="mt-2 text-sm text-slate-600">{step.text}</p>
-              </li>
+              <Reveal key={step.title} delay={i * 120}>
+                <li className="relative text-center">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand text-lg font-bold text-white shadow-sm">
+                    {i + 1}
+                  </div>
+                  <h3 className="mt-4 font-semibold text-slate-900">
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-600">{step.text}</p>
+                </li>
+              </Reveal>
             ))}
           </ol>
         </div>
@@ -289,24 +312,31 @@ export default async function Home() {
 
       {/* CTA */}
       <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="overflow-hidden rounded-3xl bg-brand px-6 py-14 text-center shadow-lg">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Klaar voor overzicht?
-          </h2>
-          <p className="mx-auto mt-4 max-w-md text-lg text-white/90">
-            Begin gratis en zie binnen een minuut wat je abonnementen je kosten.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/login?modus=registreren"
-              className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-medium text-brand shadow-sm transition hover:bg-slate-100"
-            >
-              Gratis beginnen
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <ShareButton subtle />
+        <Reveal>
+          <div className="overflow-hidden rounded-3xl bg-brand px-6 py-14 text-center shadow-lg">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-sm font-semibold text-white">
+              <Sparkles className="h-4 w-4" />
+              Helemaal gratis
+            </span>
+            <h2 className="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Klaar voor overzicht?
+            </h2>
+            <p className="mx-auto mt-4 max-w-md text-lg text-white/90">
+              Maak gratis je account en zie binnen een minuut wat je
+              abonnementen je kosten. Geen creditcard, geen verborgen kosten.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/login?modus=registreren"
+                className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-medium text-brand shadow-sm transition hover:bg-slate-100"
+              >
+                Maak gratis je account
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <ShareButton light />
+            </div>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* Footer */}
@@ -315,7 +345,10 @@ export default async function Home() {
           <span className="font-semibold text-slate-700">
             AbonnementenBeheren
           </span>
-          <span>© {new Date().getFullYear()} — Al je abonnementen op één plek</span>
+          <span>
+            Gemaakt door{" "}
+            <span className="font-medium text-slate-700">Alex Lamper</span>
+          </span>
         </div>
       </footer>
     </div>

@@ -19,10 +19,31 @@ export function AuthForm({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+  }>({});
   const [loading, setLoading] = useState(false);
+
+  function validate() {
+    const next: typeof errors = {};
+    if (mode === "registreren" && !name.trim()) {
+      next.name = "Vul je naam in.";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      next.email = "Vul een geldig e-mailadres in.";
+    }
+    if (password.length < 6) {
+      next.password = "Gebruik minimaal 6 tekens.";
+    }
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validate()) return;
     setLoading(true);
     try {
       if (mode === "registreren") {
@@ -61,7 +82,10 @@ export function AuthForm({
           <button
             key={m}
             type="button"
-            onClick={() => setMode(m)}
+            onClick={() => {
+              setMode(m);
+              setErrors({});
+            }}
             className={`rounded-md py-2 text-sm font-medium capitalize transition ${
               mode === m
                 ? "bg-white text-slate-900 shadow-sm"
@@ -79,26 +103,39 @@ export function AuthForm({
             label="Naam"
             type="text"
             value={name}
-            onChange={setName}
+            onChange={(v) => {
+              setName(v);
+              if (errors.name) setErrors((e) => ({ ...e, name: undefined }));
+            }}
             autoComplete="name"
-            required
+            placeholder="Je naam"
+            error={errors.name}
           />
         )}
         <Field
           label="E-mailadres"
           type="email"
           value={email}
-          onChange={setEmail}
+          onChange={(v) => {
+            setEmail(v);
+            if (errors.email) setErrors((e) => ({ ...e, email: undefined }));
+          }}
           autoComplete="email"
-          required
+          placeholder="naam@voorbeeld.nl"
+          error={errors.email}
         />
         <Field
           label="Wachtwoord"
           type="password"
           value={password}
-          onChange={setPassword}
+          onChange={(v) => {
+            setPassword(v);
+            if (errors.password)
+              setErrors((e) => ({ ...e, password: undefined }));
+          }}
           autoComplete={mode === "registreren" ? "new-password" : "current-password"}
-          required
+          placeholder={mode === "registreren" ? "Minimaal 6 tekens" : "••••••••"}
+          error={errors.password}
         />
         <button
           type="submit"
@@ -139,14 +176,16 @@ function Field({
   value,
   onChange,
   autoComplete,
-  required,
+  placeholder,
+  error,
 }: {
   label: string;
   type: string;
   value: string;
   onChange: (v: string) => void;
   autoComplete?: string;
-  required?: boolean;
+  placeholder?: string;
+  error?: string;
 }) {
   return (
     <label className="block">
@@ -158,9 +197,15 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         autoComplete={autoComplete}
-        required={required}
-        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+        placeholder={placeholder}
+        aria-invalid={Boolean(error)}
+        className={`w-full rounded-lg border px-3 py-2 text-slate-900 placeholder:text-slate-400 outline-none transition focus:ring-2 ${
+          error
+            ? "border-red-400 focus:border-red-400 focus:ring-red-400/20"
+            : "border-slate-300 focus:border-brand focus:ring-brand/20"
+        }`}
       />
+      {error && <span className="mt-1 block text-sm text-red-600">{error}</span>}
     </label>
   );
 }

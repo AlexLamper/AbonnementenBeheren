@@ -10,7 +10,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "AbonnementenBeheren — al je abonnementen op één plek",
+  title: "AbonnementenBeheren - al je abonnementen op één plek",
   description:
     "De simpelste manier om al je abonnementen bij te houden. Voeg in één klik diensten toe en zie direct je maandelijkse en jaarlijkse kosten.",
 };
