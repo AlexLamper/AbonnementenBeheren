@@ -6,6 +6,7 @@ export const ziggo: Preset = {
   category: "Internet & TV",
   logoUrl: "https://www.google.com/s2/favicons?domain=ziggo.nl&sz=64",
   color: "#F36F21",
+  affiliateUrl: "https://www.ziggo.nl/tv-internet",
   plans: [
     { name: "Internet", price: 49.0, billingPeriod: "maandelijks" },
     { name: "Internet & TV", price: 62.0, billingPeriod: "maandelijks" },

@@ -6,6 +6,7 @@ export const adobe: Preset = {
   category: "AI & Software",
   logoUrl: "https://www.google.com/s2/favicons?domain=adobe.com&sz=64",
   color: "#FF0000",
+  affiliateUrl: "https://www.adobe.com/nl/creativecloud/plans.html",
   plans: [
     { name: "Photoshop", price: 25.79, billingPeriod: "maandelijks" },
     { name: "Alle apps", price: 65.99, billingPeriod: "maandelijks" },

@@ -6,6 +6,7 @@ export const netflix: Preset = {
   category: "Streaming",
   logoUrl: "https://www.google.com/s2/favicons?domain=netflix.com&sz=64",
   color: "#E50914",
+  affiliateUrl: "https://www.netflix.com/nl/",
   plans: [
     { name: "Standaard met advertenties", price: 6.99, billingPeriod: "maandelijks" },
     { name: "Standaard", price: 13.99, billingPeriod: "maandelijks" },

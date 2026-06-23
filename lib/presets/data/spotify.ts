@@ -7,7 +7,7 @@ export const spotify: Preset = {
   category: "Muziek",
   logoUrl: "https://www.google.com/s2/favicons?domain=spotify.com&sz=64",
   color: "#1DB954",
-  affiliateUrl: undefined,
+  affiliateUrl: "https://www.spotify.com/nl/premium/",
   plans: [
     { name: "Individual", price: 12.99, billingPeriod: "maandelijks" },
     { name: "Student", price: 6.99, billingPeriod: "maandelijks" },

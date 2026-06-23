@@ -6,6 +6,7 @@ export const basicfit: Preset = {
   category: "Sport",
   logoUrl: "https://www.google.com/s2/favicons?domain=basic-fit.com&sz=64",
   color: "#FF6600",
+  affiliateUrl: "https://www.basic-fit.com/nl-nl/prijs",
   plans: [
     { name: "Comfort", price: 24.99, billingPeriod: "maandelijks" },
     { name: "Premium", price: 29.99, billingPeriod: "maandelijks" },
