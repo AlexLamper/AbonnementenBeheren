@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -8,15 +9,46 @@ import {
   Share2,
   Check,
   ArrowRight,
-  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import { authOptions } from "@/lib/authOptions";
 import { getPresets } from "@/lib/presets/store";
 import { ServiceLogo } from "@/components/ServiceLogo";
 import { ShareButton } from "@/components/ShareButton";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import { Reveal } from "@/components/Reveal";
 import { formatEUR, totals } from "@/lib/money";
+import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
+};
+
+const FAQS = [
+  {
+    q: "Hoe kan ik mijn abonnementen beheren?",
+    a: "Maak gratis een account aan, voeg je abonnementen toe vanuit de kant-en-klare lijst met diensten en je ziet direct al je abonnementen op één plek met de kosten per maand en per jaar.",
+  },
+  {
+    q: "Is abonnementen beheren met AbonnementenBeheren gratis?",
+    a: "Ja, AbonnementenBeheren is volledig gratis. Je hebt geen creditcard nodig en er zijn geen verborgen kosten.",
+  },
+  {
+    q: "Welke diensten kan ik toevoegen?",
+    a: "Populaire diensten zoals Spotify, Netflix, Disney+ en Basic-Fit staan kant-en-klaar in de lijst. Je kunt ook elk eigen abonnement handmatig toevoegen.",
+  },
+  {
+    q: "Zie ik wat ik per maand en per jaar betaal?",
+    a: "Ja. AbonnementenBeheren rekent al je abonnementen automatisch om, zodat je in één oogopslag je totale maandelijkse en jaarlijkse kosten ziet.",
+  },
+  {
+    q: "Helpt het bij het opzeggen van abonnementen?",
+    a: "Doordat je al je abonnementen overzichtelijk bij elkaar hebt, zie je snel wat je niet meer gebruikt en kun je op tijd opzeggen wat je niet meer nodig hebt.",
+  },
+];
 
 const FEATURES = [
   {
@@ -58,12 +90,6 @@ const STEPS = [
 
 // Voorbeeldabonnementen voor de mock in de hero.
 const SAMPLE_IDS = ["spotify", "netflix", "disneyplus", "basicfit"] as const;
-const SAMPLE_PLAN = {
-  spotify: "Premium",
-  netflix: "Standaard",
-  disneyplus: "Premium",
-  basicfit: "Comfort",
-} as const;
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
@@ -87,30 +113,64 @@ export default async function Home() {
 
   const logoStrip = presets.slice(0, 8);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": `${SITE_URL}/#app`,
+        name: SITE_NAME,
+        url: SITE_URL,
+        description: SITE_DESCRIPTION,
+        applicationCategory: "FinanceApplication",
+        operatingSystem: "Web",
+        inLanguage: "nl-NL",
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "EUR",
+        },
+        publisher: { "@id": `${SITE_URL}/#organization` },
+      },
+      {
+        "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
+        name: SITE_NAME,
+        url: SITE_URL,
+        logo: `${SITE_URL}/logo/logo-transparent.png`,
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
+        url: SITE_URL,
+        name: SITE_NAME,
+        inLanguage: "nl-NL",
+        publisher: { "@id": `${SITE_URL}/#organization` },
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${SITE_URL}/#faq`,
+        mainEntity: FAQS.map((item) => ({
+          "@type": "Question",
+          name: item.q,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: item.a,
+          },
+        })),
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <span className="text-lg font-bold tracking-tight text-brand">
-            AbonnementenBeheren
-          </span>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/login"
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-            >
-              Inloggen
-            </Link>
-            <Link
-              href="/login?modus=registreren"
-              className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
-            >
-              Gratis beginnen
-            </Link>
-          </div>
-        </div>
-      </header>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <SiteHeader />
 
       {/* Hero */}
       <section className="relative overflow-hidden">
@@ -131,15 +191,15 @@ export default async function Home() {
               className="mt-6 animate-fade-in-up text-balance text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
               style={{ animationDelay: "75ms" }}
             >
-              Al je abonnementen op één plek
+              Abonnementen beheren op één plek
             </h1>
             <p
               className="mx-auto mt-5 max-w-md animate-fade-in-up text-pretty text-lg text-slate-600 lg:mx-0"
               style={{ animationDelay: "150ms" }}
             >
-              De simpelste manier om je abonnementen bij te houden. Voeg in één
-              klik diensten toe en zie meteen wat je per maand en per jaar kwijt
-              bent. Helemaal gratis.
+              Beheer al je abonnementen gratis op één plek. Voeg in één klik
+              diensten toe en zie meteen wat je per maand en per jaar aan
+              abonnementen kwijt bent.
             </p>
             <div
               className="mt-8 flex animate-fade-in-up flex-wrap items-center justify-center gap-3 lg:justify-start"
@@ -147,7 +207,7 @@ export default async function Home() {
             >
               <Link
                 href="/login?modus=registreren"
-                className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 font-medium text-white shadow-sm transition hover:opacity-90"
+                className="hover-lift inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 font-medium text-white shadow-sm transition hover:opacity-90"
               >
                 Maak gratis je account
                 <ArrowRight className="h-4 w-4" />
@@ -235,8 +295,9 @@ export default async function Home() {
           </p>
           <Reveal className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-5">
             {logoStrip.map((p) => (
-              <div
+              <Link
                 key={p.id}
+                href={`/${p.id}`}
                 className="flex items-center gap-2 opacity-80 transition hover:opacity-100"
               >
                 <ServiceLogo
@@ -248,9 +309,17 @@ export default async function Home() {
                 <span className="text-sm font-medium text-slate-600">
                   {p.name}
                 </span>
-              </div>
+              </Link>
             ))}
           </Reveal>
+          <p className="mt-6 text-center text-sm">
+            <Link
+              href="/diensten"
+              className="font-medium text-brand hover:underline"
+            >
+              Bekijk alle diensten en prijzen →
+            </Link>
+          </p>
         </div>
       </section>
 
@@ -328,7 +397,7 @@ export default async function Home() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link
                 href="/login?modus=registreren"
-                className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-medium text-brand shadow-sm transition hover:bg-slate-100"
+                className="hover-lift inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-medium text-brand shadow-sm transition hover:bg-slate-100"
               >
                 Maak gratis je account
                 <ArrowRight className="h-4 w-4" />
@@ -339,18 +408,38 @@ export default async function Home() {
         </Reveal>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200/70">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-slate-500 sm:flex-row">
-          <span className="font-semibold text-slate-700">
-            AbonnementenBeheren
-          </span>
-          <span>
-            Gemaakt door{" "}
-            <span className="font-medium text-slate-700">Alex Lamper</span>
-          </span>
+      {/* FAQ */}
+      <section className="border-t border-slate-200/70 bg-white/50">
+        <div className="mx-auto max-w-3xl px-6 py-20">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+              Veelgestelde vragen over abonnementen beheren
+            </h2>
+            <p className="mt-4 text-lg text-slate-600">
+              Alles wat je wilt weten over het bijhouden van je abonnementen.
+            </p>
+          </div>
+          <div className="mt-10 space-y-3">
+            {FAQS.map((item, i) => (
+              <Reveal key={item.q} delay={i * 60}>
+                <details className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <summary className="flex cursor-pointer items-center justify-between gap-4 font-semibold text-slate-900 [&::-webkit-details-marker]:hidden">
+                    {item.q}
+                    <span className="text-brand transition-transform group-open:rotate-45">
+                      +
+                    </span>
+                  </summary>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                    {item.a}
+                  </p>
+                </details>
+              </Reveal>
+            ))}
+          </div>
         </div>
-      </footer>
+      </section>
+
+      <SiteFooter />
     </div>
   );
 }

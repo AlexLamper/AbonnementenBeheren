@@ -13,11 +13,12 @@ export function SubscriptionList({
   onDelete: (id: string) => void;
 }) {
   return (
-    <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-      {items.map((item) => (
+    <ul className="stagger divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      {items.map((item, i) => (
         <SubscriptionItem
           key={item.id}
           item={item}
+          index={i}
           onEdit={() => onEdit(item)}
           onDelete={() => onDelete(item.id)}
         />

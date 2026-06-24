@@ -8,10 +8,12 @@ import { ServiceLogo } from "@/components/ServiceLogo";
 
 export function SubscriptionItem({
   item,
+  index = 0,
   onEdit,
   onDelete,
 }: {
   item: ClientSubscription;
+  index?: number;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -19,7 +21,10 @@ export function SubscriptionItem({
   const monthly = toMonthly(item.price, item.billingPeriod);
 
   return (
-    <li className="flex items-center gap-3 p-3 sm:p-4">
+    <li
+      className="flex items-center gap-3 p-3 transition-colors hover:bg-slate-50/70 sm:p-4"
+      style={{ "--i": index } as React.CSSProperties}
+    >
       <ServiceLogo name={item.name} logoUrl={item.logoUrl} color={item.color} />
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-slate-900">

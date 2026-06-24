@@ -10,11 +10,16 @@ type Mode = "inloggen" | "registreren";
 export function AuthForm({
   initialMode,
   googleEnabled,
+  next,
 }: {
   initialMode: Mode;
   googleEnabled: boolean;
+  next?: string;
 }) {
   const router = useRouter();
+  // Alleen interne paden toestaan om open-redirects te voorkomen.
+  const dest =
+    next && next.startsWith("/") && !next.startsWith("//") ? next : "/overzicht";
   const [mode, setMode] = useState<Mode>(initialMode);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -68,7 +73,7 @@ export function AuthForm({
         toast.error("E-mailadres of wachtwoord is onjuist");
         return;
       }
-      router.push("/overzicht");
+      router.push(dest);
       router.refresh();
     } finally {
       setLoading(false);
@@ -159,7 +164,7 @@ export function AuthForm({
           </div>
           <button
             type="button"
-            onClick={() => signIn("google", { callbackUrl: "/overzicht" })}
+            onClick={() => signIn("google", { callbackUrl: dest })}
             className="w-full rounded-lg border border-slate-300 bg-white py-2.5 font-medium text-slate-700 transition hover:bg-slate-50"
           >
             Doorgaan met Google

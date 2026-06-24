@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { signOut } from "next-auth/react";
 import { Plus, LogOut } from "lucide-react";
 import { toast } from "sonner";
@@ -15,17 +17,48 @@ import { EmptyState } from "@/components/EmptyState";
 import { AddSubscriptionDialog } from "@/components/AddSubscriptionDialog";
 import { EditSubscriptionDialog } from "@/components/EditSubscriptionDialog";
 
+/** Tijdgebonden begroeting op basis van de lokale tijd van de bezoeker. */
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 6) return "Goedenacht";
+  if (hour < 12) return "Goedemorgen";
+  if (hour < 18) return "Goedemiddag";
+  return "Goedeavond";
+}
+
+// useSyncExternalStore: server rendert null (geen tijdzone bekend), de client
+// rendert de echte lokale begroeting. Voorkomt hydration-mismatch zonder
+// setState in een effect.
+const noopSubscribe = () => () => {};
+
+function useGreeting(): string | null {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => getGreeting(),
+    () => null
+  );
+}
+
 export function OverviewClient({
   initial,
   presets,
   firstName,
+  autoAddId,
 }: {
   initial: ClientSubscription[];
   presets: Preset[];
   firstName?: string;
+  autoAddId?: string;
 }) {
+  // Open de toevoeg-dialog vanzelf bij ?add=<presetId> (vanaf dienstpagina's).
+  const autoAddName = autoAddId
+    ? presets.find((p) => p.id === autoAddId)?.name
+    : undefined;
+
+  const greeting = useGreeting();
+
   const [items, setItems] = useState<ClientSubscription[]>(initial);
-  const [addOpen, setAddOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(Boolean(autoAddName));
   const [editing, setEditing] = useState<ClientSubscription | null>(null);
 
   const { monthly, yearly } = useMemo(() => totals(items), [items]);
@@ -79,8 +112,27 @@ export function OverviewClient({
   return (
     <div className="mx-auto max-w-2xl px-4 pb-24 pt-6 sm:pt-10">
       <header className="mb-6 flex items-center justify-between">
-        <span className="font-bold text-brand">AbonnementenBeheren</span>
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-bold text-slate-700"
+        >
+          <Image
+            src="/logo/logo-transparent.png"
+            alt="AbonnementenBeheren logo"
+            width={28}
+            height={28}
+            className="h-7 w-7 object-contain"
+            priority
+          />
+          AbonnementenBeheren
+        </Link>
         <div className="flex items-center gap-2">
+          <Link
+            href="/diensten"
+            className="hidden rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 sm:inline-flex"
+          >
+            Diensten
+          </Link>
           <ShareButton />
           <button
             type="button"
@@ -93,13 +145,19 @@ export function OverviewClient({
         </div>
       </header>
 
-      <h1 className="mb-4 text-2xl font-bold text-slate-900">
-        {firstName ? `Hoi ${firstName}` : "Jouw abonnementen"}
+      <h1 className="mb-4 animate-fade-in-up text-2xl font-bold text-slate-900">
+        {greeting
+          ? `${greeting}${firstName ? `, ${firstName}` : ""}`
+          : firstName
+            ? `Hoi ${firstName}`
+            : "Jouw abonnementen"}
       </h1>
 
-      <TotalsCards monthly={monthly} yearly={yearly} />
+      <div className="animate-fade-in-up [animation-delay:80ms]">
+        <TotalsCards monthly={monthly} yearly={yearly} />
+      </div>
 
-      <div className="mb-3 mt-8 flex items-center justify-between">
+      <div className="mb-3 mt-8 flex animate-fade-in-up items-center justify-between [animation-delay:160ms]">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
           Abonnementen ({items.length})
         </h2>
@@ -128,6 +186,7 @@ export function OverviewClient({
         onClose={() => setAddOpen(false)}
         onAdd={addItem}
         presets={presets}
+        initialQuery={autoAddName}
       />
       <EditSubscriptionDialog
         subscription={editing}

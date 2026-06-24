@@ -1,19 +1,29 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { ArrowLeft } from "lucide-react";
 import { authOptions } from "@/lib/authOptions";
 import { AuthForm } from "@/components/AuthForm";
 
+export const metadata: Metadata = {
+  title: "Inloggen of gratis account aanmaken",
+  description:
+    "Log in of maak gratis een account aan om je abonnementen te beheren en je maandelijkse en jaarlijkse kosten te zien.",
+  alternates: { canonical: "/login" },
+};
+
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ modus?: string }>;
+  searchParams: Promise<{ modus?: string; next?: string }>;
 }) {
-  const session = await getServerSession(authOptions);
-  if (session?.user) redirect("/overzicht");
+  const { modus, next } = await searchParams;
 
-  const { modus } = await searchParams;
+  const session = await getServerSession(authOptions);
+  if (session?.user) redirect(next?.startsWith("/") ? next : "/overzicht");
+
   const initialMode = modus === "registreren" ? "registreren" : "inloggen";
   const googleEnabled = process.env.NEXT_PUBLIC_GOOGLE_ENABLED === "true";
 
@@ -29,11 +39,23 @@ export default async function LoginPage({
         </Link>
         <Link
           href="/"
-          className="mb-8 block text-center text-lg font-bold text-brand"
+          className="mb-8 flex items-center justify-center gap-2 text-lg font-bold text-slate-700"
         >
+          <Image
+            src="/logo/logo-transparent.png"
+            alt="AbonnementenBeheren logo"
+            width={32}
+            height={32}
+            className="h-8 w-8 object-contain"
+            priority
+          />
           AbonnementenBeheren
         </Link>
-        <AuthForm initialMode={initialMode} googleEnabled={googleEnabled} />
+        <AuthForm
+          initialMode={initialMode}
+          googleEnabled={googleEnabled}
+          next={next}
+        />
       </div>
     </main>
   );

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import type { Preset, PresetPlan } from "@/lib/presets/types";
 import type { SubscriptionInput } from "@/lib/validation";
-import { searchPresets } from "@/lib/presets";
+import { searchPresets, popularPresets } from "@/lib/presets";
 import { Modal } from "@/components/Modal";
 import { PresetResult } from "@/components/PresetResult";
 import { SubscriptionForm } from "@/components/SubscriptionForm";
@@ -14,18 +14,23 @@ export function AddSubscriptionDialog({
   onClose,
   onAdd,
   presets,
+  initialQuery,
 }: {
   open: boolean;
   onClose: () => void;
   onAdd: (input: SubscriptionInput) => Promise<boolean>;
   presets: Preset[];
+  initialQuery?: string;
 }) {
-  const [query, setQuery] = useState("");
+  // Vul de zoekbalk voor met de dienst wanneer de dialog daarmee geopend
+  // wordt (bijv. vanaf een openbare dienstpagina via ?add=<id>).
+  const [query, setQuery] = useState(initialQuery ?? "");
   const [custom, setCustom] = useState(false);
 
+  const hasQuery = query.trim().length > 0;
   const results = useMemo(
-    () => searchPresets(query, presets),
-    [query, presets]
+    () => (hasQuery ? searchPresets(query, presets) : popularPresets(presets)),
+    [hasQuery, query, presets]
   );
 
   function reset() {
@@ -86,6 +91,12 @@ export function AddSubscriptionDialog({
             />
           </div>
 
+          {!hasQuery && (
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Populair
+            </p>
+          )}
+
           <ul className="max-h-[50vh] space-y-2 overflow-y-auto">
             {results.map((preset) => (
               <PresetResult
@@ -94,7 +105,7 @@ export function AddSubscriptionDialog({
                 onPick={pickPreset}
               />
             ))}
-            {results.length === 0 && (
+            {hasQuery && results.length === 0 && (
               <li className="py-4 text-center text-sm text-slate-500">
                 Geen dienst gevonden voor “{query}”.
               </li>

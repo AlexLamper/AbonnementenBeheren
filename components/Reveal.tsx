@@ -26,8 +26,9 @@ export function Reveal({
       "(prefers-reduced-motion: reduce)"
     ).matches;
     if (reduce) {
-      setShown(true);
-      return;
+      // Niet synchroon in de effect-body zetten; defer naar de volgende frame.
+      const raf = requestAnimationFrame(() => setShown(true));
+      return () => cancelAnimationFrame(raf);
     }
 
     const io = new IntersectionObserver(
