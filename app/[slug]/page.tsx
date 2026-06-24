@@ -186,13 +186,19 @@ export default async function ServicePage({
           <h2 className="text-2xl font-bold text-slate-900">
             {preset.name} abonnementen en prijzen
           </h2>
-          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-slate-200 bg-slate-50 text-slate-500">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Abonnement</th>
-                  <th className="px-4 py-3 font-medium">Prijs</th>
-                  <th className="px-4 py-3 font-medium">Per maand</th>
+                  <th className="whitespace-nowrap px-4 py-3 font-medium">
+                    Abonnement
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-3 font-medium">
+                    Prijs
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-3 font-medium">
+                    Per maand
+                  </th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -202,16 +208,16 @@ export default async function ServicePage({
                     <td className="px-4 py-3 font-medium text-slate-900">
                       {plan.name}
                     </td>
-                    <td className="px-4 py-3 text-slate-700">
+                    <td className="whitespace-nowrap px-4 py-3 text-slate-700">
                       {formatEUR(plan.price)}{" "}
                       <span className="text-slate-400">
                         {periodLabel(plan.billingPeriod).toLowerCase()}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-700">
+                    <td className="whitespace-nowrap px-4 py-3 text-slate-700">
                       {formatEUR(toMonthly(plan.price, plan.billingPeriod))}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="whitespace-nowrap px-4 py-3 text-right">
                       <Link
                         href={`/overzicht?add=${preset.id}`}
                         className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:underline"

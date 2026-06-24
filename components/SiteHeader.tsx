@@ -16,10 +16,10 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-background/80 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-4 sm:px-6">
         <Link
           href="/"
-          className="flex items-center gap-2 text-lg font-bold tracking-tight text-slate-700"
+          className="flex shrink-0 items-center gap-2 text-base font-bold tracking-tight text-slate-700 sm:text-lg"
         >
           <Image
             src="/logo/logo-transparent.png"
@@ -29,13 +29,13 @@ export function SiteHeader() {
             className="h-8 w-8 object-contain"
             priority
           />
-          AbonnementenBeheren
+          <span className="hidden xs:inline">AbonnementenBeheren</span>
         </Link>
 
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-1.5 sm:gap-2">
           <Link
             href="/diensten"
-            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+            className="hidden rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 sm:block sm:px-4"
           >
             Diensten
           </Link>
@@ -43,7 +43,7 @@ export function SiteHeader() {
           {loggedIn ? (
             <Link
               href="/overzicht"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 sm:px-4"
             >
               <LayoutDashboard className="h-4 w-4" />
               Mijn overzicht
@@ -52,13 +52,13 @@ export function SiteHeader() {
             <>
               <Link
                 href="/login"
-                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 sm:px-4"
               >
                 Inloggen
               </Link>
               <Link
                 href="/login?modus=registreren"
-                className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
+                className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 sm:px-4"
               >
                 Gratis beginnen
               </Link>

@@ -114,7 +114,7 @@ export function OverviewClient({
       <header className="mb-6 flex items-center justify-between">
         <Link
           href="/"
-          className="flex items-center gap-2 font-bold text-slate-700"
+          className="flex shrink-0 items-center gap-2 font-bold text-slate-700"
         >
           <Image
             src="/logo/logo-transparent.png"
@@ -124,7 +124,7 @@ export function OverviewClient({
             className="h-7 w-7 object-contain"
             priority
           />
-          AbonnementenBeheren
+          <span className="hidden xs:inline">AbonnementenBeheren</span>
         </Link>
         <div className="flex items-center gap-2">
           <Link
