@@ -5,6 +5,19 @@ export const alt =
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+function Donut({ size: s }: { size: number }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 48 48" fill="none">
+      <g transform="rotate(-90 24 24)">
+        <circle cx="24" cy="24" r="16" stroke="#2DD4BF" strokeWidth="9" strokeDasharray="42 100.5" />
+        <circle cx="24" cy="24" r="16" stroke="#2AA898" strokeWidth="9" strokeDasharray="28 100.5" strokeDashoffset="-45" />
+        <circle cx="24" cy="24" r="16" stroke="#7FE3D3" strokeWidth="9" strokeDasharray="15 100.5" strokeDashoffset="-76" />
+        <circle cx="24" cy="24" r="16" stroke="#1F5A6E" strokeWidth="9" strokeDasharray="4.5 100.5" strokeDashoffset="-94" />
+      </g>
+    </svg>
+  );
+}
+
 export default function OpengraphImage() {
   return new ImageResponse(
     (
@@ -13,64 +26,48 @@ export default function OpengraphImage() {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
+          alignItems: "center",
+          justifyContent: "space-between",
           padding: "80px",
-          background: "linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)",
+          background: "#08233B",
           color: "white",
           fontFamily: "sans-serif",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "20px",
-            fontSize: 36,
-            fontWeight: 700,
-            opacity: 0.95,
-          }}
-        >
+        <div style={{ display: "flex", flexDirection: "column", maxWidth: 720 }}>
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              width: 64,
-              height: 64,
-              borderRadius: 16,
-              background: "rgba(255,255,255,0.18)",
-              fontSize: 40,
+              gap: 16,
+              fontSize: 34,
+              fontWeight: 700,
             }}
           >
-            €
+            <Donut size={56} />
+            <span style={{ display: "flex" }}>
+              Abonnementen<span style={{ color: "#7FE3D3" }}>Beheren</span>
+            </span>
           </div>
-          AbonnementenBeheren
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              fontSize: 80,
+              fontWeight: 800,
+              lineHeight: 1.04,
+              marginTop: 48,
+              letterSpacing: "-0.03em",
+            }}
+          >
+            <span>Al je abonnementen.</span>
+            <span style={{ color: "#2DD4BF" }}>Eén helder totaal.</span>
+          </div>
+          <div style={{ display: "flex", fontSize: 34, marginTop: 28, color: "#A9BFD0" }}>
+            Gratis bijhouden - per maand én per jaar.
+          </div>
         </div>
-
-        <div
-          style={{
-            display: "flex",
-            fontSize: 88,
-            fontWeight: 800,
-            lineHeight: 1.05,
-            marginTop: 48,
-            letterSpacing: "-0.02em",
-          }}
-        >
-          Abonnementen beheren op één plek
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            fontSize: 40,
-            marginTop: 28,
-            opacity: 0.9,
-          }}
-        >
-          Gratis al je abonnementen bijhouden - per maand én per jaar.
-        </div>
+        <Donut size={300} />
       </div>
     ),
     { ...size }

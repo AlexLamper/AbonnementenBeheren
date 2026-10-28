@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
+import { siGoogle } from "simple-icons";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
@@ -80,21 +81,38 @@ export function AuthForm({
     }
   }
 
+  const isRegister = mode === "registreren";
+
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-6 grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1">
+    <div className="mt-5">
+      <h1 className="font-display text-[32px] font-bold leading-tight tracking-tight text-slate-900 sm:text-[34px]">
+        {isRegister ? "Maak je gratis account" : "Welkom terug"}
+      </h1>
+      <p className="mt-2 text-[15px] text-slate-500">
+        {isRegister
+          ? "Al een account? Kies hieronder Inloggen."
+          : "Nog geen account? Kies hieronder Registreren."}
+      </p>
+
+      <div
+        role="tablist"
+        aria-label="Inloggen of registreren"
+        className="mt-6 grid grid-cols-2 gap-1 rounded-full bg-[#e6eef1] p-1"
+      >
         {(["inloggen", "registreren"] as Mode[]).map((m) => (
           <button
             key={m}
             type="button"
+            role="tab"
+            aria-selected={mode === m}
             onClick={() => {
               setMode(m);
               setErrors({});
             }}
-            className={`rounded-md py-2 text-sm font-medium capitalize transition ${
+            className={`rounded-full py-2.5 text-sm capitalize transition ${
               mode === m
-                ? "bg-white text-slate-900 shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
+                ? "bg-navy font-bold text-white shadow-sm"
+                : "font-semibold text-slate-600 hover:text-slate-900"
             }`}
           >
             {m}
@@ -102,8 +120,8 @@ export function AuthForm({
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {mode === "registreren" && (
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
+        {isRegister && (
           <Field
             label="Naam"
             type="text"
@@ -138,35 +156,34 @@ export function AuthForm({
             if (errors.password)
               setErrors((e) => ({ ...e, password: undefined }));
           }}
-          autoComplete={mode === "registreren" ? "new-password" : "current-password"}
-          placeholder={mode === "registreren" ? "Minimaal 6 tekens" : "••••••••"}
+          autoComplete={isRegister ? "new-password" : "current-password"}
+          placeholder={isRegister ? "Minimaal 6 tekens" : "••••••••"}
           error={errors.password}
         />
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-brand py-2.5 font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+          className="h-[50px] w-full rounded-full bg-mint font-bold text-mint-ink transition hover:bg-mint-light disabled:opacity-50"
         >
-          {loading
-            ? "Bezig…"
-            : mode === "registreren"
-              ? "Account aanmaken"
-              : "Inloggen"}
+          {loading ? "Bezig…" : isRegister ? "Account aanmaken" : "Inloggen"}
         </button>
       </form>
 
       {googleEnabled && (
         <>
-          <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
-            <span className="h-px flex-1 bg-slate-200" />
+          <div className="my-5 flex items-center gap-3 text-sm text-slate-500">
+            <span className="h-px flex-1 bg-line" />
             of
-            <span className="h-px flex-1 bg-slate-200" />
+            <span className="h-px flex-1 bg-line" />
           </div>
           <button
             type="button"
             onClick={() => signIn("google", { callbackUrl: dest })}
-            className="w-full rounded-lg border border-slate-300 bg-white py-2.5 font-medium text-slate-700 transition hover:bg-slate-50"
+            className="flex h-[50px] w-full items-center justify-center gap-2.5 rounded-full border border-slate-300 bg-white font-semibold text-slate-900 transition hover:bg-surface"
           >
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+              <path d={siGoogle.path} fill="#4285F4" />
+            </svg>
             Doorgaan met Google
           </button>
         </>
@@ -192,25 +209,32 @@ function Field({
   placeholder?: string;
   error?: string;
 }) {
+  const id = useId();
   return (
-    <label className="block">
-      <span className="mb-1 block text-sm font-medium text-slate-700">
+    <div>
+      <label htmlFor={id} className="mb-1.5 block text-sm font-semibold text-slate-700">
         {label}
-      </span>
+      </label>
       <input
+        id={id}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         autoComplete={autoComplete}
         placeholder={placeholder}
         aria-invalid={Boolean(error)}
-        className={`w-full rounded-lg border px-3 py-2 text-slate-900 placeholder:text-slate-400 outline-none transition focus:ring-2 ${
+        aria-describedby={error ? `${id}-fout` : undefined}
+        className={`h-12 w-full rounded-[14px] border bg-white px-4 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-4 ${
           error
-            ? "border-red-400 focus:border-red-400 focus:ring-red-400/20"
-            : "border-slate-300 focus:border-brand focus:ring-brand/20"
+            ? "border-red-600 focus:ring-red-500/15"
+            : "border-slate-300 focus:border-mint focus:ring-mint/20"
         }`}
       />
-      {error && <span className="mt-1 block text-sm text-red-600">{error}</span>}
-    </label>
+      {error && (
+        <p id={`${id}-fout`} className="mt-1.5 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+    </div>
   );
 }

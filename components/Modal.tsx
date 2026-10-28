@@ -1,19 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import { X } from "lucide-react";
 
 export function Modal({
   open,
   onClose,
   title,
+  icon,
   children,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
+  /** Optioneel element links van de titel, bijv. een dienstlogo. */
+  icon?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  const titleId = useId();
+
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
@@ -31,24 +36,33 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex animate-fade-in items-end justify-center bg-slate-900/40 p-0 [animation-duration:0.2s] sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex animate-fade-in items-end justify-center bg-navy/60 p-0 backdrop-blur-[2px] [animation-duration:0.2s] sm:items-center sm:p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg animate-slide-in-up rounded-t-2xl bg-white p-5 shadow-xl sm:animate-fade-in-scale sm:rounded-2xl"
+        className="max-h-[92vh] w-full max-w-[480px] animate-slide-in-up overflow-y-auto rounded-t-[28px] bg-white p-5 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.55)] sm:animate-fade-in-scale sm:rounded-[28px] sm:p-6"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
+        aria-labelledby={titleId}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            {icon}
+            <h2
+              id={titleId}
+              className="truncate font-display text-[22px] font-bold text-slate-900"
+            >
+              {title}
+            </h2>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface text-slate-600 transition hover:bg-line hover:text-slate-900"
             aria-label="Sluiten"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" strokeWidth={2.4} />
           </button>
         </div>
         {children}

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Toaster } from "sonner";
@@ -12,8 +12,13 @@ import {
   AUTHOR,
 } from "@/lib/seo";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin"],
+});
+
+const grotesk = Space_Grotesk({
+  variable: "--font-grotesk",
   subsets: ["latin"],
 });
 
@@ -60,7 +65,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "/logo/favicon.ico",
     shortcut: "/logo/favicon.ico",
-    apple: "/logo/logo-transparent.png",
+    apple: "/logo/logo.png",
   },
   verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
     ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
@@ -68,14 +73,17 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#4f46e5",
+  themeColor: "#08233b",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="nl" className={`${geistSans.variable} h-full antialiased`}>
+    <html
+      lang="nl"
+      className={`${jakarta.variable} ${grotesk.variable} h-full antialiased`}
+    >
       <body className="min-h-full">
         <Providers>{children}</Providers>
         <Toaster position="top-center" richColors />

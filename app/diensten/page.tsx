@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { Suspense } from "react";
 import { getPresets } from "@/lib/presets/store";
-import { ServiceLogo } from "@/components/ServiceLogo";
+import { toMonthly } from "@/lib/money";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { formatEUR, toMonthly } from "@/lib/money";
+import {
+  DienstenBrowser,
+  DienstenBrowserWithParams,
+  type DienstItem,
+} from "@/components/DienstenBrowser";
 
 export const metadata: Metadata = {
   title: "Alle diensten en abonnementsprijzen",
@@ -17,78 +21,45 @@ export const metadata: Metadata = {
 export default async function DienstenPage() {
   const presets = await getPresets();
 
-  // Groepeer op categorie, gesorteerd op categorienaam.
-  const byCategory = new Map<string, typeof presets>();
-  for (const p of presets) {
-    const list = byCategory.get(p.category) ?? [];
-    list.push(p);
-    byCategory.set(p.category, list);
-  }
-  const categories = [...byCategory.keys()].sort((a, b) =>
-    a.localeCompare(b, "nl")
-  );
+  const items: DienstItem[] = presets.map((p) => ({
+    id: p.id,
+    name: p.name,
+    category: p.category,
+    logoUrl: p.logoUrl,
+    color: p.color,
+    fromMonthly: Math.min(
+      ...p.plans.map((pl) => toMonthly(pl.price, pl.billingPeriod))
+    ),
+  }));
 
   return (
     <div className="min-h-screen">
-      <SiteHeader />
+      <div className="bg-navy">
+        <SiteHeader active="diensten" />
+        <section className="mx-auto max-w-6xl px-5 pb-7 pt-12 sm:px-6 sm:pt-14">
+          <nav aria-label="Kruimelpad" className="text-sm text-haze">
+            <Link href="/" className="hover:text-white">
+              Home
+            </Link>{" "}
+            <span className="text-navy-soft">/</span>{" "}
+            <span className="text-white">Diensten</span>
+          </nav>
+          <h1 className="mt-3.5 max-w-3xl font-display text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-[52px]">
+            Alle diensten en abonnementsprijzen
+          </h1>
+          <p className="mt-3.5 max-w-2xl text-[17px] leading-relaxed text-haze">
+            Bekijk per dienst de actuele abonnementen en kosten. Klik door voor
+            uitleg en verschillen, of voeg een abonnement met één klik toe aan
+            je overzicht.
+          </p>
+        </section>
+      </div>
 
-      <main className="mx-auto max-w-5xl px-6 py-12">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-          Alle diensten en abonnementsprijzen
-        </h1>
-        <p className="mt-3 max-w-2xl text-lg text-slate-600">
-          Bekijk per dienst de actuele abonnementen en kosten. Klik door voor
-          uitleg, verschillen en de officiële website - of voeg een abonnement
-          met één klik toe aan je overzicht.
-        </p>
-
-        {categories.map((category) => (
-          <section key={category} className="mt-12">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-              {category}
-            </h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {byCategory
-                .get(category)!
-                .slice()
-                .sort((a, b) => a.name.localeCompare(b.name, "nl"))
-                .map((p) => {
-                  const cheapest = [...p.plans].sort(
-                    (a, b) =>
-                      toMonthly(a.price, a.billingPeriod) -
-                      toMonthly(b.price, b.billingPeriod)
-                  )[0];
-                  return (
-                    <Link
-                      key={p.id}
-                      href={`/${p.id}`}
-                      className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:bg-slate-50"
-                    >
-                      <ServiceLogo
-                        name={p.name}
-                        logoUrl={p.logoUrl}
-                        color={p.color}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-slate-900">{p.name}</p>
-                        {cheapest && (
-                          <p className="text-sm text-slate-500">
-                            vanaf{" "}
-                            {formatEUR(
-                              toMonthly(cheapest.price, cheapest.billingPeriod)
-                            )}
-                            /mnd
-                          </p>
-                        )}
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-slate-400" />
-                    </Link>
-                  );
-                })}
-            </div>
-          </section>
-        ))}
-      </main>
+      {/* De volledige lijst wordt server-side gerenderd (fallback); de
+          client-versie leest daarna ?q= uit de URL. */}
+      <Suspense fallback={<DienstenBrowser items={items} />}>
+        <DienstenBrowserWithParams items={items} />
+      </Suspense>
 
       <SiteFooter />
     </div>

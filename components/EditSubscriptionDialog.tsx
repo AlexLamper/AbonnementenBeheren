@@ -4,6 +4,7 @@ import type { ClientSubscription } from "@/lib/types";
 import type { SubscriptionInput } from "@/lib/validation";
 import { Modal } from "@/components/Modal";
 import { SubscriptionForm } from "@/components/SubscriptionForm";
+import { ServiceLogo } from "@/components/ServiceLogo";
 
 export function EditSubscriptionDialog({
   subscription,
@@ -19,6 +20,17 @@ export function EditSubscriptionDialog({
       open={!!subscription}
       onClose={onClose}
       title="Abonnement bewerken"
+      icon={
+        subscription && (
+          <ServiceLogo
+            name={subscription.name}
+            presetId={subscription.presetId}
+            logoUrl={subscription.logoUrl}
+            color={subscription.color}
+            size={40}
+          />
+        )
+      }
     >
       {subscription && (
         <SubscriptionForm

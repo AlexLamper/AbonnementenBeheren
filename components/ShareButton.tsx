@@ -7,12 +7,15 @@ const SHARE_URL = "https://abonnementenbeheren.com";
 const SHARE_TEXT =
   "Houd al je abonnementen makkelijk bij met AbonnementenBeheren";
 
+/** Deelknop; `tone="dark"` voor navy achtergronden. */
 export function ShareButton({
-  subtle = false,
-  light = false,
+  tone = "light",
+  label = "Delen",
+  className = "",
 }: {
-  subtle?: boolean;
-  light?: boolean;
+  tone?: "dark" | "light";
+  label?: string;
+  className?: string;
 }) {
   async function handleShare() {
     if (typeof navigator !== "undefined" && navigator.share) {
@@ -35,16 +38,19 @@ export function ShareButton({
     }
   }
 
-  const className = light
-    ? "inline-flex items-center gap-2 rounded-lg border border-white/30 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
-    : subtle
-      ? "inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-brand"
-      : "inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50";
+  const styles =
+    tone === "dark"
+      ? "border-white/25 text-white hover:bg-white/10"
+      : "border-line bg-white text-slate-700 hover:bg-surface";
 
   return (
-    <button type="button" onClick={handleShare} className={className}>
+    <button
+      type="button"
+      onClick={handleShare}
+      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition ${styles} ${className}`}
+    >
       <Share2 className="h-4 w-4" />
-      Deel
+      {label}
     </button>
   );
 }

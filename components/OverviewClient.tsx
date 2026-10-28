@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { signOut } from "next-auth/react";
@@ -9,10 +8,11 @@ import { toast } from "sonner";
 import type { ClientSubscription } from "@/lib/types";
 import type { Preset } from "@/lib/presets/types";
 import type { SubscriptionInput } from "@/lib/validation";
-import { totals } from "@/lib/money";
+import { toMonthly, totals } from "@/lib/money";
+import { Logo } from "@/components/Logo";
 import { ShareButton } from "@/components/ShareButton";
 import { TotalsCards } from "@/components/TotalsCards";
-import { SubscriptionList } from "@/components/SubscriptionList";
+import { SubscriptionList, type SortKey } from "@/components/SubscriptionList";
 import { EmptyState } from "@/components/EmptyState";
 import { AddSubscriptionDialog } from "@/components/AddSubscriptionDialog";
 import { EditSubscriptionDialog } from "@/components/EditSubscriptionDialog";
@@ -39,6 +39,13 @@ function useGreeting(): string | null {
   );
 }
 
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "duurste", label: "Duurste eerst" },
+  { value: "goedkoopste", label: "Goedkoopste eerst" },
+  { value: "naam", label: "Op naam" },
+  { value: "nieuwste", label: "Nieuwste eerst" },
+];
+
 export function OverviewClient({
   initial,
   presets,
@@ -58,10 +65,32 @@ export function OverviewClient({
   const greeting = useGreeting();
 
   const [items, setItems] = useState<ClientSubscription[]>(initial);
-  const [addOpen, setAddOpen] = useState(Boolean(autoAddName));
+  // `key` laat de dialog opnieuw mounten zodat een nieuwe zoekterm doorkomt.
+  const [add, setAdd] = useState<{ open: boolean; query?: string; key: number }>({
+    open: Boolean(autoAddName),
+    query: autoAddName,
+    key: 0,
+  });
   const [editing, setEditing] = useState<ClientSubscription | null>(null);
+  const [sort, setSort] = useState<SortKey>("duurste");
 
   const { monthly, yearly } = useMemo(() => totals(items), [items]);
+
+  const breakdown = useMemo(
+    () =>
+      items
+        .map((it) => ({
+          id: it.id,
+          name: it.name,
+          monthly: toMonthly(it.price, it.billingPeriod),
+        }))
+        .sort((a, b) => b.monthly - a.monthly),
+    [items]
+  );
+
+  function openAdd(query?: string) {
+    setAdd((s) => ({ open: true, query, key: s.key + 1 }));
+  }
 
   async function addItem(input: SubscriptionInput) {
     const res = await fetch("/api/subscriptions", {
@@ -109,84 +138,151 @@ export function OverviewClient({
     toast.success("Verwijderd");
   }
 
+  const isEmpty = items.length === 0;
+  const title = greeting
+    ? `${greeting}${firstName ? `, ${firstName}` : ""}`
+    : firstName
+      ? `Hoi ${firstName}`
+      : "Jouw abonnementen";
+
   return (
-    <div className="mx-auto max-w-2xl px-4 pb-24 pt-6 sm:pt-10">
-      <header className="mb-6 flex items-center justify-between">
-        <Link
-          href="/"
-          className="flex shrink-0 items-center gap-2 font-bold text-slate-700"
-        >
-          <Image
-            src="/logo/logo-transparent.png"
-            alt="AbonnementenBeheren logo"
-            width={28}
-            height={28}
-            className="h-7 w-7 object-contain"
-            priority
-          />
-          <span className="hidden xs:inline">AbonnementenBeheren</span>
-        </Link>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/diensten"
-            className="hidden rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 sm:inline-flex"
-          >
-            Diensten
-          </Link>
-          <ShareButton />
-          <button
-            type="button"
-            onClick={() => signOut({ callbackUrl: "/" })}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
-            <LogOut className="h-4 w-4" />
-            Uitloggen
-          </button>
-        </div>
-      </header>
+    <div className="min-h-screen pb-28 sm:pb-16">
+      <div className="bg-navy pb-24 sm:pb-28">
+        {/* App-header */}
+        <header className="border-b border-white/[0.08]">
+          <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:h-[72px] sm:px-6">
+            <div className="flex items-center gap-8">
+              <Logo hideWordmarkOnMobile />
+              <nav className="hidden gap-1 text-sm md:flex">
+                <Link
+                  href="/overzicht"
+                  aria-current="page"
+                  className="rounded-full bg-white/10 px-3.5 py-2 font-semibold text-white"
+                >
+                  Overzicht
+                </Link>
+                <Link
+                  href="/diensten"
+                  className="rounded-full px-3.5 py-2 text-haze transition hover:text-white"
+                >
+                  Diensten
+                </Link>
+              </nav>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:block">
+                <ShareButton tone="dark" />
+              </div>
+              <button
+                type="button"
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="inline-flex items-center gap-2.5 rounded-full bg-white/[0.08] py-1.5 pl-1.5 pr-3.5 text-sm font-semibold text-white transition hover:bg-white/15"
+              >
+                <span
+                  aria-hidden
+                  className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-mint font-extrabold text-mint-ink"
+                >
+                  {(firstName ?? "?").charAt(0).toUpperCase()}
+                </span>
+                Uitloggen
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </header>
 
-      <h1 className="mb-4 animate-fade-in-up text-2xl font-bold text-slate-900">
-        {greeting
-          ? `${greeting}${firstName ? `, ${firstName}` : ""}`
-          : firstName
-            ? `Hoi ${firstName}`
-            : "Jouw abonnementen"}
-      </h1>
-
-      <div className="animate-fade-in-up [animation-delay:80ms]">
-        <TotalsCards monthly={monthly} yearly={yearly} />
+        <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-11">
+          <h1 className="animate-fade-in-up font-display text-[28px] font-bold tracking-tight text-white sm:text-[40px]">
+            {isEmpty ? `Welkom${firstName ? `, ${firstName}` : ""}` : title}
+          </h1>
+          <p className="mt-1.5 animate-fade-in-up text-haze [animation-delay:60ms]">
+            {isEmpty
+              ? "Voeg je eerste abonnement toe om je totaal te zien."
+              : "Zo staan je abonnementen er nu voor."}
+          </p>
+          <div className="mt-6 animate-fade-in-up [animation-delay:120ms] sm:mt-7">
+            <TotalsCards
+              monthly={monthly}
+              yearly={yearly}
+              count={items.length}
+              breakdown={breakdown}
+            />
+          </div>
+        </section>
       </div>
 
-      <div className="mb-3 mt-8 flex animate-fade-in-up items-center justify-between [animation-delay:160ms]">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-          Abonnementen ({items.length})
-        </h2>
+      <section className="relative mx-auto -mt-[72px] max-w-6xl px-3 sm:px-6">
+        <div className="animate-fade-in-up rounded-[24px] border border-line bg-white p-4 shadow-float [animation-delay:180ms] sm:rounded-[28px] sm:p-7">
+          {isEmpty ? (
+            <EmptyState
+              onAdd={() => openAdd()}
+              onQuickAdd={(name) => openAdd(name)}
+              presets={presets}
+            />
+          ) : (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+                <h2 className="font-display text-xl font-bold text-slate-900 sm:text-2xl">
+                  Abonnementen{" "}
+                  <span className="font-medium text-slate-500">({items.length})</span>
+                </h2>
+                <div className="flex items-center gap-2">
+                  <label htmlFor="sorteer" className="sr-only">
+                    Sorteren
+                  </label>
+                  <select
+                    id="sorteer"
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value as SortKey)}
+                    className="h-10 rounded-full border border-line bg-white px-3.5 text-sm font-semibold text-slate-700 outline-none focus:border-mint focus:ring-4 focus:ring-mint/20"
+                  >
+                    {SORT_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => openAdd()}
+                    className="hidden h-10 items-center gap-1.5 rounded-full bg-mint px-4 text-sm font-bold text-mint-ink transition hover:bg-mint-light sm:inline-flex"
+                  >
+                    <Plus className="h-4 w-4" strokeWidth={2.6} />
+                    Toevoegen
+                  </button>
+                </div>
+              </div>
+              <SubscriptionList
+                items={items}
+                sort={sort}
+                totalMonthly={monthly}
+                onEdit={setEditing}
+                onDelete={deleteItem}
+              />
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* Zwevende toevoegknop op mobiel */}
+      {!isEmpty && (
         <button
           type="button"
-          onClick={() => setAddOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white transition hover:opacity-90"
+          onClick={() => openAdd()}
+          className="fixed bottom-6 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-mint px-5 py-4 font-bold text-mint-ink shadow-[0_14px_30px_-12px_rgba(8,35,59,0.6)] transition hover:bg-mint-light sm:hidden"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-5 w-5" strokeWidth={2.8} />
           Toevoegen
         </button>
-      </div>
-
-      {items.length === 0 ? (
-        <EmptyState onAdd={() => setAddOpen(true)} />
-      ) : (
-        <SubscriptionList
-          items={items}
-          onEdit={setEditing}
-          onDelete={deleteItem}
-        />
       )}
 
       <AddSubscriptionDialog
-        open={addOpen}
-        onClose={() => setAddOpen(false)}
+        key={add.key}
+        open={add.open}
+        onClose={() => setAdd((s) => ({ ...s, open: false }))}
         onAdd={addItem}
         presets={presets}
-        initialQuery={autoAddName}
+        initialQuery={add.query}
       />
       <EditSubscriptionDialog
         subscription={editing}

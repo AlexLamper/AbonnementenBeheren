@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import type { Preset, PresetPlan } from "@/lib/presets/types";
 import type { SubscriptionInput } from "@/lib/validation";
 import { searchPresets, popularPresets } from "@/lib/presets";
@@ -58,7 +58,11 @@ export function AddSubscriptionDialog({
   }
 
   return (
-    <Modal open={open} onClose={close} title="Abonnement toevoegen">
+    <Modal
+      open={open}
+      onClose={close}
+      title={custom ? "Eigen abonnement" : "Abonnement toevoegen"}
+    >
       {custom ? (
         <div className="space-y-4">
           <SubscriptionForm
@@ -72,27 +76,32 @@ export function AddSubscriptionDialog({
           <button
             type="button"
             onClick={() => setCustom(false)}
-            className="w-full text-center text-sm font-medium text-slate-500 hover:text-brand"
+            className="mx-auto flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-brand"
           >
-            ← Terug naar zoeken
+            <ArrowLeft className="h-4 w-4" />
+            Terug naar zoeken
           </button>
         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <div className="space-y-3.5">
+          <div className="flex h-[50px] items-center gap-2.5 rounded-full border border-slate-300 px-4 transition focus-within:border-mint focus-within:ring-4 focus-within:ring-mint/20">
+            <Search className="h-[18px] w-[18px] shrink-0 text-slate-500" aria-hidden />
+            <label htmlFor="zoek-preset" className="sr-only">
+              Zoek een dienst
+            </label>
             <input
-              type="text"
+              id="zoek-preset"
+              type="search"
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Zoek een dienst, bijv. Spotify"
-              className="w-full rounded-lg border border-slate-300 py-2.5 pl-10 pr-3 text-slate-900 outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              className="min-w-0 flex-1 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-400"
             />
           </div>
 
           {!hasQuery && (
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <p className="px-1 text-xs font-bold uppercase tracking-[0.12em] text-brand">
               Populair
             </p>
           )}
@@ -103,6 +112,7 @@ export function AddSubscriptionDialog({
                 key={preset.id}
                 preset={preset}
                 onPick={pickPreset}
+                defaultOpen={hasQuery && results.length === 1}
               />
             ))}
             {hasQuery && results.length === 0 && (
@@ -115,7 +125,7 @@ export function AddSubscriptionDialog({
           <button
             type="button"
             onClick={() => setCustom(true)}
-            className="w-full rounded-lg border border-slate-300 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="h-12 w-full rounded-full border-[1.5px] border-dashed border-[#c3d3da] text-sm font-semibold text-slate-700 transition hover:border-mint hover:bg-mint-wash"
           >
             Staat er niet bij? Eigen abonnement toevoegen
           </button>
