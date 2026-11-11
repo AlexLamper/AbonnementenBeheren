@@ -8,7 +8,7 @@ export const linkedinpremium: Preset = {
   color: "#0A66C2",
   affiliateUrl: "https://premium.linkedin.com/",
   plans: [
-    { name: "Premium Career", price: 39.99, billingPeriod: "maandelijks" },
+    { name: "Premium Career", price: 29.99, billingPeriod: "maandelijks" },
     { name: "Premium Career (jaarlijks)", price: 239.88, billingPeriod: "jaarlijks" },
     { name: "Premium Business", price: 59.99, billingPeriod: "maandelijks" },
   ],

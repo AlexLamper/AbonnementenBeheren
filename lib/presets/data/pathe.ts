@@ -8,6 +8,7 @@ export const pathe: Preset = {
   color: "#FFC426",
   affiliateUrl: "https://www.pathe.nl/",
   plans: [
-    { name: "Unlimited", price: 26.5, billingPeriod: "maandelijks" },
+    { name: "Unlimited", price: 23.0, billingPeriod: "maandelijks" },
+    { name: "Unlimited Gold", price: 32.0, billingPeriod: "maandelijks" },
   ],
 };

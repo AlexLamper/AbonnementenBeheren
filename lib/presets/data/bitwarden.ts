@@ -8,7 +8,7 @@ export const bitwarden: Preset = {
   color: "#175DDC",
   affiliateUrl: "https://bitwarden.com/pricing/",
   plans: [
-    { name: "Premium (jaar)", price: 21.38, billingPeriod: "jaarlijks" },
-    { name: "Families (jaar)", price: 51.71, billingPeriod: "jaarlijks" },
+    { name: "Premium (jaar)", price: 21.56, billingPeriod: "jaarlijks" },
+    { name: "Families (jaar)", price: 52.14, billingPeriod: "jaarlijks" },
   ],
 };

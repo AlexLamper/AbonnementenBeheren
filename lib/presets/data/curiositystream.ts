@@ -8,7 +8,7 @@ export const curiositystream: Preset = {
   color: "#F7B500",
   affiliateUrl: "https://curiositystream.com/",
   plans: [
-    { name: "Standard", price: 4.99, billingPeriod: "maandelijks" },
-    { name: "Standard (jaarlijks)", price: 39.99, billingPeriod: "jaarlijks" },
+    { name: "Standard", price: 5.43, billingPeriod: "maandelijks" },
+    { name: "Standard (jaarlijks)", price: 43.55, billingPeriod: "jaarlijks" },
   ],
 };

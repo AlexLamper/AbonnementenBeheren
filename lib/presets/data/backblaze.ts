@@ -8,7 +8,7 @@ export const backblaze: Preset = {
   color: "#E21E29",
   affiliateUrl: "https://www.backblaze.com/cloud-backup/pricing",
   plans: [
-    { name: "Personal Backup (maand)", price: 9.72, billingPeriod: "maandelijks" },
-    { name: "Personal Backup (jaar)", price: 106.92, billingPeriod: "jaarlijks" },
+    { name: "Personal Backup (maand)", price: 9.8, billingPeriod: "maandelijks" },
+    { name: "Personal Backup (jaar)", price: 107.81, billingPeriod: "jaarlijks" },
   ],
 };

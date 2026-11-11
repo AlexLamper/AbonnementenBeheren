@@ -8,6 +8,9 @@ export const toverland: Preset = {
   color: "#6B2C91",
   affiliateUrl: "https://www.toverland.com/",
   plans: [
-    { name: "Abonnement", price: 95.0, billingPeriod: "jaarlijks" },
+    { name: "Volwassene", price: 14.0, billingPeriod: "maandelijks" },
+    { name: "Volwassene (jaarlijks)", price: 160.0, billingPeriod: "jaarlijks" },
+    { name: "Kind", price: 10.5, billingPeriod: "maandelijks" },
+    { name: "Kind (jaarlijks)", price: 120.0, billingPeriod: "jaarlijks" },
   ],
 };

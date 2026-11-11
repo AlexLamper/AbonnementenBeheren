@@ -8,8 +8,8 @@ export const squarespace: Preset = {
   color: "#000000",
   affiliateUrl: "https://www.squarespace.com/pricing",
   plans: [
-    { name: "Basic (jaar)", price: 232.32, billingPeriod: "jaarlijks" },
-    { name: "Core (jaar)", price: 333.96, billingPeriod: "jaarlijks" },
-    { name: "Plus (jaar)", price: 566.28, billingPeriod: "jaarlijks" },
+    { name: "Basic (jaar)", price: 144.0, billingPeriod: "jaarlijks" },
+    { name: "Core (jaar)", price: 216.0, billingPeriod: "jaarlijks" },
+    { name: "Plus (jaar)", price: 384.0, billingPeriod: "jaarlijks" },
   ],
 };

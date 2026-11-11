@@ -158,7 +158,7 @@ export const AI_CONTENT: Record<string, PresetContent> = {
     description:
       "HeyGen maakt video's met realistische AI-avatars die jouw tekst uitspreken, in veel talen. Het wordt veel gebruikt voor marketing, uitlegvideo's en het vertalen van bestaande video's.",
     differences:
-      "Creator is bedoeld voor individuele makers en is ook per jaar te betalen. Pro geeft meer tegoed en ruimere mogelijkheden voor intensief gebruik.",
+      "Creator is bedoeld voor individuele makers en is ook per jaar te betalen. Pro geeft meer tegoed en ruimere mogelijkheden zoals 4K-export, en is er in meerdere varianten met meer credits tegen een hogere prijs.",
     website: "https://www.heygen.com/",
   },
   ideogram: {

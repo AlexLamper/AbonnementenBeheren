@@ -123,7 +123,7 @@ export const LIFESTYLE_CONTENT: Record<string, PresetContent> = {
     description:
       "Met Pathé Unlimited ga je voor een vast bedrag per maand zo vaak naar de film als je wilt in de Pathé-bioscopen in Nederland. Voor speciale zalen en formaten kan een toeslag gelden.",
     differences:
-      "Er is één Unlimited-abonnement dat je per maand betaalt.",
+      "Met Unlimited ga je onbeperkt naar de film, maar betaal je voor speciale zalen en formaten soms een toeslag. Met Unlimited Gold betaal je die toeslagen niet. Beide betaal je per maand.",
     website: "https://www.pathe.nl/",
   },
   cjp: {
@@ -139,7 +139,7 @@ export const LIFESTYLE_CONTENT: Record<string, PresetContent> = {
     description:
       "Met een Efteling Abonnement bezoek je het attractiepark in Kaatsheuvel een jaar lang zo vaak als je wilt. Handig als je meerdere keren per jaar gaat.",
     differences:
-      "Het genoemde bedrag is een indicatie voor het standaardabonnement. Kijk op de website van de Efteling voor de actuele varianten en prijzen.",
+      "Classic geeft 290 dagen per jaar toegang, Plus 340 dagen en Premium alle dagen. Je betaalt per maand (minimaal 12 maanden) of in één keer voor een jaar; jaarlijks betalen is iets voordeliger.",
     website: "https://www.efteling.com/nl",
   },
   natuurmonumenten: {
@@ -147,7 +147,7 @@ export const LIFESTYLE_CONTENT: Record<string, PresetContent> = {
     description:
       "Natuurmonumenten beschermt en beheert natuurgebieden in heel Nederland. Als lid steun je dat werk met een vaste bijdrage.",
     differences:
-      "Je kiest zelf hoeveel je bijdraagt, met een minimumbedrag. Het bedrag hier is een indicatie van een basislidmaatschap.",
+      "Je kiest zelf hoeveel je bijdraagt. Het bedrag hier is het minimumbedrag per maand.",
     website: "https://www.natuurmonumenten.nl/",
   },
   staatsbosbeheer: {
@@ -163,7 +163,7 @@ export const LIFESTYLE_CONTENT: Record<string, PresetContent> = {
     description:
       "Attractiepark Toverland in Sevenum (Limburg) heeft attracties en achtbanen voor jong en oud. Met een abonnement ga je een jaar lang zo vaak als je wilt.",
     differences:
-      "Het genoemde bedrag is een indicatie voor het standaardabonnement. Kijk op de website van Toverland voor de actuele varianten en prijzen.",
+      "Er zijn abonnementen voor volwassenen (vanaf 140 cm) en kinderen (90 tot 140 cm); voor 60-plussers en gasten met een beperking gelden lagere prijzen. Je betaalt per maand (minimaal 12 maanden) of in één keer voor een jaar.",
     website: "https://www.toverland.com/",
   },
   cineville: {
@@ -171,7 +171,7 @@ export const LIFESTYLE_CONTENT: Record<string, PresetContent> = {
     description:
       "Met Cineville ga je voor een vast bedrag per maand zo vaak als je wilt naar de film in aangesloten filmtheaters en arthousebioscopen in Nederland. Je reserveert je kaartje via de app of bij de kassa.",
     differences:
-      "Er is één Cineville-abonnement dat je per maand betaalt.",
+      "Je betaalt per maand. Tot en met 29 jaar betaal je een lager tarief dan het gewone abonnement.",
     website: "https://www.cineville.nl/",
   },
 

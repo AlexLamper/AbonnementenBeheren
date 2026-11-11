@@ -8,7 +8,7 @@ export const myfitnesspal: Preset = {
   color: "#0066EE",
   affiliateUrl: "https://www.myfitnesspal.com/premium",
   plans: [
-    { name: "Premium", price: 19.99, billingPeriod: "maandelijks" },
-    { name: "Premium (jaarlijks)", price: 79.99, billingPeriod: "jaarlijks" },
+    { name: "Premium", price: 21.99, billingPeriod: "maandelijks" },
+    { name: "Premium (jaarlijks)", price: 87.99, billingPeriod: "jaarlijks" },
   ],
 };

@@ -8,6 +8,7 @@ export const cineville: Preset = {
   color: "#111111",
   affiliateUrl: "https://www.cineville.nl/",
   plans: [
-    { name: "Cineville", price: 21.5, billingPeriod: "maandelijks" },
+    { name: "Cineville", price: 24.0, billingPeriod: "maandelijks" },
+    { name: "Cineville t/m 29 jaar", price: 19.0, billingPeriod: "maandelijks" },
   ],
 };

@@ -9,6 +9,6 @@ export const museumkaart: Preset = {
   affiliateUrl: "https://www.museumkaart.nl/",
   plans: [
     { name: "Volwassenen", price: 75.0, billingPeriod: "jaarlijks" },
-    { name: "Jongeren t/m 18 jaar", price: 37.5, billingPeriod: "jaarlijks" },
+    { name: "Jongeren t/m 18 jaar", price: 39.0, billingPeriod: "jaarlijks" },
   ],
 };

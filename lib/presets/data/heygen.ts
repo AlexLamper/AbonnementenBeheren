@@ -10,6 +10,6 @@ export const heygen: Preset = {
   plans: [
     { name: "Creator", price: 31.38, billingPeriod: "maandelijks" },
     { name: "Creator (jaarlijks)", price: 311.67, billingPeriod: "jaarlijks" },
-    { name: "Pro", price: 107.14, billingPeriod: "maandelijks" },
+    { name: "Pro", price: 53.03, billingPeriod: "maandelijks" },
   ],
 };

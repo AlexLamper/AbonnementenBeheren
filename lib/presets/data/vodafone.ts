@@ -8,7 +8,6 @@ export const vodafone: Preset = {
   color: "#E60000",
   affiliateUrl: "https://www.vodafone.nl/",
   plans: [
-    { name: "3 GB", price: 15.0, billingPeriod: "maandelijks" },
     { name: "15 GB", price: 20.0, billingPeriod: "maandelijks" },
     { name: "30 GB", price: 24.5, billingPeriod: "maandelijks" },
     { name: "Unlimited Start", price: 28.5, billingPeriod: "maandelijks" },

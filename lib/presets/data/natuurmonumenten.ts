@@ -8,6 +8,6 @@ export const natuurmonumenten: Preset = {
   color: "#6AB023",
   affiliateUrl: "https://www.natuurmonumenten.nl/",
   plans: [
-    { name: "Lidmaatschap", price: 3.0, billingPeriod: "maandelijks" },
+    { name: "Lidmaatschap", price: 4.25, billingPeriod: "maandelijks" },
   ],
 };

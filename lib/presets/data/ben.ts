@@ -8,9 +8,9 @@ export const ben: Preset = {
   color: "#009FE3",
   affiliateUrl: "https://www.ben.nl/",
   plans: [
-    { name: "5 GB", price: 8.0, billingPeriod: "maandelijks" },
-    { name: "10 GB", price: 9.0, billingPeriod: "maandelijks" },
-    { name: "15 GB", price: 10.0, billingPeriod: "maandelijks" },
-    { name: "20 GB", price: 12.0, billingPeriod: "maandelijks" },
+    { name: "15 GB", price: 9.0, billingPeriod: "maandelijks" },
+    { name: "25 GB", price: 9.5, billingPeriod: "maandelijks" },
+    { name: "35 GB", price: 10.0, billingPeriod: "maandelijks" },
+    { name: "40 GB", price: 11.0, billingPeriod: "maandelijks" },
   ],
 };

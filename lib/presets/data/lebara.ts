@@ -8,9 +8,9 @@ export const lebara: Preset = {
   color: "#0071BC",
   affiliateUrl: "https://www.lebara.nl/",
   plans: [
+    { name: "1 GB", price: 4.0, billingPeriod: "maandelijks" },
     { name: "5 GB", price: 7.0, billingPeriod: "maandelijks" },
     { name: "10 GB", price: 8.0, billingPeriod: "maandelijks" },
-    { name: "20 GB", price: 11.0, billingPeriod: "maandelijks" },
-    { name: "45 GB", price: 25.0, billingPeriod: "maandelijks" },
+    { name: "40 GB", price: 11.0, billingPeriod: "maandelijks" },
   ],
 };

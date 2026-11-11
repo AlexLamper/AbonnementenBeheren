@@ -8,7 +8,7 @@ export const blinkist: Preset = {
   color: "#2CE080",
   affiliateUrl: "https://www.blinkist.com/",
   plans: [
-    { name: "Premium", price: 14.99, billingPeriod: "maandelijks" },
-    { name: "Premium (jaarlijks)", price: 89.99, billingPeriod: "jaarlijks" },
+    { name: "Premium", price: 12.99, billingPeriod: "maandelijks" },
+    { name: "Premium (jaarlijks)", price: 79.99, billingPeriod: "jaarlijks" },
   ],
 };

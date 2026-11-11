@@ -8,7 +8,7 @@ export const dropout: Preset = {
   color: "#FFD400",
   affiliateUrl: "https://www.dropout.tv/",
   plans: [
-    { name: "Dropout", price: 6.99, billingPeriod: "maandelijks" },
-    { name: "Dropout (jaarlijks)", price: 69.99, billingPeriod: "jaarlijks" },
+    { name: "Dropout", price: 7.61, billingPeriod: "maandelijks" },
+    { name: "Dropout (jaarlijks)", price: 76.22, billingPeriod: "jaarlijks" },
   ],
 };

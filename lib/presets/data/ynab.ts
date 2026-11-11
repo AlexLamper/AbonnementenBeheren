@@ -8,7 +8,7 @@ export const ynab: Preset = {
   color: "#3B5BDB",
   affiliateUrl: "https://www.ynab.com/pricing",
   plans: [
-    { name: "Maandelijks", price: 16.19, billingPeriod: "maandelijks" },
-    { name: "Jaarlijks", price: 117.72, billingPeriod: "jaarlijks" },
+    { name: "Maandelijks", price: 16.32, billingPeriod: "maandelijks" },
+    { name: "Jaarlijks", price: 118.7, billingPeriod: "jaarlijks" },
   ],
 };

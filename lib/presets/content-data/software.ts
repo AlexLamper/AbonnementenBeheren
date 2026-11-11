@@ -110,7 +110,7 @@ export const SOFTWARE_CONTENT: Record<string, PresetContent> = {
     description:
       "Evernote is een van de bekendste notitie-apps, waarmee je notities, webpagina's, foto's en documenten verzamelt en doorzoekt. Betaalde abonnementen synchroniseren op meer apparaten en geven meer uploadruimte.",
     differences:
-      "Personal is bedoeld voor individueel gebruik, Professional voegt extra functies toe voor intensief en zakelijk gebruik. Jaarlijks betalen is goedkoper dan per maand.",
+      "Starter (voorheen Personal) is bedoeld voor individueel gebruik, Advanced (voorheen Professional) voegt extra functies toe voor intensief en zakelijk gebruik. Jaarlijks betalen is flink goedkoper dan per maand.",
     website: "https://evernote.com/",
   },
   ticktick: {

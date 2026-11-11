@@ -7,5 +7,5 @@ export const telegraaf: Preset = {
   logoUrl: "https://www.google.com/s2/favicons?domain=telegraaf.nl&sz=64",
   color: "#C8102E",
   affiliateUrl: "https://www.telegraaf.nl/",
-  plans: [{ name: "Digitaal", price: 16.99, billingPeriod: "maandelijks" }],
+  plans: [{ name: "Digitaal", price: 14.95, billingPeriod: "maandelijks" }],
 };

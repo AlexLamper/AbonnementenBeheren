@@ -8,7 +8,9 @@ export const simpel: Preset = {
   color: "#2EB24A",
   affiliateUrl: "https://www.simpel.nl/",
   plans: [
-    { name: "5 GB", price: 6.5, billingPeriod: "maandelijks" },
-    { name: "5 GB + onbeperkt bellen", price: 8.0, billingPeriod: "maandelijks" },
+    { name: "10 GB", price: 7.5, billingPeriod: "maandelijks" },
+    { name: "18 GB", price: 9.0, billingPeriod: "maandelijks" },
+    { name: "30 GB", price: 10.0, billingPeriod: "maandelijks" },
+    { name: "10 GB + onbeperkt bellen", price: 9.0, billingPeriod: "maandelijks" },
   ],
 };

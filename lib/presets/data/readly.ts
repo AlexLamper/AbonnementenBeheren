@@ -7,5 +7,5 @@ export const readly: Preset = {
   logoUrl: "https://www.google.com/s2/favicons?domain=readly.com&sz=64",
   color: "#E93E2D",
   affiliateUrl: "https://www.readly.com/",
-  plans: [{ name: "Readly", price: 12.99, billingPeriod: "maandelijks" }],
+  plans: [{ name: "Readly", price: 14.99, billingPeriod: "maandelijks" }],
 };

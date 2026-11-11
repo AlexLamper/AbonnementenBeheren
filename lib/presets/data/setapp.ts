@@ -8,9 +8,9 @@ export const setapp: Preset = {
   color: "#6E33FF",
   affiliateUrl: "https://setapp.com/pricing",
   plans: [
-    { name: "Mac (maand)", price: 16.19, billingPeriod: "maandelijks" },
-    { name: "Mac (jaar)", price: 116.51, billingPeriod: "jaarlijks" },
-    { name: "Mac + iOS (maand)", price: 20.51, billingPeriod: "maandelijks" },
-    { name: "Power User (maand)", price: 24.83, billingPeriod: "maandelijks" },
+    { name: "Mac (maand)", price: 16.32, billingPeriod: "maandelijks" },
+    { name: "Mac (jaar)", price: 117.48, billingPeriod: "jaarlijks" },
+    { name: "Mac + iOS (maand)", price: 20.68, billingPeriod: "maandelijks" },
+    { name: "Power User (maand)", price: 25.04, billingPeriod: "maandelijks" },
   ],
 };

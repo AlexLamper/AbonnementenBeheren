@@ -8,7 +8,7 @@ export const notion: Preset = {
   color: "#000000",
   affiliateUrl: "https://www.notion.com/nl/pricing",
   plans: [
-    { name: "Plus (maand)", price: 12.96, billingPeriod: "maandelijks" },
-    { name: "Plus (jaar)", price: 129.6, billingPeriod: "jaarlijks" },
+    { name: "Plus (maand)", price: 13.07, billingPeriod: "maandelijks" },
+    { name: "Plus (jaar)", price: 130.68, billingPeriod: "jaarlijks" },
   ],
 };

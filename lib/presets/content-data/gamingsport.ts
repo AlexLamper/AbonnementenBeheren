@@ -183,9 +183,9 @@ export const GAMINGSPORT_CONTENT: Record<string, PresetContent> = {
   fitbitpremium: {
     tagline: "Uitgebreidere gezondheids- en slaapinzichten voor Fitbit.",
     description:
-      "Fitbit Premium is het betaalde abonnement in de Fitbit-app van Google. Je krijgt onder meer uitgebreidere slaapanalyses, een dagelijkse paraatheidsscore, begeleide workouts en mindfulness-sessies.",
+      "Fitbit Premium heet sinds mei 2026 Google Health Premium: het betaalde abonnement in de Google Health-app van Google (voorheen de Fitbit-app). Je krijgt onder meer uitgebreidere slaapanalyses, een dagelijkse paraatheidsscore, begeleide workouts en de AI-coach Google Health Coach op basis van Gemini.",
     differences:
-      "Er is één abonnement, per maand of per jaar te betalen; met een jaarabonnement betaal je per maand minder. Bij een nieuw Fitbit-apparaat of Pixel Watch zit vaak een gratis proefperiode.",
+      "Er is één abonnement, per maand of per jaar te betalen; met een jaarabonnement betaal je per maand minder. Bij een nieuw Fitbit-apparaat of Pixel Watch zit vaak een gratis proefperiode, en in een aantal landen zit Google Health Premium ook bij Google AI Pro en Ultra.",
     website: "https://www.fitbit.com/",
   },
   applefitnessplus: {

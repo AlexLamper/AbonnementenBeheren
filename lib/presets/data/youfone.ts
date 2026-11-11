@@ -9,7 +9,8 @@ export const youfone: Preset = {
   affiliateUrl: "https://www.youfone.nl/",
   plans: [
     { name: "10 GB", price: 7.5, billingPeriod: "maandelijks" },
-    { name: "20 GB", price: 10.0, billingPeriod: "maandelijks" },
+    { name: "30 GB", price: 10.0, billingPeriod: "maandelijks" },
     { name: "40 GB", price: 12.0, billingPeriod: "maandelijks" },
+    { name: "50 GB", price: 15.0, billingPeriod: "maandelijks" },
   ],
 };

@@ -8,7 +8,7 @@ export const nebula: Preset = {
   color: "#3F7CF6",
   affiliateUrl: "https://nebula.tv/",
   plans: [
-    { name: "Nebula", price: 6.0, billingPeriod: "maandelijks" },
-    { name: "Nebula (jaarlijks)", price: 60.0, billingPeriod: "jaarlijks" },
+    { name: "Nebula", price: 6.53, billingPeriod: "maandelijks" },
+    { name: "Nebula (jaarlijks)", price: 65.34, billingPeriod: "jaarlijks" },
   ],
 };

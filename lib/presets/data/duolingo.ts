@@ -8,8 +8,8 @@ export const duolingo: Preset = {
   color: "#58CC02",
   affiliateUrl: "https://www.duolingo.com/",
   plans: [
-    { name: "Super", price: 12.99, billingPeriod: "maandelijks" },
-    { name: "Super (jaarlijks)", price: 83.99, billingPeriod: "jaarlijks" },
+    { name: "Super", price: 16.49, billingPeriod: "maandelijks" },
+    { name: "Super (jaarlijks)", price: 89.99, billingPeriod: "jaarlijks" },
     { name: "Max", price: 29.99, billingPeriod: "maandelijks" },
     { name: "Max (jaarlijks)", price: 167.99, billingPeriod: "jaarlijks" },
   ],

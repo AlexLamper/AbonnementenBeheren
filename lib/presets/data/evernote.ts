@@ -8,9 +8,9 @@ export const evernote: Preset = {
   color: "#00A82D",
   affiliateUrl: "https://evernote.com/compare-plans",
   plans: [
-    { name: "Personal (maand)", price: 14.99, billingPeriod: "maandelijks" },
-    { name: "Personal (jaar)", price: 129.99, billingPeriod: "jaarlijks" },
-    { name: "Professional (maand)", price: 17.99, billingPeriod: "maandelijks" },
-    { name: "Professional (jaar)", price: 169.99, billingPeriod: "jaarlijks" },
+    { name: "Starter (maand)", price: 12.99, billingPeriod: "maandelijks" },
+    { name: "Starter (jaar)", price: 79.9, billingPeriod: "jaarlijks" },
+    { name: "Advanced (maand)", price: 21.99, billingPeriod: "maandelijks" },
+    { name: "Advanced (jaar)", price: 199.99, billingPeriod: "jaarlijks" },
   ],
 };

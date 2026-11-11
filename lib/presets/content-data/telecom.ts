@@ -70,7 +70,7 @@ export const TELECOM_CONTENT: Record<string, PresetContent> = {
     description:
       "Vodafone biedt sim-only abonnementen met een vaste databundel of onbeperkt data, inclusief 5G. Heb je ook Ziggo-internet, dan krijg je extra data of korting.",
     differences:
-      "De bundels lopen van 3 GB tot onbeperkt data; Unlimited Plus voegt onbeperkt bellen en meer data in de EU toe. Actiekortingen, jongerenkorting en de contractduur kunnen de maandprijs veranderen.",
+      "De bundels lopen van 15 GB tot onbeperkt data; Unlimited Plus voegt onbeperkt bellen en meer data in de EU toe. Actiekortingen, jongerenkorting en de contractduur kunnen de maandprijs veranderen.",
     website: "https://www.vodafone.nl/",
   },
   kpnmobiel: {
@@ -78,7 +78,7 @@ export const TELECOM_CONTENT: Record<string, PresetContent> = {
     description:
       "KPN Mobiel biedt sim-only abonnementen met een vaste databundel of onbeperkt data op het eigen 4G- en 5G-netwerk. Met KPN-internet thuis krijg je extra voordeel.",
     differences:
-      "De bundels met 8 of 15 GB zijn voor normaal gebruik; Unlimited-abonnementen geven onbeperkt data, waarbij de maximale snelheid oploopt van 50 Mbit/s tot de hoogste snelheid bij SuperUnlimited. Een korter contract kost meer, en acties kunnen de prijs tijdelijk verlagen.",
+      "De bundels met 10 of 20 GB zijn voor normaal gebruik; Unlimited-abonnementen geven onbeperkt data, waarbij de maximale snelheid oploopt van 50 Mbit/s via 400 Mbit/s tot 700 Mbit/s bij SuperUnlimited. Een korter contract kost meer, en acties kunnen de prijs tijdelijk verlagen.",
     website: "https://www.kpn.com/",
   },
   simyo: {
@@ -110,7 +110,7 @@ export const TELECOM_CONTENT: Record<string, PresetContent> = {
     description:
       "Ben is een sim-only merk van Odido en gebruikt het netwerk van Odido. Je kiest een databundel met 200 belminuten of onbeperkt bellen.",
     differences:
-      "De abonnementen verschillen in de hoeveelheid data. Onbeperkt bellen, 5G en een korter contract kosten extra, en tijdelijke acties kunnen de prijs verlagen.",
+      "De abonnementen verschillen in de hoeveelheid data. De genoemde bedragen zijn de reguliere prijzen bij 2 jaar met 200 Mbit/s; een hogere snelheid, onbeperkt bellen en een korter contract kosten extra, en tijdelijke acties kunnen de prijs verlagen.",
     website: "https://www.ben.nl/",
   },
   hollandsnieuwe: {
@@ -134,7 +134,7 @@ export const TELECOM_CONTENT: Record<string, PresetContent> = {
     description:
       "Simpel biedt goedkope sim-only abonnementen zonder toeters en bellen. Je kiest een databundel met een belbundel of onbeperkt bellen.",
     differences:
-      "Het verschil zit in de hoeveelheid data en of je onbeperkt belt. Nieuwe klanten krijgen vaak het eerste jaar korting; de genoemde bedragen zijn de prijzen daarna, en een korter contract kost meer.",
+      "Het verschil zit in de hoeveelheid data en of je onbeperkt belt; onbeperkt bellen kost 1,50 euro per maand extra. Nieuwe klanten krijgen vaak het eerste jaar korting; de genoemde bedragen zijn de prijzen daarna, en een korter contract kost meer.",
     website: "https://www.simpel.nl/",
   },
   budgetmobiel: {
