@@ -2,6 +2,14 @@
 // Prijzen staan in de preset-data; hier alleen uitleg, verschillen en de
 // officiële website. Tekst is informatief en kan na prijswijzigingen verouderen.
 
+import { AI_CONTENT } from "@/lib/presets/content-data/ai";
+import { GAMINGSPORT_CONTENT } from "@/lib/presets/content-data/gamingsport";
+import { LIFESTYLE_CONTENT } from "@/lib/presets/content-data/lifestyle";
+import { MEDIA_CONTENT } from "@/lib/presets/content-data/media";
+import { SOFTWARE_CONTENT } from "@/lib/presets/content-data/software";
+import { STREAMING_CONTENT } from "@/lib/presets/content-data/streaming";
+import { TELECOM_CONTENT } from "@/lib/presets/content-data/telecom";
+
 export interface PresetContent {
   /** Korte krachtzin onder de titel. */
   tagline: string;
@@ -13,7 +21,7 @@ export interface PresetContent {
   website: string;
 }
 
-export const PRESET_CONTENT: Record<string, PresetContent> = {
+const BASE_CONTENT: Record<string, PresetContent> = {
   spotify: {
     tagline: "Muziekstreaming met miljoenen nummers en podcasts.",
     description:
@@ -278,6 +286,18 @@ export const PRESET_CONTENT: Record<string, PresetContent> = {
       "Maandelijks betalen is flexibel; het jaarabonnement is per maand fors voordeliger.",
     website: "https://www.strava.com/",
   },
+};
+
+// Samengevoegd: basis + content-data/*.ts.
+export const PRESET_CONTENT: Record<string, PresetContent> = {
+  ...BASE_CONTENT,
+  ...AI_CONTENT,
+  ...GAMINGSPORT_CONTENT,
+  ...LIFESTYLE_CONTENT,
+  ...MEDIA_CONTENT,
+  ...SOFTWARE_CONTENT,
+  ...STREAMING_CONTENT,
+  ...TELECOM_CONTENT,
 };
 
 export function getPresetContent(id: string): PresetContent | undefined {

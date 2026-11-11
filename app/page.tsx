@@ -4,14 +4,11 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import {
   Search,
-  Wallet,
-  Bell,
-  Share2,
   ArrowRight,
-  UserPlus,
-  BarChart3,
   ArrowDownWideNarrow,
+  ChevronDown,
   Plus,
+  X,
 } from "lucide-react";
 import { authOptions } from "@/lib/authOptions";
 import { getPresets } from "@/lib/presets/store";
@@ -22,7 +19,14 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Reveal } from "@/components/Reveal";
 import { LogoMark } from "@/components/Logo";
-import { formatEUR, toMonthly, totals } from "@/lib/money";
+import {
+  formatEUR,
+  periodLabel,
+  toMonthly,
+  toYearly,
+  totals,
+  type BillingPeriod,
+} from "@/lib/money";
 import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -54,47 +58,6 @@ const FAQS = [
   },
 ];
 
-const FEATURES = [
-  {
-    icon: Search,
-    title: "Toevoegen in één klik",
-    text: "Zoek een dienst zoals Spotify of Netflix, kies je pakket en het staat erin.",
-  },
-  {
-    icon: Wallet,
-    title: "Maand- én jaarkosten",
-    text: "Zie direct wat alles samen per maand en per jaar kost. Netjes omgerekend.",
-  },
-  {
-    icon: Bell,
-    title: "Nooit meer vergeten",
-    text: "Houd overzicht over wat er loopt en zeg op tijd op wat je niet gebruikt.",
-  },
-  {
-    icon: Share2,
-    title: "Simpel te delen",
-    text: "Deel de app met huisgenoten en familie met één knop.",
-  },
-];
-
-const STEPS = [
-  {
-    icon: UserPlus,
-    title: "Account maken",
-    text: "Met e-mail of Google, in tien seconden.",
-  },
-  {
-    icon: Search,
-    title: "Diensten kiezen",
-    text: "Zoek, kies je pakket en de prijs staat er al.",
-  },
-  {
-    icon: BarChart3,
-    title: "Overzicht houden",
-    text: "Per maand en per jaar, altijd actueel.",
-  },
-];
-
 // Voorbeeldabonnementen voor het overzicht in de hero: [preset-id, pakket].
 const SAMPLE: [string, string][] = [
   ["netflix", "Standaard"],
@@ -119,8 +82,55 @@ const STRIP_IDS = [
 
 const BAR_COLORS = ["bg-mint", "bg-teal", "bg-mint-light", "bg-[#3f7c8c]", "bg-[#2a4b63]"];
 
+// "Hoe het werkt": de dienst die in het voorbeeld aan het hero-overzicht
+// wordt toegevoegd. Bewust een dienst die daar nog niet in staat.
+const DEMO: [string, string] = ["disneyplus", "Standaard"];
+
+// De stappen verwijzen naar de genummerde punten in het voorbeeld.
+const HOW_STEPS = [
+  {
+    title: "Typ de naam",
+    text: "Tik in je overzicht op Toevoegen en typ een paar letters. Je ziet de dienst met logo en het aantal pakketten.",
+  },
+  {
+    title: "Kies je pakket",
+    text: "Alle pakketten staan erbij, met prijs. Je tikt aan welk pakket je hebt.",
+  },
+  {
+    title: "Je totaal rekent mee",
+    text: "Je maand- en jaartotaal kloppen meteen weer. Zelf optellen hoeft niet.",
+  },
+];
+
+// "Per jaar"-voorbeeld: diensten uit de lijst met verschillende
+// betaalperiodes, plus één zelf toegevoegd abonnement per kwartaal.
+const YEAR_SAMPLE: [string, string][] = [
+  ["basicfit", "Comfort"],
+  ["max", "Standaard"],
+  ["microsoft365", "Family (jaar)"],
+  ["amazonprime", "Jaar"],
+];
+const CUSTOM_SAMPLE = {
+  name: "Tennisclub",
+  price: 45,
+  billingPeriod: "kwartaal" as BillingPeriod,
+  color: "#2a4b63",
+};
+
 function cheapestMonthly(p: Preset) {
   return Math.min(...p.plans.map((pl) => toMonthly(pl.price, pl.billingPeriod)));
+}
+
+/** Genummerd punt dat een stap koppelt aan een plek in het voorbeeld. */
+function StepPin({ n, className = "" }: { n: number; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-mint font-display text-[13px] font-bold text-mint-ink ${className}`}
+    >
+      {n}
+    </span>
+  );
 }
 
 export default async function Home() {
@@ -150,6 +160,64 @@ export default async function Home() {
 
   const chips = pick(CHIP_IDS);
   const strip = pick(STRIP_IDS);
+
+  // Hoe het werkt: één dienst toevoegen aan het voorbeeldoverzicht uit de hero.
+  const sampleIds = new Set(sampleItems.map((s) => s.preset.id));
+  const demo =
+    byId(DEMO[0]) ??
+    presets.find((p) => p.plans.length > 1 && !sampleIds.has(p.id)) ??
+    presets.find((p) => p.plans.length > 0);
+  const demoPlan = demo
+    ? (demo.plans.find((pl) => pl.name === DEMO[1]) ??
+      demo.plans[Math.min(1, demo.plans.length - 1)])
+    : undefined;
+  const demoAfter = demoPlan
+    ? {
+        added: toMonthly(demoPlan.price, demoPlan.billingPeriod),
+        monthly: monthly + toMonthly(demoPlan.price, demoPlan.billingPeriod),
+        yearly: yearly + toYearly(demoPlan.price, demoPlan.billingPeriod),
+      }
+    : undefined;
+  const demoQuery = demo ? demo.name.slice(0, 4).toLowerCase() : "";
+
+  // Per jaar: echte prijzen uit de lijst plus één eigen abonnement.
+  const yearRows = [
+    ...YEAR_SAMPLE.map(([id, planName]) => {
+      const preset = byId(id);
+      if (!preset || preset.plans.length === 0) return null;
+      const plan = preset.plans.find((pl) => pl.name === planName) ?? preset.plans[0];
+      return {
+        key: preset.id,
+        name: preset.name,
+        presetId: preset.id as string | undefined,
+        logoUrl: preset.logoUrl,
+        color: preset.color,
+        planName: plan.name,
+        price: plan.price,
+        billingPeriod: plan.billingPeriod,
+        custom: false,
+      };
+    }),
+    {
+      key: "eigen",
+      name: CUSTOM_SAMPLE.name,
+      presetId: undefined,
+      logoUrl: undefined,
+      color: CUSTOM_SAMPLE.color,
+      planName: "Eigen abonnement",
+      price: CUSTOM_SAMPLE.price,
+      billingPeriod: CUSTOM_SAMPLE.billingPeriod,
+      custom: true,
+    },
+  ]
+    .filter((r): r is NonNullable<typeof r> => Boolean(r))
+    .map((r) => ({
+      ...r,
+      monthly: toMonthly(r.price, r.billingPeriod),
+      yearly: toYearly(r.price, r.billingPeriod),
+    }))
+    .sort((a, b) => b.yearly - a.yearly);
+  const yearTotals = totals(yearRows);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -369,75 +437,340 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Hoe het werkt */}
-      <section id="hoe-het-werkt" className="mx-auto max-w-5xl scroll-mt-24 px-6 pt-20">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+      {/* Hoe het werkt: één dienst toevoegen, met echte pakketten en prijzen */}
+      <section
+        id="hoe-het-werkt"
+        aria-labelledby="hoe-het-werkt-titel"
+        className="mx-auto max-w-5xl scroll-mt-24 px-5 pt-24 sm:px-6 sm:pt-28"
+      >
+        <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand">
-              Hoe het werkt
-            </p>
-            <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-[38px]">
-              In drie stappen klaar
+            <h2
+              id="hoe-het-werkt-titel"
+              className="max-w-md text-balance font-display text-3xl font-bold leading-[1.08] tracking-tight text-slate-900 sm:text-[40px]"
+            >
+              {demo
+                ? `Zo zet je ${demo.name} in je overzicht`
+                : "Zo zet je een abonnement in je overzicht"}
             </h2>
+            <p className="mt-4 max-w-md text-pretty text-[17px] leading-relaxed text-slate-600">
+              Bij elke dienst uit de lijst gaat het zo. Staat jouw abonnement er
+              niet bij, dan vul je zelf de naam, prijs en periode in.
+            </p>
+
+            <ol className="mt-9 flex max-w-md flex-col gap-6">
+              {HOW_STEPS.map((step, i) => (
+                <li key={step.title} className="flex gap-4">
+                  <StepPin n={i + 1} className="mt-px" />
+                  <div>
+                    <h3 className="font-display text-lg font-bold text-slate-900">
+                      {step.title}
+                    </h3>
+                    <p className="mt-1 text-[15px] leading-relaxed text-slate-600">
+                      {step.text}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            <div className="mt-9 max-w-md border-t border-line pt-6">
+              <p className="text-[15px] leading-relaxed text-slate-600">
+                Je hebt alleen een gratis account nodig, met je e-mailadres of
+                Google. Geen creditcard.
+              </p>
+              <Link
+                href="/diensten"
+                className="mt-3 inline-flex items-center gap-1.5 font-semibold text-brand hover:underline"
+              >
+                Alle {presets.length} diensten bekijken
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
-          <Link
-            href="/diensten"
-            className="inline-flex items-center gap-1.5 font-semibold text-brand hover:underline"
-          >
-            Alle {presets.length} diensten bekijken
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <ol className="mt-8 grid gap-5 sm:grid-cols-3">
-          {STEPS.map(({ icon: Icon, title, text }, i) => (
-            <Reveal key={title} delay={i * 100}>
-              <li className="h-full rounded-[22px] border border-line bg-white p-6">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-mint-soft text-brand">
-                  <Icon className="h-[22px] w-[22px]" />
-                </span>
-                <h3 className="mt-4 font-display text-xl font-bold text-slate-900">
-                  {title}
-                </h3>
-                <p className="mt-1.5 text-[15px] leading-relaxed text-slate-500">{text}</p>
-              </li>
+
+          {demo && demoPlan && demoAfter && (
+            <Reveal>
+              <figure className="relative mx-auto w-full max-w-[460px] sm:ml-3.5 sm:mr-auto lg:ml-auto lg:mr-0">
+                <figcaption className="sr-only">
+                  Voorbeeld: na het typen van &ldquo;{demoQuery}&rdquo; verschijnt{" "}
+                  {demo.name} met {demo.plans.length} pakketten. Je kiest{" "}
+                  {demoPlan.name} voor {formatEUR(demoPlan.price)}{" "}
+                  {periodLabel(demoPlan.billingPeriod).toLowerCase()}. Je
+                  maandtotaal gaat van {formatEUR(monthly)} naar{" "}
+                  {formatEUR(demoAfter.monthly)}, je jaartotaal wordt{" "}
+                  {formatEUR(demoAfter.yearly)}.
+                </figcaption>
+
+                <div aria-hidden>
+                  {/* Nagebouwde "Abonnement toevoegen"-dialog */}
+                  <div className="rounded-[28px] border border-line bg-white p-5 pb-20 shadow-float sm:p-6 sm:pb-20">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-display text-[22px] font-bold text-slate-900">
+                        Abonnement toevoegen
+                      </p>
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface text-slate-600">
+                        <X className="h-4 w-4" strokeWidth={2.4} />
+                      </span>
+                    </div>
+
+                    <div className="relative mt-5">
+                      <StepPin
+                        n={1}
+                        className="absolute -left-[35px] top-1/2 -translate-y-1/2 ring-4 ring-white sm:-left-[39px]"
+                      />
+                      <div className="flex h-[50px] items-center gap-2.5 rounded-full border border-mint px-4 ring-4 ring-mint/20">
+                        <Search className="h-[18px] w-[18px] shrink-0 text-slate-500" />
+                        <span className="text-base text-slate-900">
+                          {demoQuery}
+                          <span className="ml-px inline-block h-5 w-[2px] translate-y-1 bg-slate-900" />
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Zelfde plek als in de echte dialog: direct onder de zoekbalk */}
+                    <div className="mt-3.5 flex items-center gap-3 rounded-[18px] border-[1.5px] border-dashed border-[#c3d3da] px-4 py-2.5">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mint-soft text-brand">
+                        <Plus className="h-4 w-4" strokeWidth={2.6} />
+                      </span>
+                      <span className="min-w-0 flex-1 text-sm">
+                        <span className="block truncate font-semibold text-slate-900">
+                          Eigen abonnement toevoegen
+                        </span>
+                        <span className="block text-[13px] text-slate-500">
+                          Staat je dienst er niet bij? Vul naam en prijs zelf in.
+                        </span>
+                      </span>
+                    </div>
+
+                    <div className="mt-3.5 rounded-[20px] border border-[#9fe6d9]">
+                      <div className="flex items-center gap-3.5 rounded-t-[19px] bg-mint-wash px-4 py-3">
+                        <ServiceLogo
+                          name={demo.name}
+                          presetId={demo.id}
+                          logoUrl={demo.logoUrl}
+                          color={demo.color}
+                          size={42}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-bold text-slate-900">{demo.name}</p>
+                          <p className="text-[13px] text-slate-500">
+                            {demo.category}
+                            {demo.plans.length > 1 && ` · ${demo.plans.length} pakketten`}
+                          </p>
+                        </div>
+                        <ChevronDown className="h-5 w-5 rotate-180 text-brand" />
+                      </div>
+                      <ul className="flex flex-col p-1.5">
+                        {demo.plans.map((plan) => {
+                          const picked = plan === demoPlan;
+                          return (
+                            <li
+                              key={plan.name}
+                              className={`relative flex items-center justify-between gap-3 rounded-[14px] py-3 pl-3 pr-3 sm:pl-[70px] sm:pr-3.5 ${
+                                picked ? "bg-surface" : ""
+                              }`}
+                            >
+                              {picked && (
+                                <StepPin
+                                  n={2}
+                                  className="absolute -left-[42px] top-1/2 -translate-y-1/2 ring-4 ring-white sm:-left-[46px]"
+                                />
+                              )}
+                              <span className="text-[15px] font-semibold leading-snug text-slate-800">
+                                {plan.name}
+                              </span>
+                              <span className="flex shrink-0 items-center gap-2.5">
+                                <span className="flex flex-col items-end sm:flex-row sm:items-baseline sm:gap-2.5">
+                                  <span className="font-display text-[15px] font-bold tabular-nums text-slate-900">
+                                    {formatEUR(plan.price)}
+                                  </span>
+                                  <span className="text-xs text-slate-500 sm:text-[13px]">
+                                    {periodLabel(plan.billingPeriod).toLowerCase()}
+                                  </span>
+                                </span>
+                                <span
+                                  className={`flex h-7 w-7 items-center justify-center rounded-full text-mint-ink ${
+                                    picked ? "bg-mint" : "bg-mint-soft"
+                                  }`}
+                                >
+                                  <Plus className="h-3.5 w-3.5" strokeWidth={2.8} />
+                                </span>
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+
+                  </div>
+
+                  {/* Het totaal dat meteen meerekent */}
+                  <div className="relative -mt-12 ml-auto w-[88%] rounded-[22px] bg-navy p-5 shadow-[0_24px_48px_-24px_rgba(8,35,59,0.6)] sm:w-[84%] sm:p-6">
+                    <StepPin
+                      n={3}
+                      className="absolute -left-3.5 top-1/2 -translate-y-1/2 ring-4 ring-white"
+                    />
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-sm text-haze">Per maand</p>
+                      <span className="rounded-full bg-mint px-2.5 py-1 font-display text-xs font-bold tabular-nums text-mint-ink">
+                        + {formatEUR(demoAfter.added)}
+                      </span>
+                    </div>
+                    <p className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-display font-bold leading-none tracking-tight tabular-nums">
+                      <span className="text-lg text-haze">{formatEUR(monthly)}</span>
+                      <ArrowRight className="h-4 w-4 text-haze" />
+                      <span className="text-[34px] text-white sm:text-[38px]">
+                        {formatEUR(demoAfter.monthly)}
+                      </span>
+                    </p>
+                    <dl className="mt-4 flex flex-col gap-2 border-t border-white/[0.12] pt-3.5 text-sm">
+                      <div className="flex justify-between">
+                        <dt className="text-haze">Per jaar</dt>
+                        <dd className="font-display font-bold tabular-nums text-white">
+                          {formatEUR(demoAfter.yearly)}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between">
+                        <dt className="text-haze">Actief</dt>
+                        <dd className="font-display font-bold text-white">
+                          {sampleItems.length + 1}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                </div>
+              </figure>
             </Reveal>
-          ))}
-        </ol>
+          )}
+        </div>
       </section>
 
-      {/* Features */}
-      <section className="mx-auto max-w-5xl px-6 pt-24">
-        <div className="grid items-start gap-10 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-14">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand">
-              Waarom AbonnementenBeheren
-            </p>
-            <h2 className="mt-2 font-display text-3xl font-bold leading-tight tracking-tight text-slate-900 sm:text-[38px]">
-              Alles wat je nodig hebt, niets wat je afleidt
-            </h2>
-            <p className="mt-4 leading-relaxed text-slate-600">
-              Gemaakt om je in een minuut overzicht te geven over wat je elke
-              maand betaalt.
-            </p>
+      {/* Per maand en per jaar: een rekenvoorbeeld met echte prijzen */}
+      <section
+        aria-labelledby="per-jaar-titel"
+        className="mx-auto max-w-5xl px-5 pt-24 sm:px-6 sm:pt-32"
+      >
+        <h2
+          id="per-jaar-titel"
+          className="text-balance font-display text-[2.4rem] font-bold leading-[1.02] tracking-[-0.035em] text-slate-900 sm:text-5xl lg:text-[56px]"
+        >
+          <span className="block">Per maand valt het mee.</span>
+          <span className="block">Per jaar niet altijd.</span>
+        </h2>
+        <p className="mt-5 max-w-md text-pretty text-[17px] leading-relaxed text-slate-600 lg:ml-auto lg:mt-3">
+          Je overzicht rekent alles om naar één maandbedrag en één jaarbedrag,
+          ook wat je per week, per kwartaal of per jaar betaalt. Hieronder een
+          voorbeeld met prijzen uit de lijst en één eigen abonnement.
+        </p>
+
+        <Reveal className="mt-10 sm:mt-12">
+          <div className="overflow-hidden rounded-[28px] border border-line bg-white">
+            <table className="w-full table-fixed border-collapse text-left">
+              <caption className="sr-only">
+                Rekenvoorbeeld: wat {yearRows.length} abonnementen per maand en per
+                jaar kosten
+              </caption>
+              <thead>
+                <tr className="text-[13px] text-slate-500">
+                  <th scope="col" className="py-4 pl-4 pr-2 font-medium sm:pl-7">
+                    Abonnement
+                  </th>
+                  <th
+                    scope="col"
+                    className="hidden px-3 py-4 font-medium md:table-cell md:w-[200px]"
+                  >
+                    Je betaalt
+                  </th>
+                  <th
+                    scope="col"
+                    className="hidden px-3 py-4 text-right font-medium sm:table-cell sm:w-[130px]"
+                  >
+                    Per maand
+                  </th>
+                  <th
+                    scope="col"
+                    className="w-[128px] bg-mint-wash py-4 pl-3 pr-4 text-right font-semibold text-brand sm:w-[180px] sm:pr-7 lg:w-[210px]"
+                  >
+                    Per jaar
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {yearRows.map((r) => (
+                  <tr key={r.key} className="border-t border-[#eef2f5]">
+                    <th scope="row" className="py-3.5 pl-4 pr-2 text-left font-normal sm:pl-7">
+                      <div className="flex items-center gap-3">
+                        <ServiceLogo
+                          name={r.name}
+                          presetId={r.presetId}
+                          logoUrl={r.logoUrl}
+                          color={r.color}
+                          size={40}
+                          rounded="rounded-[12px]"
+                        />
+                        <div className="min-w-0">
+                          <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 font-bold leading-snug text-slate-900">
+                            {r.name}
+                            {r.custom && (
+                              <span className="rounded-full bg-surface px-2 py-0.5 text-[11px] font-semibold leading-normal text-slate-600">
+                                zelf toegevoegd
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-[13px] text-slate-500">
+                            <span className="md:hidden">
+                              {formatEUR(r.price)}{" "}
+                              {periodLabel(r.billingPeriod).toLowerCase()}
+                            </span>
+                            <span className="hidden md:inline">{r.planName}</span>
+                          </p>
+                        </div>
+                      </div>
+                    </th>
+                    <td className="hidden px-3 py-3.5 text-[15px] text-slate-600 md:table-cell">
+                      <span className="font-display font-semibold tabular-nums text-slate-900">
+                        {formatEUR(r.price)}
+                      </span>{" "}
+                      {periodLabel(r.billingPeriod).toLowerCase()}
+                    </td>
+                    <td className="hidden px-3 py-3.5 text-right font-display text-[17px] tabular-nums text-slate-700 sm:table-cell">
+                      {formatEUR(r.monthly)}
+                    </td>
+                    <td className="bg-mint-wash py-3.5 pl-3 pr-4 text-right font-display text-[17px] font-bold tabular-nums text-slate-900 sm:pr-7 sm:text-lg">
+                      {formatEUR(r.yearly)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-navy">
+                  <th
+                    scope="row"
+                    className="py-5 pl-4 pr-2 text-left align-bottom font-normal sm:py-6 sm:pl-7"
+                  >
+                    <span className="block font-display text-lg font-bold text-white">
+                      Samen
+                    </span>
+                    <span className="block text-[13px] text-haze sm:hidden">
+                      {formatEUR(yearTotals.monthly)} per maand
+                    </span>
+                    <span className="hidden text-[13px] text-haze sm:block">
+                      {yearRows.length} abonnementen
+                    </span>
+                  </th>
+                  <td className="hidden md:table-cell" />
+                  <td className="hidden px-3 py-5 text-right align-bottom font-display text-lg font-bold tabular-nums text-white sm:table-cell sm:py-6 sm:text-xl">
+                    {formatEUR(yearTotals.monthly)}
+                  </td>
+                  <td className="py-5 pl-3 pr-4 text-right align-bottom font-display text-[22px] font-bold leading-none tracking-tight tabular-nums text-mint sm:py-6 sm:pr-7 sm:text-[34px] lg:text-[40px]">
+                    {formatEUR(yearTotals.yearly)}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            {FEATURES.map(({ icon: Icon, title, text }, i) => (
-              <Reveal
-                key={title}
-                delay={i * 80}
-                className="rounded-[22px] border border-line bg-white p-6"
-              >
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy text-mint">
-                  <Icon className="h-[22px] w-[22px]" />
-                </span>
-                <h3 className="mt-4 font-display text-[19px] font-bold text-slate-900">
-                  {title}
-                </h3>
-                <p className="mt-1.5 text-[15px] leading-relaxed text-slate-500">{text}</p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* Diensten-strook */}

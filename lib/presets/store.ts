@@ -4,17 +4,21 @@ import { PRESETS } from "@/lib/presets";
 import type { Preset } from "@/lib/presets/types";
 
 /**
- * Haalt de presetcatalogus uit MongoDB. Valt terug op de statische
- * `PRESETS` wanneer de database leeg of onbereikbaar is, zodat de
- * "Abonnement toevoegen"-flow altijd blijft werken.
+ * Haalt de presetcatalogus op. Presets uit MongoDB gaan voor (zo kun je
+ * een prijs in de database aanpassen), en de statische `PRESETS` vullen
+ * alles aan wat (nog) niet in de database staat. Zo verschijnen nieuwe
+ * diensten uit `data/` direct na een deploy, ook als de database al
+ * gevuld is. Bij een lege of onbereikbare database: alleen `PRESETS`.
  */
 export async function getPresets(): Promise<Preset[]> {
   try {
     await connectDB();
     const docs = await PresetModel.find().lean<Preset[]>();
     if (!docs.length) return PRESETS;
-    return docs
-      .map((d) => ({
+
+    const merged = new Map<string, Preset>(PRESETS.map((p) => [p.id, p]));
+    for (const d of docs) {
+      merged.set(d.id, {
         id: d.id,
         name: d.name,
         category: d.category,
@@ -26,8 +30,9 @@ export async function getPresets(): Promise<Preset[]> {
           price: p.price,
           billingPeriod: p.billingPeriod,
         })),
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name, "nl"));
+      });
+    }
+    return [...merged.values()].sort((a, b) => a.name.localeCompare(b.name, "nl"));
   } catch {
     return PRESETS;
   }
