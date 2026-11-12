@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { PREMIUM_ENABLED } from "@/lib/premium";
 
 const PRODUCT_LINKS = [
   { href: "/", label: "Home" },
   { href: "/diensten", label: "Diensten" },
   { href: "/overzicht", label: "Mijn overzicht" },
+  ...(PREMIUM_ENABLED ? [{ href: "/premium", label: "Premium" }] : []),
+];
+
+const LEGAL_LINKS = [
+  { href: "/privacy", label: "Privacy" },
+  { href: "/voorwaarden", label: "Voorwaarden" },
 ];
 
 const POPULAR_LINKS = [
@@ -25,9 +32,10 @@ export function SiteFooter() {
               Gratis overzicht van al je abonnementen, per maand en per jaar.
             </p>
           </div>
-          <div className="flex gap-16">
+          <div className="flex flex-wrap gap-x-16 gap-y-10">
             <FooterColumn title="Product" links={PRODUCT_LINKS} />
             <FooterColumn title="Populair" links={POPULAR_LINKS} />
+            <FooterColumn title="Info" links={LEGAL_LINKS} />
           </div>
         </div>
         <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-5 text-sm text-haze sm:flex-row sm:justify-between">

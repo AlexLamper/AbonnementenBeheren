@@ -1,27 +1,27 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/authOptions";
 import { connectDB } from "@/lib/db";
 import { Subscription } from "@/lib/models/Subscription";
 import { subscriptionInputSchema } from "@/lib/validation";
-import { toClient } from "@/lib/serialize";
+import { serializeFor } from "@/lib/serialize";
+import { getRequestUser } from "@/lib/requestUser";
+import { getEntitlement, LIMIT_REACHED } from "@/lib/premium";
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+export async function GET(req: Request) {
+  const user = await getRequestUser(req);
+  if (!user) {
     return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 });
   }
 
   await connectDB();
-  const docs = await Subscription.find({ userId: session.user.id }).sort({
+  const docs = await Subscription.find({ userId: user.id }).sort({
     createdAt: -1,
   });
-  return NextResponse.json(docs.map(toClient));
+  return NextResponse.json(docs.map(serializeFor(user.mobile)));
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const user = await getRequestUser(req);
+  if (!user) {
     return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 });
   }
 
@@ -40,10 +40,25 @@ export async function POST(req: Request) {
     );
   }
 
+  // Gratis limiet: altijd op de server gecontroleerd, zodat site en app
+  // dezelfde regel volgen en niemand er omheen kan.
+  const entitlement = await getEntitlement(user.id);
+  if (!entitlement.canAdd) {
+    return NextResponse.json(
+      {
+        error: `Met een gratis account kun je ${entitlement.limit} abonnementen bijhouden. Neem Premium voor onbeperkt.`,
+        code: LIMIT_REACHED,
+        limit: entitlement.limit,
+        count: entitlement.count,
+      },
+      { status: 403 }
+    );
+  }
+
   await connectDB();
   const doc = await Subscription.create({
     ...parsed.data,
-    userId: session.user.id,
+    userId: user.id,
   });
-  return NextResponse.json(toClient(doc), { status: 201 });
+  return NextResponse.json(serializeFor(user.mobile)(doc), { status: 201 });
 }

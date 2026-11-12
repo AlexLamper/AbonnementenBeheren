@@ -1,0 +1,292 @@
+name: iOS-app naar TestFlight
+
+on:
+  # Elke push naar main die de app raakt, bouwt een nieuwe TestFlight-build.
+  # Het buildnummer komt uit App Store Connect, dus pubspec ophogen hoeft niet.
+  # Wijzigingen aan alleen de website starten deze workflow niet.
+  push:
+    branches:
+      - main
+    paths:
+      - "mobile/**"
+      - ".github/workflows/ios-testflight.yml"
+      - ".github/workflows/scripts/resolve_version.py"
+  workflow_dispatch:
+    inputs:
+      build_name:
+        description: "Versie (bijv. 1.0.3). Leeg = automatisch uit pubspec.yaml + App Store Connect."
+        required: false
+        default: ""
+      build_number:
+        description: "Buildnummer (bijv. 46). Leeg = automatisch uit App Store Connect."
+        required: false
+        default: ""
+
+# Een nieuwere push vervangt een build die nog loopt.
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: true
+
+jobs:
+  # Zonder Apple-secrets slaan we de (dure) macOS-build netjes over in plaats
+  # van rood te worden. Zie mobile/README.md voor de lijst met secrets.
+  check:
+    name: Secrets aanwezig?
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        env:
+          CERT: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          PROFILE: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          ASC_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -n "$CERT" ] && [ -n "$PROFILE" ] && [ -n "$ASC_KEY" ] && [ -n "$TEAM" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Apple-secrets ontbreken nog; TestFlight-build overgeslagen. Zie mobile/README.md."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  test:
+    name: Analyse en tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.50.0"
+          channel: stable
+          cache: true
+      - name: Afhankelijkheden
+        working-directory: mobile
+        run: flutter pub get
+      - name: Analyse
+        working-directory: mobile
+        run: flutter analyze --no-fatal-infos
+      - name: Tests
+        working-directory: mobile
+        run: flutter test
+
+  build-and-upload-ios:
+    name: Flutter IPA bouwen en naar TestFlight
+    needs: [check, test]
+    if: needs.check.outputs.ready == 'true'
+    runs-on: macos-latest
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select latest stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      # ── 2. Flutter ───────────────────────────────────────────────────────────
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.50.0"
+          channel: stable
+          cache: true
+
+      - name: Install Flutter dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      # ── 3. Code signing ──────────────────────────────────────────────────────
+      # Secrets (GitHub → Settings → Secrets and variables → Actions):
+      #   BUILD_CERTIFICATE_BASE64       base64 van je Distribution .p12
+      #   P12_PASSWORD                   wachtwoord van de .p12
+      #   BUILD_PROVISION_PROFILE_BASE64 base64 van het App Store-profiel voor com.abonnementenbeheren.app
+      #   KEYCHAIN_PASSWORD              willekeurig wachtwoord voor de tijdelijke keychain
+      - name: Import Distribution certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          security import "$CERTIFICATE_PATH" \
+            -P "$P12_PASSWORD" \
+            -A -t cert -f pkcs12 \
+            -k "$KEYCHAIN_PATH"
+
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+      - name: Install provisioning profile
+        env:
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+        run: |
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          PP_PLIST=$RUNNER_TEMP/build_pp.plist
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o "$PP_PATH"
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
+
+          security cms -D -i "$PP_PATH" > "$PP_PLIST"
+          PP_UUID=$(/usr/libexec/PlistBuddy -c 'Print UUID' "$PP_PLIST")
+          PP_NAME=$(/usr/libexec/PlistBuddy -c 'Print Name' "$PP_PLIST")
+          PP_APP_ID=$(/usr/libexec/PlistBuddy -c 'Print Entitlements:application-identifier' "$PP_PLIST")
+          APP_BUNDLE_ID="${PP_APP_ID#*.}"
+
+          if [ "$APP_BUNDLE_ID" != "com.abonnementenbeheren.app" ]; then
+            echo "::error::Het provisioning profile hoort bij $APP_BUNDLE_ID, verwacht com.abonnementenbeheren.app."
+            exit 1
+          fi
+
+          echo "PP_UUID=$PP_UUID" >> $GITHUB_ENV
+          echo "PP_NAME=$PP_NAME" >> $GITHUB_ENV
+          echo "APP_BUNDLE_ID=$APP_BUNDLE_ID" >> $GITHUB_ENV
+          echo "Using provisioning profile: $PP_NAME ($PP_UUID)"
+
+      # ── 3b. Versie bepalen ───────────────────────────────────────────────────
+      # Vraagt App Store Connect welke versie/build al bestaan en kiest de
+      # volgende vrije, zodat een vergeten pubspec-bump de upload niet breekt.
+      - name: Resolve version and build number
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          INPUT_BUILD_NAME: ${{ github.event.inputs.build_name }}
+          INPUT_BUILD_NUMBER: ${{ github.event.inputs.build_number }}
+          PUBSPEC_PATH: mobile/pubspec.yaml
+        run: |
+          python3 -m venv "$RUNNER_TEMP/versionvenv"
+          "$RUNNER_TEMP/versionvenv/bin/python" -m pip install --quiet --disable-pip-version-check pyjwt cryptography
+          "$RUNNER_TEMP/versionvenv/bin/python" .github/workflows/scripts/resolve_version.py
+
+      # ── 4. ExportOptions ─────────────────────────────────────────────────────
+      - name: Create ExportOptions.plist
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          cat > /tmp/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>teamID</key>
+            <string>${TEAM_ID}</string>
+            <key>signingCertificate</key>
+            <string>Apple Distribution</string>
+            <key>uploadSymbols</key>
+            <true/>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>${APP_BUNDLE_ID}</key>
+              <string>${PP_NAME}</string>
+            </dict>
+          </dict>
+          </plist>
+          EOF
+
+      # ── 5. Build IPA ─────────────────────────────────────────────────────────
+      - name: Build Flutter iOS (unsigned)
+        working-directory: mobile
+        env:
+          REVENUECAT_APPLE_KEY: ${{ secrets.REVENUECAT_APPLE_KEY }}
+        run: |
+          echo "Building $BUILD_NAME ($BUILD_NUMBER)"
+          if [ -z "${REVENUECAT_APPLE_KEY:-}" ]; then
+            echo "::warning::REVENUECAT_APPLE_KEY ontbreekt: de app werkt, maar Premium kopen kan in deze build niet."
+          fi
+
+          flutter build ios --release --no-codesign \
+            --build-name="$BUILD_NAME" \
+            --build-number="$BUILD_NUMBER" \
+            --dart-define=REVENUECAT_APPLE_KEY="${REVENUECAT_APPLE_KEY:-}"
+
+      - name: Archive and export signed IPA
+        working-directory: mobile/ios
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcodebuild -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            archive \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            -exportOptionsPlist /tmp/ExportOptions.plist \
+            -exportPath ../build/ios/ipa
+
+          IPA_PATH=$(find ../build/ios/ipa -name "*.ipa" | head -1)
+          if [ -z "${IPA_PATH:-}" ]; then
+            echo "No IPA file produced."
+            exit 1
+          fi
+
+      # ── 6. Upload naar TestFlight ───────────────────────────────────────────
+      #   APP_STORE_CONNECT_KEY_ID / _ISSUER_ID / _API_KEY_P8 (base64 van de .p8)
+      - name: Upload IPA to TestFlight
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+        run: |
+          set -euo pipefail
+
+          KEY_DIR="$HOME/.appstoreconnect/private_keys"
+          KEY_PATH="$KEY_DIR/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+          mkdir -p "$KEY_DIR"
+          echo -n "$APP_STORE_CONNECT_API_KEY_P8" | base64 --decode -o "$KEY_PATH"
+
+          IPA_PATH=$(find mobile/build/ios/ipa -name "*.ipa" | head -1)
+          echo "Uploading: $IPA_PATH"
+
+          # altool kan 0 teruggeven terwijl Apple de build weigert; daarom de
+          # uitvoer controleren.
+          UPLOAD_LOG="$RUNNER_TEMP/altool-upload.log"
+          set +e
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$IPA_PATH" \
+            --apiKey "$APP_STORE_CONNECT_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
+            --verbose 2>&1 | tee "$UPLOAD_LOG"
+          ALTOOL_EXIT=${PIPESTATUS[0]}
+          set -e
+
+          if [ "$ALTOOL_EXIT" -ne 0 ] || grep -qiE "UPLOAD FAILED|Failed to upload package|ERROR:" "$UPLOAD_LOG"; then
+            REASON=$(awk -F'"' '/description/ {print $(NF-1)}' "$UPLOAD_LOG" | sort -u | head -5)
+            echo "::error::TestFlight-upload mislukt als $BUILD_NAME ($BUILD_NUMBER)."
+            if [ -n "${REASON:-}" ]; then
+              echo "$REASON" | while read -r line; do echo "::error::$line"; done
+            fi
+            exit 1
+          fi
+          echo "Upload geaccepteerd door App Store Connect."
+
+      # ── 7. Opruimen ─────────────────────────────────────────────────────────
+      - name: Clean up keychain and provisioning profile
+        if: always()
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
+          rm -f ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
+          rm -f "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8"

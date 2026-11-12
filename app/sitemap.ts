@@ -31,6 +31,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.5,
     },
+    ...(process.env.PREMIUM_ENABLED === "true"
+      ? [
+          {
+            url: `${SITE_URL}/premium`,
+            lastModified: now,
+            changeFrequency: "monthly" as const,
+            priority: 0.6,
+          },
+        ]
+      : []),
+    ...["privacy", "voorwaarden"].map((path) => ({
+      url: `${SITE_URL}/${path}`,
+      lastModified: now,
+      changeFrequency: "yearly" as const,
+      priority: 0.2,
+    })),
     ...servicePages,
   ];
 }

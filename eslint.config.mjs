@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // De Flutter-app heeft eigen tooling (flutter analyze).
+    "mobile/**",
   ]),
 ]);
 

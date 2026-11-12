@@ -9,6 +9,10 @@ export const SITE_NAME = "AbonnementenBeheren";
 
 export const AUTHOR = "Alex Lamper";
 
+/** Contactadres op de privacy- en voorwaardenpagina. */
+export const CONTACT_EMAIL =
+  process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "info@abonnementenbeheren.com";
+
 export const SITE_TITLE =
   "Abonnementen beheren - gratis overzicht van al je abonnementen";
 

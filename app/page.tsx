@@ -28,6 +28,7 @@ import {
   type BillingPeriod,
 } from "@/lib/money";
 import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/seo";
+import { FREE_SUBSCRIPTION_LIMIT, PREMIUM_ENABLED } from "@/lib/premium";
 
 export const metadata: Metadata = {
   title: SITE_TITLE,
@@ -42,7 +43,9 @@ const FAQS = [
   },
   {
     q: "Is abonnementen beheren met AbonnementenBeheren gratis?",
-    a: "Ja, AbonnementenBeheren is volledig gratis. Je hebt geen creditcard nodig en er zijn geen verborgen kosten.",
+    a: PREMIUM_ENABLED
+      ? `Ja, je begint gratis en houdt tot ${FREE_SUBSCRIPTION_LIMIT} abonnementen bij zonder creditcard. Wil je er meer bijhouden, dan kan dat met Premium.`
+      : "Ja, AbonnementenBeheren is volledig gratis. Je hebt geen creditcard nodig en er zijn geen verborgen kosten.",
   },
   {
     q: "Welke diensten kan ik toevoegen?",
