@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PREMIUM_ENABLED } from "@/lib/premium";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExternalLink, Check, Plus, ChevronRight } from "lucide-react";
@@ -283,7 +284,7 @@ export default async function ServicePage({
               Houd {preset.name} en al je andere abonnementen bij
             </h2>
             <ul className="mt-3.5 flex flex-col gap-2 text-sm text-mist">
-              {["Voor altijd gratis", "Geen creditcard", "In één klik toegevoegd"].map((t) => (
+              {[PREMIUM_ENABLED ? "Gratis beginnen" : "Voor altijd gratis", "Geen creditcard", "In één klik toegevoegd"].map((t) => (
                 <li key={t} className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-mint" strokeWidth={2.6} />
                   {t}

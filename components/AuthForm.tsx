@@ -40,8 +40,10 @@ export function AuthForm({
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       next.email = "Vul een geldig e-mailadres in.";
     }
-    if (password.length < 6) {
-      next.password = "Gebruik minimaal 6 tekens.";
+    // Nieuwe wachtwoorden: minimaal 8 tekens (zelfde regel als de server).
+    if (mode === "registreren" ? password.length < 8 : password.length < 1) {
+      next.password =
+        mode === "registreren" ? "Gebruik minimaal 8 tekens." : "Vul je wachtwoord in.";
     }
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -157,7 +159,7 @@ export function AuthForm({
               setErrors((e) => ({ ...e, password: undefined }));
           }}
           autoComplete={isRegister ? "new-password" : "current-password"}
-          placeholder={isRegister ? "Minimaal 6 tekens" : "••••••••"}
+          placeholder={isRegister ? "Minimaal 8 tekens" : "••••••••"}
           error={errors.password}
         />
         <button

@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/authOptions";
 import { connectDB } from "@/lib/db";
 import { Subscription } from "@/lib/models/Subscription";
 import { subscriptionUpdateSchema } from "@/lib/validation";
-import { toClient } from "@/lib/serialize";
+import { serializeFor } from "@/lib/serialize";
+import { getRequestUser } from "@/lib/requestUser";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function PATCH(req: Request, { params }: Params) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const user = await getRequestUser(req);
+  if (!user) {
     return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 });
   }
 
@@ -32,20 +31,21 @@ export async function PATCH(req: Request, { params }: Params) {
 
   await connectDB();
   // Ownership-check: alleen het eigen abonnement mag aangepast worden.
+  // Aanpassen en verwijderen mag altijd, ook boven de gratis limiet.
   const doc = await Subscription.findOneAndUpdate(
-    { _id: id, userId: session.user.id },
+    { _id: id, userId: user.id },
     parsed.data,
     { new: true }
-  );
+  ).catch(() => null);
   if (!doc) {
     return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
   }
-  return NextResponse.json(toClient(doc));
+  return NextResponse.json(serializeFor(user.mobile)(doc));
 }
 
-export async function DELETE(_req: Request, { params }: Params) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+export async function DELETE(req: Request, { params }: Params) {
+  const user = await getRequestUser(req);
+  if (!user) {
     return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 });
   }
 
@@ -53,8 +53,8 @@ export async function DELETE(_req: Request, { params }: Params) {
   await connectDB();
   const doc = await Subscription.findOneAndDelete({
     _id: id,
-    userId: session.user.id,
-  });
+    userId: user.id,
+  }).catch(() => null);
   if (!doc) {
     return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
   }

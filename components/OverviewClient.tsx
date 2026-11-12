@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { signOut } from "next-auth/react";
-import { Plus, LogOut } from "lucide-react";
+import { Plus, LogOut, Sparkles, Download } from "lucide-react";
 import { toast } from "sonner";
 import type { ClientSubscription } from "@/lib/types";
 import type { Preset } from "@/lib/presets/types";
@@ -16,6 +16,17 @@ import { SubscriptionList, type SortKey } from "@/components/SubscriptionList";
 import { EmptyState } from "@/components/EmptyState";
 import { AddSubscriptionDialog } from "@/components/AddSubscriptionDialog";
 import { EditSubscriptionDialog } from "@/components/EditSubscriptionDialog";
+import { UpgradeDialog, type UpgradeReason } from "@/components/UpgradeDialog";
+import type { PlanPrices } from "@/components/PlanPicker";
+
+export interface OverviewPlan {
+  premiumEnabled: boolean;
+  isPremium: boolean;
+  /** Maximum aantal abonnementen, of null voor onbeperkt. */
+  limit: number | null;
+  freeLimit: number;
+  prices: PlanPrices;
+}
 
 /** Tijdgebonden begroeting op basis van de lokale tijd van de bezoeker. */
 function getGreeting(): string {
@@ -51,11 +62,15 @@ export function OverviewClient({
   presets,
   firstName,
   autoAddId,
+  plan,
+  openUpgrade = false,
 }: {
   initial: ClientSubscription[];
   presets: Preset[];
   firstName?: string;
   autoAddId?: string;
+  plan: OverviewPlan;
+  openUpgrade?: boolean;
 }) {
   // Open de toevoeg-dialog vanzelf bij ?add=<presetId> (vanaf dienstpagina's).
   const autoAddName = autoAddId
@@ -65,9 +80,16 @@ export function OverviewClient({
   const greeting = useGreeting();
 
   const [items, setItems] = useState<ClientSubscription[]>(initial);
+  const limitReached = plan.limit !== null && items.length >= plan.limit;
+  const startWithUpgrade =
+    plan.premiumEnabled && !plan.isPremium && (openUpgrade || (Boolean(autoAddName) && limitReached));
+  const [upgrade, setUpgrade] = useState<{ open: boolean; reason: UpgradeReason }>({
+    open: startWithUpgrade,
+    reason: openUpgrade ? "manual" : "limit",
+  });
   // `key` laat de dialog opnieuw mounten zodat een nieuwe zoekterm doorkomt.
   const [add, setAdd] = useState<{ open: boolean; query?: string; key: number }>({
-    open: Boolean(autoAddName),
+    open: Boolean(autoAddName) && !limitReached,
     query: autoAddName,
     key: 0,
   });
@@ -89,7 +111,19 @@ export function OverviewClient({
   );
 
   function openAdd(query?: string) {
+    if (limitReached) {
+      setUpgrade({ open: true, reason: "limit" });
+      return;
+    }
     setAdd((s) => ({ open: true, query, key: s.key + 1 }));
+  }
+
+  function exportCsv() {
+    if (plan.premiumEnabled && !plan.isPremium) {
+      setUpgrade({ open: true, reason: "export" });
+      return;
+    }
+    window.location.href = "/api/export";
   }
 
   async function addItem(input: SubscriptionInput) {
@@ -100,6 +134,11 @@ export function OverviewClient({
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
+      if (data.code === "LIMIT_REACHED") {
+        setAdd((s) => ({ ...s, open: false }));
+        setUpgrade({ open: true, reason: "limit" });
+        return false;
+      }
       toast.error(data.error ?? "Toevoegen mislukt");
       return false;
     }
@@ -170,6 +209,25 @@ export function OverviewClient({
               </nav>
             </div>
             <div className="flex items-center gap-2">
+              {plan.premiumEnabled &&
+                (plan.isPremium ? (
+                  <Link
+                    href="/premium"
+                    className="hidden items-center gap-1.5 rounded-full bg-mint/15 px-3.5 py-2 text-sm font-bold text-mint-light transition hover:bg-mint/25 sm:inline-flex"
+                  >
+                    <Sparkles className="h-4 w-4" strokeWidth={2.4} />
+                    Premium
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setUpgrade({ open: true, reason: "manual" })}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-mint px-3.5 py-2 text-sm font-bold text-mint-ink transition hover:bg-mint-light"
+                  >
+                    <Sparkles className="h-4 w-4" strokeWidth={2.4} />
+                    <span className="hidden xs:inline">Premium</span>
+                  </button>
+                ))}
               <div className="hidden sm:block">
                 <ShareButton tone="dark" />
               </div>
@@ -200,6 +258,13 @@ export function OverviewClient({
               ? "Voeg je eerste abonnement toe om je totaal te zien."
               : "Zo staan je abonnementen er nu voor."}
           </p>
+          {plan.limit !== null && (
+            <UsageMeter
+              count={items.length}
+              limit={plan.limit}
+              onUpgrade={() => setUpgrade({ open: true, reason: "manual" })}
+            />
+          )}
           <div className="mt-6 animate-fade-in-up [animation-delay:120ms] sm:mt-7">
             <TotalsCards
               monthly={monthly}
@@ -227,6 +292,17 @@ export function OverviewClient({
                   <span className="font-medium text-slate-500">({items.length})</span>
                 </h2>
                 <div className="flex items-center gap-2">
+                  {plan.premiumEnabled && (
+                    <button
+                      type="button"
+                      onClick={exportCsv}
+                      aria-label="Exporteer als CSV"
+                      title="Exporteer als CSV"
+                      className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white text-slate-600 transition hover:border-mint hover:text-brand"
+                    >
+                      <Download className="h-4 w-4" />
+                    </button>
+                  )}
                   <label htmlFor="sorteer" className="sr-only">
                     Sorteren
                   </label>
@@ -289,6 +365,53 @@ export function OverviewClient({
         onClose={() => setEditing(null)}
         onSave={updateItem}
       />
+      {plan.premiumEnabled && !plan.isPremium && (
+        <UpgradeDialog
+          open={upgrade.open}
+          onClose={() => setUpgrade((u) => ({ ...u, open: false }))}
+          reason={upgrade.reason}
+          limit={plan.freeLimit}
+          prices={plan.prices}
+        />
+      )}
+    </div>
+  );
+}
+
+/** "3 van 5 gratis" met een balkje, op de navy band. */
+function UsageMeter({
+  count,
+  limit,
+  onUpgrade,
+}: {
+  count: number;
+  limit: number;
+  onUpgrade: () => void;
+}) {
+  const used = Math.min(count, limit);
+  const full = count >= limit;
+  return (
+    <div className="mt-4 flex max-w-md animate-fade-in-up items-center gap-3 rounded-full border border-white/[0.12] bg-white/[0.06] py-1.5 pl-4 pr-1.5 [animation-delay:90ms]">
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[13px] font-semibold text-mist">
+          {full
+            ? `Alle ${limit} gratis plekken gebruikt`
+            : `${used} van ${limit} gratis abonnementen`}
+        </p>
+        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10">
+          <div
+            className={`h-1.5 rounded-full ${full ? "bg-mint-light" : "bg-mint"}`}
+            style={{ width: `${(used / limit) * 100}%` }}
+          />
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={onUpgrade}
+        className="shrink-0 rounded-full bg-mint px-3.5 py-2 text-[13px] font-bold text-mint-ink transition hover:bg-mint-light"
+      >
+        Onbeperkt
+      </button>
     </div>
   );
 }

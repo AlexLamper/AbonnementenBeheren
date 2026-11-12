@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PREMIUM_ENABLED } from "@/lib/premium";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -54,7 +55,7 @@ export default async function LoginPage({
           </div>
         </div>
         <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-mist">
-          {["Voor altijd gratis", "Geen creditcard", "Nederlands"].map((t) => (
+          {[PREMIUM_ENABLED ? "Gratis beginnen" : "Voor altijd gratis", "Geen creditcard", "Nederlands"].map((t) => (
             <li key={t} className="flex items-center gap-1.5">
               <Check className="h-4 w-4 text-mint" strokeWidth={2.6} />
               {t}

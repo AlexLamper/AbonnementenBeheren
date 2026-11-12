@@ -7,6 +7,7 @@ import { Subscription } from "@/lib/models/Subscription";
 import { toClient } from "@/lib/serialize";
 import { getPresets } from "@/lib/presets/store";
 import { OverviewClient } from "@/components/OverviewClient";
+import { getEntitlement, FREE_SUBSCRIPTION_LIMIT, PREMIUM_PRICES } from "@/lib/premium";
 
 export const metadata: Metadata = {
   title: "Mijn abonnementen",
@@ -16,9 +17,9 @@ export const metadata: Metadata = {
 export default async function OverzichtPage({
   searchParams,
 }: {
-  searchParams: Promise<{ add?: string }>;
+  searchParams: Promise<{ add?: string; upgrade?: string }>;
 }) {
-  const { add } = await searchParams;
+  const { add, upgrade } = await searchParams;
 
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -35,7 +36,10 @@ export default async function OverzichtPage({
   });
   const initial = docs.map(toClient);
 
-  const presets = await getPresets();
+  const [presets, entitlement] = await Promise.all([
+    getPresets(),
+    getEntitlement(session.user.id),
+  ]);
   const firstName = session.user.name?.split(" ")[0];
 
   return (
@@ -44,6 +48,14 @@ export default async function OverzichtPage({
       presets={presets}
       firstName={firstName}
       autoAddId={add}
+      plan={{
+        premiumEnabled: entitlement.premiumEnabled,
+        isPremium: entitlement.isPremium,
+        limit: entitlement.limit,
+        freeLimit: FREE_SUBSCRIPTION_LIMIT,
+        prices: PREMIUM_PRICES,
+      }}
+      openUpgrade={upgrade === "1"}
     />
   );
 }
