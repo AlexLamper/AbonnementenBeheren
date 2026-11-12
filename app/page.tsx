@@ -15,6 +15,7 @@ import { getPresets } from "@/lib/presets/store";
 import type { Preset } from "@/lib/presets/types";
 import { ServiceLogo } from "@/components/ServiceLogo";
 import { ShareButton } from "@/components/ShareButton";
+import { IosAppButton } from "@/components/IosAppButton";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Reveal } from "@/components/Reveal";
@@ -361,6 +362,7 @@ export default async function Home() {
               Maak gratis je account
               <ArrowRight className="h-4 w-4" />
             </Link>
+            <IosAppButton />
           </div>
         </section>
       </div>
