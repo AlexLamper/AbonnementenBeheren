@@ -19,7 +19,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get authHeroLine2 => 'den Überblick.';
 
   @override
-  String get authHeroBody => 'Alle Abos an einem Ort: Sieh, was du pro Monat und pro Jahr ausgibst.';
+  String get authHeroBody =>
+      'Alle Abos an einem Ort: Sieh, was du pro Monat und pro Jahr ausgibst.';
 
   @override
   String get authWelcomeBack => 'Willkommen zurück';
@@ -79,14 +80,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get busy => 'Einen Moment…';
 
   @override
-  String get authInvalidCredentials => 'E-Mail-Adresse oder Passwort ist falsch.';
+  String get authInvalidCredentials =>
+      'E-Mail-Adresse oder Passwort ist falsch.';
 
   @override
   String get authNoPassword =>
       'Dieses Konto meldet sich mit Google an. Das geht in der App noch nicht; nutze bitte die Website.';
 
   @override
-  String get authEmailTaken => 'Es gibt bereits ein Konto mit dieser E-Mail-Adresse.';
+  String get authEmailTaken =>
+      'Es gibt bereits ein Konto mit dieser E-Mail-Adresse.';
 
   @override
   String get authAgreePrefix => 'Mit dem Fortfahren akzeptierst du die';
@@ -101,10 +104,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get privacyLink => 'Datenschutzerklärung';
 
   @override
-  String get errorNetwork => 'Keine Verbindung. Prüfe dein Internet und versuche es erneut.';
+  String get errorNetwork =>
+      'Keine Verbindung. Prüfe dein Internet und versuche es erneut.';
 
   @override
-  String get errorGeneric => 'Etwas ist schiefgelaufen. Bitte versuche es erneut.';
+  String get errorGeneric =>
+      'Etwas ist schiefgelaufen. Bitte versuche es erneut.';
 
   @override
   String get retry => 'Erneut versuchen';
@@ -135,7 +140,8 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get overviewSubtitleEmpty => 'Füge dein erstes Abo hinzu, um deine Summe zu sehen.';
+  String get overviewSubtitleEmpty =>
+      'Füge dein erstes Abo hinzu, um deine Summe zu sehen.';
 
   @override
   String get overviewSubtitle => 'So stehen deine Abos gerade.';
@@ -174,7 +180,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get emptyTitle => 'Noch keine Abos';
 
   @override
-  String get emptyBody => 'Füge dein erstes Abo hinzu und sieh sofort, was du monatlich ausgibst.';
+  String get emptyBody =>
+      'Füge dein erstes Abo hinzu und sieh sofort, was du monatlich ausgibst.';
 
   @override
   String get emptyAddButton => 'Abo hinzufügen';
@@ -205,7 +212,8 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get deleteConfirmBody => 'Dieses Abo wird aus deiner Übersicht entfernt.';
+  String get deleteConfirmBody =>
+      'Dieses Abo wird aus deiner Übersicht entfernt.';
 
   @override
   String get deleted => 'Gelöscht';
@@ -278,7 +286,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get customAdd => 'Eigenes Abo hinzufügen';
 
   @override
-  String get customAddBody => 'Dein Dienst fehlt? Gib Name und Preis selbst ein.';
+  String get customAddBody =>
+      'Dein Dienst fehlt? Gib Name und Preis selbst ein.';
 
   @override
   String get popular => 'Beliebt';
@@ -293,7 +302,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String plansCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count Tarife', one: '1 Tarif');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tarife',
+      one: '1 Tarif',
+    );
     return '$_temp0';
   }
 
@@ -374,8 +388,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get restorePurchases => 'Käufe wiederherstellen';
 
   @override
-  String get paywallLegal =>
-      'Premium verlängert sich automatisch, bis du kündigst. Kündigen kannst du jederzeit in den Einstellungen von App Store oder Google Play.';
+  String paywallLegal(String store) {
+    return 'Premium verlängert sich automatisch, bis du kündigst. Kündigen kannst du jederzeit in deinen $store-Einstellungen.';
+  }
 
   @override
   String get purchaseSuccess => 'Willkommen bei Premium!';
@@ -387,7 +402,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get restoreSuccess => 'Deine Käufe wurden wiederhergestellt.';
 
   @override
-  String get storeUnavailable => 'Käufe sind gerade nicht verfügbar. Bitte versuche es später erneut.';
+  String get storeUnavailable =>
+      'Käufe sind gerade nicht verfügbar. Bitte versuche es später erneut.';
 
   @override
   String get youArePremium => 'Du hast Premium. Danke für deine Unterstützung!';
@@ -414,7 +430,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get manageSubscription => 'Abo verwalten';
 
   @override
-  String get premiumViaWeb => 'Du hast Premium über die Website. Verwalte es auf abonnementenbeheren.com.';
+  String get premiumViaWeb =>
+      'Du hast Premium über die Website. Verwalte es auf abonnementenbeheren.com.';
 
   @override
   String get premiumGranted => 'Du hast Premium geschenkt bekommen.';
@@ -433,7 +450,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dein Konto und alle deine Abos werden endgültig gelöscht. Das lässt sich nicht rückgängig machen.';
 
   @override
-  String get deleteAccountStoreNote => 'Premium in der App gekauft? Kündige es auch im App Store oder bei Google Play.';
+  String deleteAccountStoreNote(String store) {
+    return 'Premium in der App gekauft? Kündige es auch über $store.';
+  }
 
   @override
   String get accountDeleted => 'Dein Konto wurde gelöscht.';

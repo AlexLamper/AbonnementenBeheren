@@ -1,0 +1,288 @@
+name: App Store metadata & screenshots
+
+# Zet de App Store-pagina uit store/ (fastlane deliver-indeling) in App Store
+# Connect voor app 6833970151 (com.abonnementenbeheren.app). Builds komen uit
+# ios-testflight.yml. Indienen voor review alleen via een handmatige run.
+# Overgenomen van CamTrip.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "store/**"
+  workflow_dispatch:
+    inputs:
+      upload_screenshots:
+        description: "Upload screenshots (replaces the existing ones)"
+        type: boolean
+        default: true
+      submit_for_review:
+        description: "Submit the version for App Review after uploading"
+        type: boolean
+        default: false
+      app_version:
+        description: "App Store version string. Leave blank to use the editable version in App Store Connect (or create one)."
+        required: false
+        default: ""
+
+concurrency:
+  group: abonnementenbeheren-appstore-metadata
+  cancel-in-progress: false
+
+env:
+  APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+  APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+  ASC_APP_ID: "6833970151"
+  APP_IDENTIFIER: com.abonnementenbeheren.app
+  SITE_URL: https://www.abonnementenbeheren.com
+  DEMO_ACCOUNT_NAME: appreview@abonnementenbeheren.com
+  TEAM_ID: 4K4D59MXKW
+  # A push to store/** never submits; screenshots are uploaded on push.
+  UPLOAD_SCREENSHOTS: ${{ github.event_name != 'workflow_dispatch' || inputs.upload_screenshots }}
+  SUBMIT_FOR_REVIEW: ${{ github.event_name == 'workflow_dispatch' && inputs.submit_for_review }}
+
+jobs:
+  upload-metadata:
+    name: Upload metadata to App Store Connect
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check store/ layout
+        run: |
+          set -euo pipefail
+          test -d store/metadata || { echo "::error::store/metadata is missing"; exit 1; }
+          for f in copyright primary_category; do
+            test -s "store/metadata/$f.txt" || echo "::warning::store/metadata/$f.txt is missing or empty"
+          done
+          for loc in nl-NL en-US de-DE fr-FR es-ES; do
+            test -d "store/metadata/$loc" || echo "::warning::store/metadata/$loc is missing"
+          done
+
+      # Same normalisation as ios-release.yml: accept raw PEM (with or without
+      # line breaks) or base64 and always write a clean PEM.
+      - name: Install App Store Connect API key
+        env:
+          APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+        run: |
+          set -euo pipefail
+          if [ -z "$APP_STORE_CONNECT_API_KEY_P8" ]; then
+            echo "::error::Secret APP_STORE_CONNECT_API_KEY_P8 is not set."; exit 1
+          fi
+          KEY_DIR="$HOME/.appstoreconnect/private_keys"
+          mkdir -p "$KEY_DIR"
+          KEY_PATH="$KEY_DIR/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+          RAW="$APP_STORE_CONNECT_API_KEY_P8"
+          if ! printf '%s' "$RAW" | grep -q "BEGIN PRIVATE KEY"; then
+            RAW=$(printf '%s' "$RAW" | tr -d ' \r\n' | base64 --decode)
+          fi
+          BODY=$(printf '%s' "$RAW" | sed -e 's/-----BEGIN PRIVATE KEY-----//' -e 's/-----END PRIVATE KEY-----//' | tr -d ' \r\n\t')
+          {
+            echo "-----BEGIN PRIVATE KEY-----"
+            printf '%s' "$BODY" | fold -w 64
+            echo
+            echo "-----END PRIVATE KEY-----"
+          } > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          openssl pkey -in "$KEY_PATH" -noout && echo "API key is a valid PEM private key."
+          echo "ASC_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+
+          # fastlane api_key JSON (json.dump escapes the PEM line breaks).
+          API_KEY_JSON="$RUNNER_TEMP/asc_api_key.json"
+          python3 - "$KEY_PATH" "$API_KEY_JSON" <<'PY'
+          import json, os, sys
+          key = open(sys.argv[1], encoding="utf-8").read()
+          with open(sys.argv[2], "w", encoding="utf-8") as fh:
+              json.dump({
+                  "key_id": os.environ["APP_STORE_CONNECT_KEY_ID"],
+                  "issuer_id": os.environ["APP_STORE_CONNECT_ISSUER_ID"],
+                  "key": key,
+                  "duration": 1200,
+                  "in_house": False,
+              }, fh)
+          PY
+          chmod 600 "$API_KEY_JSON"
+          echo "ASC_API_KEY_JSON=$API_KEY_JSON" >> "$GITHUB_ENV"
+
+      - name: Set up Python tools
+        run: |
+          python3 -m venv "$RUNNER_TEMP/ascvenv"
+          "$RUNNER_TEMP/ascvenv/bin/python" -m pip install --quiet --disable-pip-version-check pyjwt cryptography requests
+          echo "ASC_PY=$RUNNER_TEMP/ascvenv/bin/python" >> "$GITHUB_ENV"
+
+      - name: App Store Connect state (before)
+        run: $ASC_PY .github/workflows/scripts/asc_check.py status
+
+      # Uses the editable version (1.0 today) or creates one, attaches the newest
+      # VALID build of that train, and exports APP_VERSION / BUILD_NUMBER.
+      - name: Ensure editable App Store version
+        env:
+          INPUT_APP_VERSION: ${{ inputs.app_version }}
+          DEFAULT_APP_VERSION: "1.0.0"
+        run: $ASC_PY .github/workflows/scripts/asc_check.py prepare
+
+      # De app vraagt om in te loggen, dus App Review heeft een account nodig.
+      # Maakt het aan (of controleert het) via de API van de site en zet er
+      # een paar voorbeeldabonnementen in.
+      - name: Ensure App Review demo account
+        env:
+          DEMO_ACCOUNT_PASSWORD: ${{ secrets.APP_REVIEW_DEMO_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DEMO_ACCOUNT_PASSWORD:-}" ]; then
+            echo "::warning::Secret APP_REVIEW_DEMO_PASSWORD ontbreekt; geen demo-account."
+            exit 0
+          fi
+          $ASC_PY - <<'PY'
+          import os, requests
+          site = os.environ["SITE_URL"]
+          email = os.environ["DEMO_ACCOUNT_NAME"]
+          pw = os.environ["DEMO_ACCOUNT_PASSWORD"]
+          r = requests.post(f"{site}/api/mobile/register", json={"name": "App Review", "email": email, "password": pw}, timeout=30)
+          if r.status_code not in (201, 409):
+              raise SystemExit(f"Registreren mislukt: {r.status_code} {r.text[:200]}")
+          r = requests.post(f"{site}/api/mobile/login", json={"email": email, "password": pw}, timeout=30)
+          if r.status_code != 200:
+              raise SystemExit(f"Inloggen met het demo-account mislukt ({r.status_code}). Klopt het wachtwoord?")
+          h = {"Authorization": "Bearer " + r.json()["token"]}
+          subs = requests.get(f"{site}/api/subscriptions", headers=h, timeout=30).json()
+          if not subs:
+              for name, preset, plan, price in [
+                  ("Netflix", "netflix", "Standaard", 13.99),
+                  ("Spotify", "spotify", "Individual", 11.99),
+                  ("iCloud+", "icloud", "200 GB", 2.99),
+              ]:
+                  requests.post(f"{site}/api/subscriptions", headers=h, timeout=30, json={
+                      "name": name, "presetId": preset, "planName": plan,
+                      "price": price, "billingPeriod": "maandelijks",
+                  })
+          print(f"Demo-account klaar ({len(subs) or 3} abonnementen).")
+          PY
+
+      - name: Configure app (content rights, age rating, price, review info)
+        env:
+          AGE_RATING_PATH: store/age_rating.json
+          BASE_TERRITORY: NLD
+          PRIMARY_LOCALE: nl-NL
+          APP_REVIEW_EMAIL: ${{ vars.APP_REVIEW_EMAIL || secrets.APP_REVIEW_EMAIL }}
+          APP_REVIEW_PHONE: ${{ vars.APP_REVIEW_PHONE || secrets.APP_REVIEW_PHONE }}
+          DEMO_ACCOUNT_PASSWORD: ${{ secrets.APP_REVIEW_DEMO_PASSWORD }}
+          REVIEW_FIRST_NAME: Alex
+          REVIEW_LAST_NAME: Lamper
+          REVIEW_NOTES: >-
+            Sign in with the demo account. The app tracks the user's own
+            subscriptions (Netflix, Spotify, etc.) and shows the monthly and
+            yearly total. Free accounts can track up to 5 subscriptions; adding
+            more opens the Premium screen (auto-renewable subscription, monthly
+            or yearly), which can be tested in sandbox. The same account also
+            works on the website abonnementenbeheren.com. Account deletion is in
+            Settings > Delete account.
+        run: $ASC_PY .github/workflows/scripts/asc_check.py configure
+
+      # deliver detects the device slot from the pixel size, so only PNGs with a
+      # known App Store size are copied (no .DS_Store, README, etc.).
+      - name: Stage screenshots
+        if: env.UPLOAD_SCREENSHOTS == 'true'
+        run: |
+          set -euo pipefail
+          python3 - store/screenshots "$RUNNER_TEMP/screenshots" <<'PY'
+          import os, shutil, struct, sys
+          src, dst = sys.argv[1], sys.argv[2]
+          allowed = {(1320, 2868): "iPhone 6.9\"", (1284, 2778): "iPhone 6.5\""}
+          if not os.path.isdir(src):
+              sys.exit("::error::store/screenshots is missing")
+          total = 0
+          for locale in sorted(os.listdir(src)):
+              ldir = os.path.join(src, locale)
+              if not os.path.isdir(ldir):
+                  continue
+              os.makedirs(os.path.join(dst, locale), exist_ok=True)
+              for name in sorted(os.listdir(ldir)):
+                  path = os.path.join(ldir, name)
+                  if not name.lower().endswith(".png"):
+                      print(f"skip (not png): {locale}/{name}")
+                      continue
+                  with open(path, "rb") as fh:
+                      head = fh.read(24)
+                  if head[:8] != b"\x89PNG\r\n\x1a\n":
+                      sys.exit(f"::error::{locale}/{name} is not a real PNG")
+                  size = struct.unpack(">II", head[16:24])
+                  if size not in allowed:
+                      sys.exit(f"::error::{locale}/{name} is {size[0]}x{size[1]}, not an accepted size")
+                  shutil.copy2(path, os.path.join(dst, locale, name))
+                  print(f"{locale}/{name}: {size[0]}x{size[1]} -> {allowed[size]}")
+                  total += 1
+          if not total:
+              sys.exit("::error::no screenshots found")
+          PY
+          echo "SCREENSHOTS_PATH=$RUNNER_TEMP/screenshots" >> "$GITHUB_ENV"
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+
+      - name: Install fastlane
+        run: |
+          # 2064x2752 (iPad 13") screenshots need a fastlane release from late 2025
+          # or newer (fastlane PR #29760), so always install the latest.
+          gem install fastlane --no-document
+          fastlane --version
+          ruby -e 'v = Gem.loaded_specs["fastlane"]&.version || Gem::Specification.find_by_name("fastlane").version; abort("fastlane #{v} is too old for 13-inch iPad screenshots") if v < Gem::Version.new("2.230.0"); puts "fastlane #{v} OK"'
+
+      - name: Upload with fastlane deliver
+        env:
+          FASTLANE_SKIP_UPDATE_CHECK: "1"
+          FASTLANE_HIDE_CHANGELOG: "1"
+          FASTLANE_DISABLE_COLORS: "1"
+        run: |
+          set -euo pipefail
+          ARGS=(
+            --api_key_path "$ASC_API_KEY_JSON"
+            --app_identifier "$APP_IDENTIFIER"
+            --app_version "$APP_VERSION"
+            --platform ios
+            --metadata_path store/metadata
+            --skip_binary_upload true
+            --force true
+            --precheck_include_in_app_purchases false
+            --run_precheck_before_submit false
+            --automatic_release false
+            --submit_for_review "$SUBMIT_FOR_REVIEW"
+          )
+          if [ "$UPLOAD_SCREENSHOTS" = "true" ]; then
+            ARGS+=(--screenshots_path "$SCREENSHOTS_PATH" --overwrite_screenshots true)
+          else
+            ARGS+=(--skip_screenshots true)
+          fi
+          if [ "$SUBMIT_FOR_REVIEW" = "true" ]; then
+            if [ -z "${BUILD_NUMBER:-}" ]; then
+              echo "::error::No VALID build found for version $APP_VERSION; cannot submit."; exit 1
+            fi
+            ARGS+=(
+              --build_number "$BUILD_NUMBER"
+              --submission_information '{"export_compliance_uses_encryption": false, "add_id_info_uses_idfa": false, "content_rights_contains_third_party_content": false}'
+            )
+          fi
+          # Without a Deliverfile, deliver asks interactively whether to set one
+          # up and crashes in CI; all options come from the command line.
+          echo "# All options are passed on the command line." > Deliverfile
+          echo "deliver ${ARGS[*]}"
+          fastlane deliver "${ARGS[@]}"
+
+      # Apple only accepts a primary locale that already has a localization,
+      # which deliver has created by now.
+      - name: Set primary locale to nl-NL
+        env:
+          PRIMARY_LOCALE: nl-NL
+        run: $ASC_PY .github/workflows/scripts/asc_check.py locale || echo "::warning::Could not set primary locale"
+
+      - name: App Store Connect state (after)
+        if: always() && env.ASC_PY != ''
+        run: $ASC_PY .github/workflows/scripts/asc_check.py status
+
+      - name: Remove API key
+        if: always()
+        run: rm -f "$HOME/.appstoreconnect/private_keys/"*.p8 "$RUNNER_TEMP/asc_api_key.json"

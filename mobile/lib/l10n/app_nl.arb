@@ -209,7 +209,14 @@
   "bestValue": "Voordeligst",
   "buyPremium": "Neem Premium",
   "restorePurchases": "Aankopen herstellen",
-  "paywallLegal": "Premium verlengt automatisch tot je opzegt. Opzeggen kan altijd in de instellingen van de App Store of Google Play.",
+  "paywallLegal": "Premium verlengt automatisch tot je opzegt. Opzeggen kan altijd via je {store}-instellingen.",
+  "@paywallLegal": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
   "purchaseSuccess": "Welkom bij Premium!",
   "restoreNone": "Geen eerdere aankopen gevonden.",
   "restoreSuccess": "Je aankopen zijn hersteld.",
@@ -228,7 +235,14 @@
   "logout": "Uitloggen",
   "deleteAccount": "Account verwijderen",
   "deleteAccountBody": "Je account en al je abonnementen worden definitief verwijderd. Dit kun je niet ongedaan maken.",
-  "deleteAccountStoreNote": "Heb je Premium in de app gekocht? Zeg het dan ook op in de App Store of Google Play.",
+  "deleteAccountStoreNote": "Heb je Premium in de app gekocht? Zeg het dan ook op via {store}.",
+  "@deleteAccountStoreNote": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
   "accountDeleted": "Je account is verwijderd.",
   "viewOffer": "Bekijk aanbieding",
   "termsOfUse": "Gebruiksvoorwaarden (EULA)",
