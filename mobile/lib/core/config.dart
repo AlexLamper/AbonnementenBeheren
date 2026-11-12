@@ -7,7 +7,11 @@ class AppConfig {
   /// De website is ook de API. Lokaal testen: --dart-define=API_BASE_URL=http://10.0.2.2:3000
   static const apiBaseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: 'https://www.abonnementenbeheren.com');
 
-  static const _revenueCatAppleKey = String.fromEnvironment('REVENUECAT_APPLE_KEY');
+  /// Publieke SDK-sleutel (mag in de app staan). Overschrijfbaar met --dart-define.
+  static const _revenueCatAppleKey = String.fromEnvironment(
+    'REVENUECAT_APPLE_KEY',
+    defaultValue: 'appl_JgBhGVxbFkcTvmzOelBLkjZConu',
+  );
   static const _revenueCatGoogleKey = String.fromEnvironment('REVENUECAT_GOOGLE_KEY');
 
   /// RevenueCat public SDK key voor dit platform, of leeg als die ontbreekt.

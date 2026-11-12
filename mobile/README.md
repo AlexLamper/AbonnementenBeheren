@@ -42,11 +42,11 @@ GitHub → Settings → Secrets and variables → Actions:
 | --- | --- |
 | `BUILD_CERTIFICATE_BASE64` | base64 van je Apple Distribution `.p12` (zelfde als BijbelQuiz) |
 | `P12_PASSWORD` | wachtwoord van die `.p12` |
-| `BUILD_PROVISION_PROFILE_BASE64` | base64 van een **nieuw** App Store-profiel voor `com.abonnementenbeheren.app` |
-| `KEYCHAIN_PASSWORD` | willekeurig wachtwoord |
+| `BUILD_PROVISION_PROFILE_BASE64` | optioneel - zonder dit haalt de build het App Store-profiel zelf op bij Apple |
+| `KEYCHAIN_PASSWORD` | optioneel - anders maakt de build er zelf een |
 | `APPLE_TEAM_ID` | je Team ID |
-| `APP_STORE_CONNECT_KEY_ID` / `APP_STORE_CONNECT_ISSUER_ID` / `APP_STORE_CONNECT_API_KEY_P8` | App Store Connect API-sleutel (zelfde als BijbelQuiz; de `.p8` als base64) |
-| `REVENUECAT_APPLE_KEY` | RevenueCat public SDK key voor iOS (`appl_...`) |
+| `APP_STORE_CONNECT_KEY_ID` / `APP_STORE_CONNECT_ISSUER_ID` / `APP_STORE_CONNECT_API_KEY_P8` | App Store Connect API-sleutel (de inhoud van de `.p8`, gewoon als tekst of als base64) |
+| `REVENUECAT_APPLE_KEY` | optioneel - de publieke sleutel staat al in `lib/core/config.dart` |
 
 ## Eenmalig in Apple / RevenueCat
 
