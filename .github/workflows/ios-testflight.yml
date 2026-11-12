@@ -38,13 +38,11 @@ jobs:
     steps:
       - id: check
         env:
-          CERT: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
           ASC_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
-          TEAM: ${{ secrets.APPLE_TEAM_ID }}
           KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           ISSUER: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: |
-          if [ -n "$CERT" ] && [ -n "$ASC_KEY" ] && [ -n "$TEAM" ] && [ -n "$KEY_ID" ] && [ -n "$ISSUER" ]; then
+          if [ -n "$ASC_KEY" ] && [ -n "$KEY_ID" ] && [ -n "$ISSUER" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::Apple-secrets ontbreken nog; TestFlight-build overgeslagen. Zie mobile/README.md."
@@ -100,74 +98,38 @@ jobs:
         run: flutter pub get
 
       # ── 3. Code signing ──────────────────────────────────────────────────────
-      # Secrets (GitHub → Settings → Secrets and variables → Actions):
-      #   BUILD_CERTIFICATE_BASE64       base64 van je Distribution .p12
-      #   P12_PASSWORD                   wachtwoord van de .p12
-      #   BUILD_PROVISION_PROFILE_BASE64 optioneel: zonder dit secret halen we het
-      #                                  App Store-profiel zelf op via de API-sleutel
-      #   KEYCHAIN_PASSWORD              optioneel: anders maken we zelf een wachtwoord
-      - name: Import Distribution certificate
+      # Ondertekenen gaat volledig automatisch via de App Store Connect API-sleutel
+      # (rol Admin): xcodebuild -allowProvisioningUpdates maakt of hergebruikt het
+      # door Apple beheerde distributiecertificaat en het App Store-profiel.
+      # Geen .p12 of .mobileprovision nodig (zelfde aanpak als CamTrip).
+      #
+      # Secrets:
+      #   APP_STORE_CONNECT_KEY_ID, APP_STORE_CONNECT_ISSUER_ID
+      #   APP_STORE_CONNECT_API_KEY_P8  inhoud van de .p8 (tekst of base64)
+      - name: Install App Store Connect API key
         env:
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-        run: |
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          if [ -z "${KEYCHAIN_PASSWORD:-}" ]; then
-            KEYCHAIN_PASSWORD=$(openssl rand -hex 24)
-          fi
-
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
-
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-          security import "$CERTIFICATE_PATH" \
-            -P "$P12_PASSWORD" \
-            -A -t cert -f pkcs12 \
-            -k "$KEYCHAIN_PATH"
-
-          security list-keychain -d user -s "$KEYCHAIN_PATH"
-          security default-keychain -s "$KEYCHAIN_PATH"
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-      - name: Install provisioning profile
-        env:
-          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
-          EXPECTED_BUNDLE_ID: com.abonnementenbeheren.app
         run: |
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-          PP_PLIST=$RUNNER_TEMP/build_pp.plist
-          if [ -n "${BUILD_PROVISION_PROFILE_BASE64:-}" ]; then
-            echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o "$PP_PATH"
-          else
-            python3 -m venv "$RUNNER_TEMP/ascvenv"
-            "$RUNNER_TEMP/ascvenv/bin/python" -m pip install --quiet --disable-pip-version-check pyjwt cryptography
-            PROFILE_OUT="$PP_PATH" "$RUNNER_TEMP/ascvenv/bin/python" .github/workflows/scripts/fetch_profile.py
+          set -euo pipefail
+          KEY_DIR="$HOME/.appstoreconnect/private_keys"
+          mkdir -p "$KEY_DIR"
+          KEY_PATH="$KEY_DIR/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+          # Accepteert de .p8-tekst (met of zonder regeleinden) of base64 daarvan
+          # en schrijft altijd een nette PEM: xcodebuild accepteert niets anders.
+          RAW="$APP_STORE_CONNECT_API_KEY_P8"
+          if ! printf '%s' "$RAW" | grep -q "BEGIN PRIVATE KEY"; then
+            RAW=$(printf '%s' "$RAW" | tr -d ' \r\n' | base64 --decode)
           fi
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
-
-          security cms -D -i "$PP_PATH" > "$PP_PLIST"
-          PP_UUID=$(/usr/libexec/PlistBuddy -c 'Print UUID' "$PP_PLIST")
-          PP_NAME=$(/usr/libexec/PlistBuddy -c 'Print Name' "$PP_PLIST")
-          PP_APP_ID=$(/usr/libexec/PlistBuddy -c 'Print Entitlements:application-identifier' "$PP_PLIST")
-          APP_BUNDLE_ID="${PP_APP_ID#*.}"
-
-          if [ "$APP_BUNDLE_ID" != "com.abonnementenbeheren.app" ]; then
-            echo "::error::Het provisioning profile hoort bij $APP_BUNDLE_ID, verwacht com.abonnementenbeheren.app."
-            exit 1
-          fi
-
-          echo "PP_UUID=$PP_UUID" >> $GITHUB_ENV
-          echo "PP_NAME=$PP_NAME" >> $GITHUB_ENV
-          echo "APP_BUNDLE_ID=$APP_BUNDLE_ID" >> $GITHUB_ENV
-          echo "Using provisioning profile: $PP_NAME ($PP_UUID)"
+          BODY=$(printf '%s' "$RAW" | sed -e 's/-----BEGIN PRIVATE KEY-----//' -e 's/-----END PRIVATE KEY-----//' | tr -d ' \r\n\t')
+          {
+            echo "-----BEGIN PRIVATE KEY-----"
+            printf '%s' "$BODY" | fold -w 64
+            echo
+            echo "-----END PRIVATE KEY-----"
+          } > "$KEY_PATH"
+          openssl pkey -in "$KEY_PATH" -noout && echo "API-sleutel is een geldige PEM."
+          echo "ASC_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
 
       # ── 3b. Versie bepalen ───────────────────────────────────────────────────
       # Vraagt App Store Connect welke versie/build al bestaan en kiest de
@@ -177,6 +139,7 @@ jobs:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          APP_BUNDLE_ID: com.abonnementenbeheren.app
           INPUT_BUILD_NAME: ${{ github.event.inputs.build_name }}
           INPUT_BUILD_NUMBER: ${{ github.event.inputs.build_number }}
           PUBSPEC_PATH: mobile/pubspec.yaml
@@ -187,10 +150,8 @@ jobs:
 
       # ── 4. ExportOptions ─────────────────────────────────────────────────────
       - name: Create ExportOptions.plist
-        env:
-          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          cat > /tmp/ExportOptions.plist <<EOF
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -198,18 +159,11 @@ jobs:
             <key>method</key>
             <string>app-store-connect</string>
             <key>signingStyle</key>
-            <string>manual</string>
+            <string>automatic</string>
             <key>teamID</key>
-            <string>${TEAM_ID}</string>
-            <key>signingCertificate</key>
-            <string>Apple Distribution</string>
+            <string>4K4D59MXKW</string>
             <key>uploadSymbols</key>
             <true/>
-            <key>provisioningProfiles</key>
-            <dict>
-              <key>${APP_BUNDLE_ID}</key>
-              <string>${PP_NAME}</string>
-            </dict>
           </dict>
           </plist>
           EOF
@@ -236,23 +190,30 @@ jobs:
       - name: Archive and export signed IPA
         working-directory: mobile/ios
         env:
-          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: |
+          set -euo pipefail
+          AUTH=(-allowProvisioningUpdates
+                -authenticationKeyPath "$ASC_KEY_PATH"
+                -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID"
+                -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID")
+
           xcodebuild -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            "${AUTH[@]}" \
             archive \
-            DEVELOPMENT_TEAM="$TEAM_ID" \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
+            DEVELOPMENT_TEAM=4K4D59MXKW \
+            CODE_SIGN_STYLE=Automatic
 
           xcodebuild -exportArchive \
             -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
-            -exportOptionsPlist /tmp/ExportOptions.plist \
-            -exportPath ../build/ios/ipa
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath ../build/ios/ipa \
+            "${AUTH[@]}"
 
           IPA_PATH=$(find ../build/ios/ipa -name "*.ipa" | head -1)
           if [ -z "${IPA_PATH:-}" ]; then
@@ -270,15 +231,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          KEY_DIR="$HOME/.appstoreconnect/private_keys"
-          KEY_PATH="$KEY_DIR/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
-          mkdir -p "$KEY_DIR"
-          if printf '%s' "$APP_STORE_CONNECT_API_KEY_P8" | grep -q "BEGIN PRIVATE KEY"; then
-            printf '%s\n' "$APP_STORE_CONNECT_API_KEY_P8" > "$KEY_PATH"
-          else
-            echo -n "$APP_STORE_CONNECT_API_KEY_P8" | base64 --decode -o "$KEY_PATH"
-          fi
-
+          # De sleutel staat al klaar uit stap 3 (altool zoekt in ~/.appstoreconnect).
           IPA_PATH=$(find mobile/build/ios/ipa -name "*.ipa" | head -1)
           echo "Uploading: $IPA_PATH"
 
@@ -306,9 +259,7 @@ jobs:
           echo "Upload geaccepteerd door App Store Connect."
 
       # ── 7. Opruimen ─────────────────────────────────────────────────────────
-      - name: Clean up keychain and provisioning profile
+      - name: Clean up API key
         if: always()
         run: |
-          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
-          rm -f ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
           rm -f "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8"
