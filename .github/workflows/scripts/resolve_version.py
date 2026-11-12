@@ -43,7 +43,9 @@ def log(msg):
 def make_token():
     key_id = os.environ["APP_STORE_CONNECT_KEY_ID"]
     issuer_id = os.environ["APP_STORE_CONNECT_ISSUER_ID"]
-    private_key = base64.b64decode(os.environ["APP_STORE_CONNECT_API_KEY_P8"]).decode()
+    raw = os.environ["APP_STORE_CONNECT_API_KEY_P8"].strip()
+    # Accepteert zowel de .p8-tekst zelf als base64 daarvan.
+    private_key = raw if "BEGIN PRIVATE KEY" in raw else base64.b64decode(raw).decode()
     now = int(time.time())
     payload = {
         "iss": issuer_id,

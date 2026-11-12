@@ -10,7 +10,7 @@ on:
     paths:
       - "mobile/**"
       - ".github/workflows/ios-testflight.yml"
-      - ".github/workflows/scripts/resolve_version.py"
+      - ".github/workflows/scripts/**"
   workflow_dispatch:
     inputs:
       build_name:
@@ -39,11 +39,12 @@ jobs:
       - id: check
         env:
           CERT: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-          PROFILE: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
           ASC_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
           TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: |
-          if [ -n "$CERT" ] && [ -n "$PROFILE" ] && [ -n "$ASC_KEY" ] && [ -n "$TEAM" ]; then
+          if [ -n "$CERT" ] && [ -n "$ASC_KEY" ] && [ -n "$TEAM" ] && [ -n "$KEY_ID" ] && [ -n "$ISSUER" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::Apple-secrets ontbreken nog; TestFlight-build overgeslagen. Zie mobile/README.md."
@@ -102,8 +103,9 @@ jobs:
       # Secrets (GitHub → Settings → Secrets and variables → Actions):
       #   BUILD_CERTIFICATE_BASE64       base64 van je Distribution .p12
       #   P12_PASSWORD                   wachtwoord van de .p12
-      #   BUILD_PROVISION_PROFILE_BASE64 base64 van het App Store-profiel voor com.abonnementenbeheren.app
-      #   KEYCHAIN_PASSWORD              willekeurig wachtwoord voor de tijdelijke keychain
+      #   BUILD_PROVISION_PROFILE_BASE64 optioneel: zonder dit secret halen we het
+      #                                  App Store-profiel zelf op via de API-sleutel
+      #   KEYCHAIN_PASSWORD              optioneel: anders maken we zelf een wachtwoord
       - name: Import Distribution certificate
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
@@ -112,6 +114,9 @@ jobs:
         run: |
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          if [ -z "${KEYCHAIN_PASSWORD:-}" ]; then
+            KEYCHAIN_PASSWORD=$(openssl rand -hex 24)
+          fi
 
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
 
@@ -131,10 +136,20 @@ jobs:
       - name: Install provisioning profile
         env:
           BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          EXPECTED_BUNDLE_ID: com.abonnementenbeheren.app
         run: |
           PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           PP_PLIST=$RUNNER_TEMP/build_pp.plist
-          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o "$PP_PATH"
+          if [ -n "${BUILD_PROVISION_PROFILE_BASE64:-}" ]; then
+            echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o "$PP_PATH"
+          else
+            python3 -m venv "$RUNNER_TEMP/ascvenv"
+            "$RUNNER_TEMP/ascvenv/bin/python" -m pip install --quiet --disable-pip-version-check pyjwt cryptography
+            PROFILE_OUT="$PP_PATH" "$RUNNER_TEMP/ascvenv/bin/python" .github/workflows/scripts/fetch_profile.py
+          fi
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
 
@@ -206,14 +221,17 @@ jobs:
           REVENUECAT_APPLE_KEY: ${{ secrets.REVENUECAT_APPLE_KEY }}
         run: |
           echo "Building $BUILD_NAME ($BUILD_NUMBER)"
-          if [ -z "${REVENUECAT_APPLE_KEY:-}" ]; then
-            echo "::warning::REVENUECAT_APPLE_KEY ontbreekt: de app werkt, maar Premium kopen kan in deze build niet."
+          # De publieke RevenueCat-sleutel staat als standaard in config.dart;
+          # het secret is alleen nodig om die te overschrijven.
+          EXTRA_DEFINES=()
+          if [ -n "${REVENUECAT_APPLE_KEY:-}" ]; then
+            EXTRA_DEFINES+=(--dart-define=REVENUECAT_APPLE_KEY="$REVENUECAT_APPLE_KEY")
           fi
 
           flutter build ios --release --no-codesign \
             --build-name="$BUILD_NAME" \
             --build-number="$BUILD_NUMBER" \
-            --dart-define=REVENUECAT_APPLE_KEY="${REVENUECAT_APPLE_KEY:-}"
+            "${EXTRA_DEFINES[@]}"
 
       - name: Archive and export signed IPA
         working-directory: mobile/ios
@@ -243,7 +261,7 @@ jobs:
           fi
 
       # ── 6. Upload naar TestFlight ───────────────────────────────────────────
-      #   APP_STORE_CONNECT_KEY_ID / _ISSUER_ID / _API_KEY_P8 (base64 van de .p8)
+      #   APP_STORE_CONNECT_KEY_ID / _ISSUER_ID / _API_KEY_P8 (.p8-tekst of base64 daarvan)
       - name: Upload IPA to TestFlight
         env:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
@@ -255,7 +273,11 @@ jobs:
           KEY_DIR="$HOME/.appstoreconnect/private_keys"
           KEY_PATH="$KEY_DIR/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
           mkdir -p "$KEY_DIR"
-          echo -n "$APP_STORE_CONNECT_API_KEY_P8" | base64 --decode -o "$KEY_PATH"
+          if printf '%s' "$APP_STORE_CONNECT_API_KEY_P8" | grep -q "BEGIN PRIVATE KEY"; then
+            printf '%s\n' "$APP_STORE_CONNECT_API_KEY_P8" > "$KEY_PATH"
+          else
+            echo -n "$APP_STORE_CONNECT_API_KEY_P8" | base64 --decode -o "$KEY_PATH"
+          fi
 
           IPA_PATH=$(find mobile/build/ios/ipa -name "*.ipa" | head -1)
           echo "Uploading: $IPA_PATH"
