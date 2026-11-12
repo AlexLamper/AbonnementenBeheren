@@ -40,13 +40,14 @@ GitHub → Settings → Secrets and variables → Actions:
 
 | Secret | Wat |
 | --- | --- |
-| `BUILD_CERTIFICATE_BASE64` | base64 van je Apple Distribution `.p12` (zelfde als BijbelQuiz) |
-| `P12_PASSWORD` | wachtwoord van die `.p12` |
-| `BUILD_PROVISION_PROFILE_BASE64` | optioneel - zonder dit haalt de build het App Store-profiel zelf op bij Apple |
-| `KEYCHAIN_PASSWORD` | optioneel - anders maakt de build er zelf een |
-| `APPLE_TEAM_ID` | je Team ID |
-| `APP_STORE_CONNECT_KEY_ID` / `APP_STORE_CONNECT_ISSUER_ID` / `APP_STORE_CONNECT_API_KEY_P8` | App Store Connect API-sleutel (de inhoud van de `.p8`, gewoon als tekst of als base64) |
+| `APP_STORE_CONNECT_KEY_ID` | Key ID van een App Store Connect API-sleutel met rol **Admin** (`U6N9Y3JR93`) |
+| `APP_STORE_CONNECT_ISSUER_ID` | Issuer ID (Users and Access → Integrations) |
+| `APP_STORE_CONNECT_API_KEY_P8` | inhoud van `AuthKey_<id>.p8`, als tekst of base64 |
 | `REVENUECAT_APPLE_KEY` | optioneel - de publieke sleutel staat al in `lib/core/config.dart` |
+
+Ondertekenen gaat automatisch via die API-sleutel (`-allowProvisioningUpdates`):
+Apple maakt zelf het distributiecertificaat en het App Store-profiel. Er is
+dus geen `.p12` of `.mobileprovision` nodig.
 
 ## Eenmalig in Apple / RevenueCat
 
