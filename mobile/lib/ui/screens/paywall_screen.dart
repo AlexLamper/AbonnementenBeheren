@@ -221,7 +221,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              l.paywallLegal,
+                              l.paywallLegal(context.storeName),
                               textAlign: TextAlign.center,
                               style: sans(12.5, color: AppColors.slate500, height: 1.5),
                             ),

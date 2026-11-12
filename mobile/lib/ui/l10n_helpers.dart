@@ -8,6 +8,10 @@ extension L10nX on BuildContext {
   String get lang => Localizations.localeOf(this).languageCode;
 
   String eur(double amount) => formatEur(amount, lang);
+
+  /// Winkel waarin dit toestel abonnementen beheert. Apple wil op iOS geen
+  /// verwijzing naar Google Play zien, en andersom.
+  String get storeName => Theme.of(this).platform == TargetPlatform.android ? 'Google Play' : 'App Store';
 }
 
 extension PeriodL10n on BillingPeriod {

@@ -19,7 +19,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authHeroLine2 => 'a clear overview.';
 
   @override
-  String get authHeroBody => 'Put all your subscriptions in one place and see what you spend per month and per year.';
+  String get authHeroBody =>
+      'Put all your subscriptions in one place and see what you spend per month and per year.';
 
   @override
   String get authWelcomeBack => 'Welcome back';
@@ -28,7 +29,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authCreateTitle => 'Create your free account';
 
   @override
-  String get authHaveAccountHint => 'Already have an account? Choose Log in above.';
+  String get authHaveAccountHint =>
+      'Already have an account? Choose Log in above.';
 
   @override
   String get authNoAccountHint => 'No account yet? Choose Sign up above.';
@@ -86,7 +88,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'This account signs in with Google. That isn\'t available in the app yet; please use the website.';
 
   @override
-  String get authEmailTaken => 'An account with this email address already exists.';
+  String get authEmailTaken =>
+      'An account with this email address already exists.';
 
   @override
   String get authAgreePrefix => 'By continuing you agree to the';
@@ -101,7 +104,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyLink => 'Privacy Policy';
 
   @override
-  String get errorNetwork => 'No connection. Check your internet and try again.';
+  String get errorNetwork =>
+      'No connection. Check your internet and try again.';
 
   @override
   String get errorGeneric => 'Something went wrong. Please try again.';
@@ -135,7 +139,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get overviewSubtitleEmpty => 'Add your first subscription to see your total.';
+  String get overviewSubtitleEmpty =>
+      'Add your first subscription to see your total.';
 
   @override
   String get overviewSubtitle => 'Here\'s where your subscriptions stand.';
@@ -174,7 +179,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emptyTitle => 'No subscriptions yet';
 
   @override
-  String get emptyBody => 'Add your first subscription and instantly see what you spend each month.';
+  String get emptyBody =>
+      'Add your first subscription and instantly see what you spend each month.';
 
   @override
   String get emptyAddButton => 'Add subscription';
@@ -205,7 +211,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get deleteConfirmBody => 'This subscription will be removed from your overview.';
+  String get deleteConfirmBody =>
+      'This subscription will be removed from your overview.';
 
   @override
   String get deleted => 'Deleted';
@@ -278,7 +285,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get customAdd => 'Add a custom subscription';
 
   @override
-  String get customAddBody => 'Service not listed? Enter the name and price yourself.';
+  String get customAddBody =>
+      'Service not listed? Enter the name and price yourself.';
 
   @override
   String get popular => 'Popular';
@@ -293,7 +301,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String plansCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count plans', one: '1 plan');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plans',
+      one: '1 plan',
+    );
     return '$_temp0';
   }
 
@@ -374,8 +387,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get restorePurchases => 'Restore purchases';
 
   @override
-  String get paywallLegal =>
-      'Premium renews automatically until you cancel. You can cancel anytime in your App Store or Google Play settings.';
+  String paywallLegal(String store) {
+    return 'Premium renews automatically until you cancel. You can cancel anytime in your $store settings.';
+  }
 
   @override
   String get purchaseSuccess => 'Welcome to Premium!';
@@ -387,7 +401,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get restoreSuccess => 'Your purchases have been restored.';
 
   @override
-  String get storeUnavailable => 'Purchases aren\'t available right now. Please try again later.';
+  String get storeUnavailable =>
+      'Purchases aren\'t available right now. Please try again later.';
 
   @override
   String get youArePremium => 'You have Premium. Thanks for your support!';
@@ -414,7 +429,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manageSubscription => 'Manage subscription';
 
   @override
-  String get premiumViaWeb => 'You got Premium on the website. Manage it at abonnementenbeheren.com.';
+  String get premiumViaWeb =>
+      'You got Premium on the website. Manage it at abonnementenbeheren.com.';
 
   @override
   String get premiumGranted => 'You were given Premium as a gift.';
@@ -433,7 +449,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your account and all your subscriptions will be permanently deleted. This can\'t be undone.';
 
   @override
-  String get deleteAccountStoreNote => 'Bought Premium in the app? Also cancel it in the App Store or Google Play.';
+  String deleteAccountStoreNote(String store) {
+    return 'Bought Premium in the app? Also cancel it via $store.';
+  }
 
   @override
   String get accountDeleted => 'Your account has been deleted.';

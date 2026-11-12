@@ -50,3 +50,4 @@ app.*.map.json
 # Schermafbeeldingen uit screenshots/screenshots_test.dart
 /screenshots/goldens/
 /screenshots/failures/
+/screenshots/store_raw/

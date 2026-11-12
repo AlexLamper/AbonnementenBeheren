@@ -22,7 +22,7 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l.deleteAccount),
-        content: Text('${l.deleteAccountBody}\n\n${l.deleteAccountStoreNote}'),
+        content: Text('${l.deleteAccountBody}\n\n${l.deleteAccountStoreNote(context.storeName)}'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),

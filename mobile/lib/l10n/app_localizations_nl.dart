@@ -19,7 +19,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get authHeroLine2 => 'overzicht.';
 
   @override
-  String get authHeroBody => 'Zet al je abonnementen op één plek en zie wat je per maand en per jaar kwijt bent.';
+  String get authHeroBody =>
+      'Zet al je abonnementen op één plek en zie wat je per maand en per jaar kwijt bent.';
 
   @override
   String get authWelcomeBack => 'Welkom terug';
@@ -31,7 +32,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get authHaveAccountHint => 'Al een account? Kies hierboven Inloggen.';
 
   @override
-  String get authNoAccountHint => 'Nog geen account? Kies hierboven Registreren.';
+  String get authNoAccountHint =>
+      'Nog geen account? Kies hierboven Registreren.';
 
   @override
   String get tabLogin => 'Inloggen';
@@ -82,7 +84,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get authInvalidCredentials => 'E-mailadres of wachtwoord is onjuist.';
 
   @override
-  String get authNoPassword => 'Dit account logt in met Google. Dat kan nog niet in de app; gebruik de website.';
+  String get authNoPassword =>
+      'Dit account logt in met Google. Dat kan nog niet in de app; gebruik de website.';
 
   @override
   String get authEmailTaken => 'Er bestaat al een account met dit e-mailadres.';
@@ -100,7 +103,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get privacyLink => 'Privacyverklaring';
 
   @override
-  String get errorNetwork => 'Geen verbinding. Controleer je internet en probeer het opnieuw.';
+  String get errorNetwork =>
+      'Geen verbinding. Controleer je internet en probeer het opnieuw.';
 
   @override
   String get errorGeneric => 'Er ging iets mis. Probeer het opnieuw.';
@@ -134,7 +138,8 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get overviewSubtitleEmpty => 'Voeg je eerste abonnement toe om je totaal te zien.';
+  String get overviewSubtitleEmpty =>
+      'Voeg je eerste abonnement toe om je totaal te zien.';
 
   @override
   String get overviewSubtitle => 'Zo staan je abonnementen er nu voor.';
@@ -173,7 +178,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get emptyTitle => 'Nog geen abonnementen';
 
   @override
-  String get emptyBody => 'Voeg je eerste abonnement toe en zie meteen wat je per maand kwijt bent.';
+  String get emptyBody =>
+      'Voeg je eerste abonnement toe en zie meteen wat je per maand kwijt bent.';
 
   @override
   String get emptyAddButton => 'Abonnement toevoegen';
@@ -277,7 +283,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get customAdd => 'Eigen abonnement toevoegen';
 
   @override
-  String get customAddBody => 'Staat je dienst er niet bij? Vul naam en prijs zelf in.';
+  String get customAddBody =>
+      'Staat je dienst er niet bij? Vul naam en prijs zelf in.';
 
   @override
   String get popular => 'Populair';
@@ -292,7 +299,12 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String plansCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count pakketten', one: '1 pakket');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pakketten',
+      one: '1 pakket',
+    );
     return '$_temp0';
   }
 
@@ -373,8 +385,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get restorePurchases => 'Aankopen herstellen';
 
   @override
-  String get paywallLegal =>
-      'Premium verlengt automatisch tot je opzegt. Opzeggen kan altijd in de instellingen van de App Store of Google Play.';
+  String paywallLegal(String store) {
+    return 'Premium verlengt automatisch tot je opzegt. Opzeggen kan altijd via je $store-instellingen.';
+  }
 
   @override
   String get purchaseSuccess => 'Welkom bij Premium!';
@@ -386,7 +399,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get restoreSuccess => 'Je aankopen zijn hersteld.';
 
   @override
-  String get storeUnavailable => 'Aankopen zijn nu niet beschikbaar. Probeer het later opnieuw.';
+  String get storeUnavailable =>
+      'Aankopen zijn nu niet beschikbaar. Probeer het later opnieuw.';
 
   @override
   String get youArePremium => 'Je hebt Premium. Bedankt voor je steun!';
@@ -413,7 +427,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get manageSubscription => 'Abonnement beheren';
 
   @override
-  String get premiumViaWeb => 'Je hebt Premium via de website. Beheer het op abonnementenbeheren.com.';
+  String get premiumViaWeb =>
+      'Je hebt Premium via de website. Beheer het op abonnementenbeheren.com.';
 
   @override
   String get premiumGranted => 'Je hebt Premium cadeau gekregen.';
@@ -432,8 +447,9 @@ class AppLocalizationsNl extends AppLocalizations {
       'Je account en al je abonnementen worden definitief verwijderd. Dit kun je niet ongedaan maken.';
 
   @override
-  String get deleteAccountStoreNote =>
-      'Heb je Premium in de app gekocht? Zeg het dan ook op in de App Store of Google Play.';
+  String deleteAccountStoreNote(String store) {
+    return 'Heb je Premium in de app gekocht? Zeg het dan ook op via $store.';
+  }
 
   @override
   String get accountDeleted => 'Je account is verwijderd.';
