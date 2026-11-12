@@ -1,0 +1,257 @@
+{
+  "@@locale": "nl",
+  "appName": "AbonnementenBeheren",
+  "authHeroLine1": "Binnen een minuut",
+  "authHeroLine2": "overzicht.",
+  "authHeroBody": "Zet al je abonnementen op één plek en zie wat je per maand en per jaar kwijt bent.",
+  "authWelcomeBack": "Welkom terug",
+  "authCreateTitle": "Maak je gratis account",
+  "authHaveAccountHint": "Al een account? Kies hierboven Inloggen.",
+  "authNoAccountHint": "Nog geen account? Kies hierboven Registreren.",
+  "tabLogin": "Inloggen",
+  "tabRegister": "Registreren",
+  "fieldName": "Naam",
+  "fieldNameHint": "Je naam",
+  "fieldEmail": "E-mailadres",
+  "fieldEmailHint": "naam@voorbeeld.nl",
+  "fieldPassword": "Wachtwoord",
+  "fieldPasswordHintNew": "Minimaal 8 tekens",
+  "errorNameRequired": "Vul je naam in.",
+  "errorEmailInvalid": "Vul een geldig e-mailadres in.",
+  "errorPasswordShort": "Gebruik minimaal 8 tekens.",
+  "errorPasswordRequired": "Vul je wachtwoord in.",
+  "buttonLogin": "Inloggen",
+  "buttonCreateAccount": "Account aanmaken",
+  "busy": "Bezig…",
+  "authInvalidCredentials": "E-mailadres of wachtwoord is onjuist.",
+  "authNoPassword": "Dit account logt in met Google. Dat kan nog niet in de app; gebruik de website.",
+  "authEmailTaken": "Er bestaat al een account met dit e-mailadres.",
+  "authAgreePrefix": "Door verder te gaan ga je akkoord met de",
+  "and": "en",
+  "termsLink": "Voorwaarden",
+  "privacyLink": "Privacyverklaring",
+  "errorNetwork": "Geen verbinding. Controleer je internet en probeer het opnieuw.",
+  "errorGeneric": "Er ging iets mis. Probeer het opnieuw.",
+  "retry": "Opnieuw proberen",
+  "greetingNight": "Goedenacht",
+  "greetingMorning": "Goedemorgen",
+  "greetingAfternoon": "Goedemiddag",
+  "greetingEvening": "Goedeavond",
+  "greetingWithName": "{greeting}, {name}",
+  "@greetingWithName": {
+    "placeholders": {
+      "greeting": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "welcome": "Welkom",
+  "welcomeName": "Welkom, {name}",
+  "@welcomeName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "overviewSubtitleEmpty": "Voeg je eerste abonnement toe om je totaal te zien.",
+  "overviewSubtitle": "Zo staan je abonnementen er nu voor.",
+  "statPerMonth": "Per maand",
+  "statPerYear": "Per jaar",
+  "statSubscriptions": "Abonnementen",
+  "other": "Overig",
+  "listTitle": "Abonnementen",
+  "sortMostExpensive": "Duurste eerst",
+  "sortCheapest": "Goedkoopste eerst",
+  "sortName": "Op naam",
+  "sortNewest": "Nieuwste eerst",
+  "add": "Toevoegen",
+  "emptyTitle": "Nog geen abonnementen",
+  "emptyBody": "Voeg je eerste abonnement toe en zie meteen wat je per maand kwijt bent.",
+  "emptyAddButton": "Abonnement toevoegen",
+  "emptyPopular": "Of begin met een populaire dienst",
+  "percentOfTotal": "{percent}% van je totaal",
+  "@percentOfTotal": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "perMonthLower": "per maand",
+  "edit": "Bewerken",
+  "delete": "Verwijderen",
+  "cancel": "Annuleer",
+  "deleteConfirmTitle": "{name} verwijderen?",
+  "@deleteConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteConfirmBody": "Dit abonnement verdwijnt uit je overzicht.",
+  "deleted": "Verwijderd",
+  "addedName": "{name} toegevoegd",
+  "@addedName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saved": "Opgeslagen",
+  "usageCount": "{used} van {limit} gratis abonnementen",
+  "@usageCount": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageFull": "Alle {limit} gratis plekken gebruikt",
+  "@usageFull": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "unlimited": "Onbeperkt",
+  "periodMonthly": "Per maand",
+  "periodYearly": "Per jaar",
+  "periodQuarterly": "Per kwartaal",
+  "periodWeekly": "Per week",
+  "periodMonthlyShort": "per maand",
+  "periodYearlyShort": "per jaar",
+  "periodQuarterlyShort": "per kwartaal",
+  "periodWeeklyShort": "per week",
+  "addTitle": "Abonnement toevoegen",
+  "customTitle": "Eigen abonnement",
+  "editTitle": "Abonnement bewerken",
+  "searchHint": "Zoek tussen {count} diensten, bijv. Spotify",
+  "@searchHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "customAddQuery": "“{query}” zelf toevoegen",
+  "@customAddQuery": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "customAdd": "Eigen abonnement toevoegen",
+  "customAddBody": "Staat je dienst er niet bij? Vul naam en prijs zelf in.",
+  "popular": "Populair",
+  "noResults": "Geen dienst gevonden voor “{query}”. Voeg 'm hierboven zelf toe.",
+  "@noResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "backToSearch": "Terug naar zoeken",
+  "plansCount": "{count, plural, =1{1 pakket} other{{count} pakketten}}",
+  "@plansCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "formName": "Naam",
+  "formPlan": "Pakket (optioneel)",
+  "formPlanHint": "bijv. Family",
+  "formPrice": "Prijs (€)",
+  "formPeriod": "Periode",
+  "formCategory": "Categorie (optioneel)",
+  "formCategoryHint": "bijv. Streaming",
+  "formPriceInvalid": "Vul een geldige prijs in.",
+  "save": "Opslaan",
+  "premium": "Premium",
+  "paywallHeadline1": "Gratis beginnen.",
+  "paywallHeadline2": "Onbeperkt met Premium.",
+  "paywallLimitTitle": "Limiet bereikt",
+  "paywallLimitBody": "Met een gratis account houd je {limit} abonnementen bij. Met Premium voeg je er zoveel toe als je wilt.",
+  "@paywallLimitBody": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallBody": "Gratis houd je {limit} abonnementen bij. Premium haalt die grens weg.",
+  "@paywallBody": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "perkUnlimited": "Onbeperkt abonnementen bijhouden",
+  "perkExport": "Exporteer je overzicht naar Excel (CSV)",
+  "perkEverywhere": "Werkt op de website én in de app",
+  "perkSupport": "Steun een onafhankelijke maker",
+  "planYearly": "Per jaar",
+  "planMonthly": "Per maand",
+  "bestValue": "Voordeligst",
+  "buyPremium": "Neem Premium",
+  "restorePurchases": "Aankopen herstellen",
+  "paywallLegal": "Premium verlengt automatisch tot je opzegt. Opzeggen kan altijd in de instellingen van de App Store of Google Play.",
+  "purchaseSuccess": "Welkom bij Premium!",
+  "restoreNone": "Geen eerdere aankopen gevonden.",
+  "restoreSuccess": "Je aankopen zijn hersteld.",
+  "storeUnavailable": "Aankopen zijn nu niet beschikbaar. Probeer het later opnieuw.",
+  "youArePremium": "Je hebt Premium. Bedankt voor je steun!",
+  "settingsTitle": "Instellingen",
+  "account": "Account",
+  "language": "Taal",
+  "languageSystem": "Systeemtaal",
+  "plan": "Abonnement",
+  "planFree": "Gratis",
+  "manageSubscription": "Abonnement beheren",
+  "premiumViaWeb": "Je hebt Premium via de website. Beheer het op abonnementenbeheren.com.",
+  "premiumGranted": "Je hebt Premium cadeau gekregen.",
+  "exportCsv": "Exporteer als CSV",
+  "logout": "Uitloggen",
+  "deleteAccount": "Account verwijderen",
+  "deleteAccountBody": "Je account en al je abonnementen worden definitief verwijderd. Dit kun je niet ongedaan maken.",
+  "deleteAccountStoreNote": "Heb je Premium in de app gekocht? Zeg het dan ook op in de App Store of Google Play.",
+  "accountDeleted": "Je account is verwijderd.",
+  "viewOffer": "Bekijk aanbieding",
+  "termsOfUse": "Gebruiksvoorwaarden (EULA)",
+  "paywallMonthlyPer": "{price} per maand",
+  "@paywallMonthlyPer": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "legal": "Over",
+  "catAiSoftware": "AI & Software",
+  "catStreaming": "Streaming",
+  "catNews": "Nieuws & Tijdschriften",
+  "catGaming": "Gaming",
+  "catSport": "Sport",
+  "catMobile": "Mobiel",
+  "catAppsLifestyle": "Apps & Lifestyle",
+  "catInternetTv": "Internet & TV",
+  "catMusic": "Muziek",
+  "catOutings": "Uitjes & Cultuur",
+  "catMobility": "Mobiliteit",
+  "catBooks": "Boeken",
+  "catFood": "Eten & Bezorging"
+}
