@@ -15,6 +15,9 @@ geeft onbeperkt abonnementen en een CSV-export. Premium heeft twee bronnen op
 Play via RevenueCat in de app (`premiumStore`). De limiet wordt altijd op de
 server gecontroleerd (`lib/premium.ts`).
 
+Bestaande accounts met meer dan 5 abonnementen krijgen gratis Premium via
+`node scripts/grant-early-premium.mjs` (eerst droog, daarna met `--apply`).
+
 Alles staat achter `PREMIUM_ENABLED=true`; zonder die variabele is de site
 onbeperkt gratis zoals voorheen. Zie `.env.example` voor alle variabelen.
 
