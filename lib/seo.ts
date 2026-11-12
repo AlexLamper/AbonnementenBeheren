@@ -13,6 +13,15 @@ export const AUTHOR = "Alex Lamper";
 export const CONTACT_EMAIL =
   process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "info@abonnementenbeheren.com";
 
+/** App Store-pagina van de iPhone-app. */
+export const IOS_APP_STORE_URL = "https://apps.apple.com/nl/app/id6833970151";
+
+/**
+ * Pas op true zetten (NEXT_PUBLIC_IOS_APP_LIVE) zodra Apple de app heeft
+ * goedgekeurd; tot dan zou de App Store-link nergens heen gaan.
+ */
+export const IOS_APP_LIVE = process.env.NEXT_PUBLIC_IOS_APP_LIVE === "true";
+
 export const SITE_TITLE =
   "Abonnementen beheren - gratis overzicht van al je abonnementen";
 
