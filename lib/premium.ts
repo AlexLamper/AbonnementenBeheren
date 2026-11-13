@@ -1,3 +1,4 @@
+import type { Types } from "mongoose";
 import { connectDB } from "@/lib/db";
 import { User, type UserDoc } from "@/lib/models/User";
 import { Subscription } from "@/lib/models/Subscription";
@@ -60,15 +61,47 @@ export interface Entitlement {
   canAdd: boolean;
 }
 
+/**
+ * Vroege gebruikers: wie al meer abonnementen had dan de gratis limiet
+ * voordat de betaalmuur aanging, krijgt Premium cadeau (keuze van Alex:
+ * "alleen boven de 5"). Gebeurt vanzelf bij het eerstvolgende bezoek, zodat
+ * er geen los script tegen de database nodig is.
+ *
+ * Meer dan de limiet kan na de lancering niet meer zonder Premium, dus dit
+ * raakt alleen bestaande accounts. Wie ooit betaald heeft (Stripe of App
+ * Store) valt erbuiten: een verlopen abonnement levert geen gratis Premium op.
+ */
+const EARLY_PREMIUM_BEFORE = new Date(process.env.EARLY_PREMIUM_BEFORE ?? "2026-12-01T00:00:00Z");
+
+type EntitlementUser = PremiumFields & {
+  _id: Types.ObjectId;
+  stripeCustomerId?: string;
+};
+
+function qualifiesForEarlyPremium(user: EntitlementUser, count: number): boolean {
+  return (
+    PREMIUM_ENABLED &&
+    count > FREE_SUBSCRIPTION_LIMIT &&
+    !user.premiumGranted &&
+    !user.stripeCustomerId &&
+    !user.storePremiumExpiresAt &&
+    user._id.getTimestamp() < EARLY_PREMIUM_BEFORE
+  );
+}
+
 export async function getEntitlement(userId: string): Promise<Entitlement> {
   await connectDB();
   const [user, count] = await Promise.all([
     User.findById(userId)
-      .select("premiumStripe premiumStore storePremiumExpiresAt premiumGranted")
-      .lean<PremiumFields>(),
+      .select("premiumStripe premiumStore storePremiumExpiresAt premiumGranted stripeCustomerId")
+      .lean<EntitlementUser>(),
     Subscription.countDocuments({ userId }),
   ]);
-  const source = premiumSource(user);
+  let source = premiumSource(user);
+  if (user && source === null && qualifiesForEarlyPremium(user, count)) {
+    await User.updateOne({ _id: user._id }, { $set: { premiumGranted: true } });
+    source = "granted";
+  }
   const isPremium = source !== null;
   const limit = PREMIUM_ENABLED && !isPremium ? FREE_SUBSCRIPTION_LIMIT : null;
   return {

@@ -1,3 +1,6 @@
+// LET OP: niet meer nodig. lib/premium.ts geeft vroege gebruikers nu zelf
+// Premium bij hun eerstvolgende bezoek. Dit script blijft alleen als controle.
+//
 // Geeft gratis Premium (premiumGranted) aan bestaande accounts die nu al meer
 // abonnementen hebben dan de gratis limiet, zodat zij niets kwijtraken als
 // PREMIUM_ENABLED aangaat.
