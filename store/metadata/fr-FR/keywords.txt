@@ -1,1 +1,1 @@
-abonnement,gérer,suivi,résilier,dépenses,budget,streaming,netflix,spotify,mensuel,factures,rappel
+abonnement,gérer,gestion,résilier,dépenses,budget,streaming,netflix,spotify,mensuel,factures
