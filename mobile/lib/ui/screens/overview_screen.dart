@@ -715,7 +715,11 @@ class _SubscriptionTileState extends State<SubscriptionTile> {
                         style: sans(15, weight: FontWeight.w700),
                       ),
                     ),
-                    if (s.group != null) ...[const SizedBox(width: 6), _GroupTag(s.group!)],
+                    // Naam en label delen de ruimte; beide korten in met "…".
+                    if (s.group != null) ...[
+                      const SizedBox(width: 6),
+                      Flexible(child: _GroupTag(s.group!)),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 2),
@@ -781,17 +785,14 @@ class _GroupTag extends StatelessWidget {
   final String group;
 
   @override
-  Widget build(BuildContext context) => ConstrainedBox(
-    constraints: const BoxConstraints(maxWidth: 96),
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(color: AppColors.mintSoft, borderRadius: BorderRadius.circular(999)),
-      child: Text(
-        group,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: sans(11, color: AppColors.brand, weight: FontWeight.w700),
-      ),
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+    decoration: BoxDecoration(color: AppColors.mintSoft, borderRadius: BorderRadius.circular(999)),
+    child: Text(
+      group,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: sans(11, color: AppColors.brand, weight: FontWeight.w700),
     ),
   );
 }
