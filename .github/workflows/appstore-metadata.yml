@@ -173,7 +173,7 @@ jobs:
           REVIEW_LAST_NAME: Lamper
           REVIEW_NOTES: |-
             1. SCREEN RECORDING
-            Attached to this App Review Information section (app_review_recording.mp4), recorded on a physical iPhone on the latest iOS.
+            Attached to this App Review Information section (app_review_recording.mp4), recorded on a physical iPhone on the latest iOS. It shows registering a new account (which signs the user in), adding subscriptions, and buying Premium with an auto-renewable In-App Purchase (sandbox). Account deletion is not in the recording: it is in Settings (gear icon) > "Account verwijderen" (Delete account) and can be tested with the demo account or any new account.
 
             2. PURPOSE AND AUDIENCE
             AbonnementenBeheren ("manage subscriptions") is for consumers in the Netherlands and Belgium who lose track of their recurring subscriptions (streaming, music, phone, internet, gym, news, software). People often pay for services they forgot about. The app gives one overview of all subscriptions with the total cost per month and per year, so users can see what they spend and decide what to cancel. Users enter their subscriptions themselves; the app never charges or cancels anything on their behalf.
