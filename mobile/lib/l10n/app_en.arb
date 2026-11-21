@@ -110,6 +110,8 @@
   "planYearly": "Yearly",
   "planMonthly": "Monthly",
   "bestValue": "Best value",
+  "paywallOnly": "Only",
+  "paywallCheap": "Less than a cup of coffee. Unlimited subscriptions, cancel anytime.",
   "buyPremium": "Get Premium",
   "restorePurchases": "Restore purchases",
   "paywallLegal": "Premium renews automatically until you cancel. You can cancel anytime in your {store} settings.",

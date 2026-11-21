@@ -183,7 +183,7 @@ jobs:
             - Overview: monthly and yearly total, number of subscriptions, cost breakdown chart and the list of subscriptions.
             - Add: tap "Toevoegen" (Add), search a service (e.g. Netflix), tap a plan to add it with its price, or add a custom one with your own name and price.
             - Edit or delete a subscription with the pencil and trash icons.
-            - Premium: free accounts can track up to 5 subscriptions. Adding a 6th opens the Premium screen with an auto-renewable subscription (monthly or yearly) via Apple In-App Purchase; it can be tested in the sandbox. Restore purchases is on the same screen. Premium is also reachable from Settings > Premium.
+            - Premium: free accounts can track up to 5 subscriptions. Adding a 6th opens the Premium screen with one auto-renewable subscription (EUR 1.99 per month) via Apple In-App Purchase; it can be tested in the sandbox. After buying, "AbonnementenBeheren Premium" is added to the user's own list automatically so the cost is included in their total. The yearly product is no longer offered in the app. Restore purchases is on the same screen. Premium is also reachable from Settings > Premium.
             - Account deletion: Settings (gear icon) > "Account verwijderen" (Delete account). This permanently deletes the account and all its data.
             - The language can be changed in Settings (Dutch, English, German, French, Spanish).
 

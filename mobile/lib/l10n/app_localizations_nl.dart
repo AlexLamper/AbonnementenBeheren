@@ -379,6 +379,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get bestValue => 'Voordeligst';
 
   @override
+  String get paywallOnly => 'Maar';
+
+  @override
+  String get paywallCheap =>
+      'Minder dan een kop koffie. Onbeperkt abonnementen, altijd opzegbaar.';
+
+  @override
   String get buyPremium => 'Neem Premium';
 
   @override

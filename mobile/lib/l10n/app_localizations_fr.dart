@@ -382,6 +382,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get bestValue => 'Le plus avantageux';
 
   @override
+  String get paywallOnly => 'Seulement';
+
+  @override
+  String get paywallCheap =>
+      'Moins qu\'un café. Abonnements illimités, résiliable à tout moment.';
+
+  @override
   String get buyPremium => 'Passer à Premium';
 
   @override

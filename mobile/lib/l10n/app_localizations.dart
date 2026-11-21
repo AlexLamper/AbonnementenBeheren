@@ -764,6 +764,18 @@ abstract class AppLocalizations {
   /// **'Voordeligst'**
   String get bestValue;
 
+  /// No description provided for @paywallOnly.
+  ///
+  /// In nl, this message translates to:
+  /// **'Maar'**
+  String get paywallOnly;
+
+  /// No description provided for @paywallCheap.
+  ///
+  /// In nl, this message translates to:
+  /// **'Minder dan een kop koffie. Onbeperkt abonnementen, altijd opzegbaar.'**
+  String get paywallCheap;
+
   /// No description provided for @buyPremium.
   ///
   /// In nl, this message translates to:

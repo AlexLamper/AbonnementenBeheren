@@ -382,6 +382,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get bestValue => 'Am günstigsten';
 
   @override
+  String get paywallOnly => 'Nur';
+
+  @override
+  String get paywallCheap =>
+      'Weniger als eine Tasse Kaffee. Unbegrenzt Abos, jederzeit kündbar.';
+
+  @override
   String get buyPremium => 'Premium holen';
 
   @override

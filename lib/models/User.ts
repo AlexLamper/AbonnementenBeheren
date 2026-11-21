@@ -22,6 +22,12 @@ export interface UserDoc {
   stripeSubscriptionId?: string;
   /** Handmatig gegeven Premium (bijv. vroege gebruikers), los van betalingen. */
   premiumGranted?: boolean;
+  /**
+   * Staat "AbonnementenBeheren Premium" al in de lijst gezet voor de huidige
+   * betaalde periode? Voorkomt dat het terugkomt als je het zelf weghaalt.
+   * Gaat weer uit zodra het betaalde Premium stopt.
+   */
+  premiumListEntryAdded?: boolean;
 }
 
 const UserSchema = new Schema<UserDoc>(
@@ -37,6 +43,7 @@ const UserSchema = new Schema<UserDoc>(
     stripeCustomerId: { type: String },
     stripeSubscriptionId: { type: String },
     premiumGranted: { type: Boolean, default: false },
+    premiumListEntryAdded: { type: Boolean, default: false },
   },
   { collection: "users" }
 );

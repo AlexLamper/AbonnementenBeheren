@@ -16,10 +16,9 @@ export const FREE_SUBSCRIPTION_LIMIT = (() => {
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : 5;
 })();
 
-/** Getoonde prijzen op de website (de echte prijs staat in Stripe). */
+/** Getoonde prijs op de website (de echte prijs staat in Stripe). Eén plan: per maand. */
 export const PREMIUM_PRICES = {
   monthly: process.env.NEXT_PUBLIC_PREMIUM_PRICE_MONTHLY ?? "€ 1,99",
-  yearly: process.env.NEXT_PUBLIC_PREMIUM_PRICE_YEARLY ?? "€ 14,99",
 };
 
 export type PremiumSource = "stripe" | "store" | "granted" | null;

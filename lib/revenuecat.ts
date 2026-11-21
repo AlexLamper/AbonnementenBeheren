@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { User } from "@/lib/models/User";
+import { User, type UserDoc } from "@/lib/models/User";
+import { addPremiumToList, resetPremiumListEntry, DEFAULT_PAID_PLAN } from "@/lib/premiumListEntry";
 
 /**
  * RevenueCat (App Store / Google Play) → `premiumStore` op de gebruiker.
@@ -10,7 +11,7 @@ import { User } from "@/lib/models/User";
 export const PREMIUM_ENTITLEMENT_ID =
   process.env.REVENUECAT_PREMIUM_ENTITLEMENT_ID ?? "premium";
 
-type Entitlement = { expires_date?: string | null };
+type Entitlement = { expires_date?: string | null; product_identifier?: string };
 type SubscriberResponse = {
   subscriber?: { entitlements?: Record<string, Entitlement | undefined> };
 };
@@ -18,7 +19,7 @@ type SubscriberResponse = {
 /** Leest de live status bij RevenueCat (de bron van waarheid). */
 export async function fetchStorePremium(
   appUserId: string
-): Promise<{ premiumStore: boolean; storePremiumExpiresAt: Date | null }> {
+): Promise<{ premiumStore: boolean; storePremiumExpiresAt: Date | null; productId?: string }> {
   const apiKey = process.env.REVENUECAT_REST_API_KEY;
   if (!apiKey) throw new Error("REVENUECAT_REST_API_KEY ontbreekt");
 
@@ -37,7 +38,11 @@ export async function fetchStorePremium(
   // expires_date null = levenslang; een datum in het verleden = verlopen.
   const expires = ent.expires_date ? new Date(ent.expires_date) : null;
   const active = !expires || expires.getTime() > Date.now();
-  return { premiumStore: active, storePremiumExpiresAt: active ? expires : null };
+  return {
+    premiumStore: active,
+    storePremiumExpiresAt: active ? expires : null,
+    productId: ent.product_identifier,
+  };
 }
 
 export async function syncStorePremium(appUserId: string): Promise<boolean> {
@@ -45,7 +50,19 @@ export async function syncStorePremium(appUserId: string): Promise<boolean> {
     // Anonieme RevenueCat-id's ($RCAnonymousID:...) horen bij niemand.
     return false;
   }
-  const patch = await fetchStorePremium(appUserId);
-  const result = await User.updateOne({ _id: appUserId }, { $set: patch });
-  return result.matchedCount > 0;
+  const { productId, ...patch } = await fetchStorePremium(appUserId);
+  const before = await User.findByIdAndUpdate(appUserId, { $set: patch })
+    .select("premiumStore premiumStripe")
+    .lean<Pick<UserDoc, "premiumStore" | "premiumStripe">>();
+  if (!before) return false;
+
+  // Net Premium gekocht in de app: zet het in de lijst.
+  if (patch.premiumStore && !before.premiumStore) {
+    await addPremiumToList(appUserId, productId?.toLowerCase().includes("year")
+      ? { price: 14.99, billingPeriod: "jaarlijks" }
+      : DEFAULT_PAID_PLAN);
+  } else if (!patch.premiumStore && before.premiumStore && !before.premiumStripe) {
+    await resetPremiumListEntry(appUserId);
+  }
+  return true;
 }

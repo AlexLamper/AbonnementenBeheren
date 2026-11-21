@@ -9,8 +9,10 @@ export const stripe = new Stripe(
 
 export type PremiumPlan = "monthly" | "yearly";
 
+/** Er is nog maar één plan te koop: per maand. */
 export function readPlan(value: unknown): PremiumPlan {
-  return value === "yearly" ? "yearly" : "monthly";
+  void value;
+  return "monthly";
 }
 
 export function priceIdFor(plan: PremiumPlan): string | undefined {

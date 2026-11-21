@@ -3,11 +3,8 @@
 import { useState } from "react";
 import { Check, BadgeCheck } from "lucide-react";
 
-export type PlanKey = "monthly" | "yearly";
-
 export interface PlanPrices {
   monthly: string;
-  yearly: string;
 }
 
 export const PREMIUM_PERKS = [
@@ -17,20 +14,35 @@ export const PREMIUM_PERKS = [
   "Steun een onafhankelijke Nederlandse maker",
 ];
 
+/** "Maar €1,99 per maand": één vast plan, met de nadruk op de lage prijs. */
+export function PriceHero({ price }: { price: string }) {
+  return (
+    <div className="rounded-[20px] border-[1.5px] border-mint bg-mint-wash px-4 py-4 text-center">
+      <p className="text-[0.9375rem] font-bold text-brand">Maar</p>
+      <p className="flex items-end justify-center gap-1.5">
+        <span className="font-display text-[2.75rem] font-bold leading-none tracking-tight text-slate-900">
+          {price}
+        </span>
+        <span className="pb-1 text-[0.9375rem] font-semibold text-slate-600">per maand</span>
+      </p>
+      <p className="mt-2 text-[0.8125rem] leading-snug text-slate-600">
+        Minder dan een kop koffie. Onbeperkt abonnementen, altijd opzegbaar.
+      </p>
+    </div>
+  );
+}
+
 /**
- * Keuze maand/jaar + afrekenknop. Een gewoon formulier naar
- * /api/stripe/checkout, zodat het ook zonder JavaScript-fetch werkt.
+ * Prijs + afrekenknop. Een gewoon formulier naar /api/stripe/checkout, zodat
+ * het ook zonder JavaScript-fetch werkt.
  */
 export function PlanPicker({
   prices,
-  defaultPlan = "yearly",
   compact = false,
 }: {
   prices: PlanPrices;
-  defaultPlan?: PlanKey;
   compact?: boolean;
 }) {
-  const [plan, setPlan] = useState<PlanKey>(defaultPlan);
   const [submitting, setSubmitting] = useState(false);
 
   return (
@@ -40,24 +52,8 @@ export function PlanPicker({
       onSubmit={() => setSubmitting(true)}
       className="space-y-3"
     >
-      <input type="hidden" name="plan" value={plan} />
-      <div role="radiogroup" aria-label="Kies een abonnement" className="grid gap-2.5">
-        <PlanOption
-          selected={plan === "yearly"}
-          onSelect={() => setPlan("yearly")}
-          title="Per jaar"
-          price={prices.yearly}
-          suffix="per jaar"
-          badge="Voordeligst"
-        />
-        <PlanOption
-          selected={plan === "monthly"}
-          onSelect={() => setPlan("monthly")}
-          title="Per maand"
-          price={prices.monthly}
-          suffix="per maand"
-        />
-      </div>
+      <input type="hidden" name="plan" value="monthly" />
+      <PriceHero price={prices.monthly} />
       <button
         type="submit"
         disabled={submitting}
@@ -73,58 +69,6 @@ export function PlanPicker({
         </p>
       )}
     </form>
-  );
-}
-
-function PlanOption({
-  selected,
-  onSelect,
-  title,
-  price,
-  suffix,
-  badge,
-}: {
-  selected: boolean;
-  onSelect: () => void;
-  title: string;
-  price: string;
-  suffix: string;
-  badge?: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={selected}
-      onClick={onSelect}
-      className={`flex w-full items-center gap-3.5 rounded-[18px] border-[1.5px] px-4 py-3.5 text-left transition ${
-        selected
-          ? "border-mint bg-mint-wash"
-          : "border-line bg-white hover:border-[#9fe6d9]"
-      }`}
-    >
-      <span
-        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition ${
-          selected ? "border-mint bg-mint text-mint-ink" : "border-slate-300"
-        }`}
-      >
-        {selected && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2 font-bold text-slate-900">
-          {title}
-          {badge && (
-            <span className="rounded-full bg-navy px-2 py-0.5 text-[0.6875rem] font-bold uppercase tracking-wide text-mint-light">
-              {badge}
-            </span>
-          )}
-        </span>
-      </span>
-      <span className="text-right">
-        <span className="block font-display text-lg font-bold text-slate-900">{price}</span>
-        <span className="block text-xs text-slate-500">{suffix}</span>
-      </span>
-    </button>
   );
 }
 

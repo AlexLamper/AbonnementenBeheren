@@ -381,6 +381,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bestValue => 'Best value';
 
   @override
+  String get paywallOnly => 'Only';
+
+  @override
+  String get paywallCheap =>
+      'Less than a cup of coffee. Unlimited subscriptions, cancel anytime.';
+
+  @override
   String get buyPremium => 'Get Premium';
 
   @override

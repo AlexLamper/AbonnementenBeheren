@@ -110,6 +110,8 @@
   "planYearly": "Jährlich",
   "planMonthly": "Monatlich",
   "bestValue": "Am günstigsten",
+  "paywallOnly": "Nur",
+  "paywallCheap": "Weniger als eine Tasse Kaffee. Unbegrenzt Abos, jederzeit kündbar.",
   "buyPremium": "Premium holen",
   "restorePurchases": "Käufe wiederherstellen",
   "paywallLegal": "Premium verlängert sich automatisch, bis du kündigst. Kündigen kannst du jederzeit in deinen {store}-Einstellungen.",

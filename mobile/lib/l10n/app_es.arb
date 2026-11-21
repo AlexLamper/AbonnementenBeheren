@@ -110,6 +110,8 @@
   "planYearly": "Anual",
   "planMonthly": "Mensual",
   "bestValue": "Mejor precio",
+  "paywallOnly": "Solo",
+  "paywallCheap": "Menos que un café. Suscripciones ilimitadas, cancela cuando quieras.",
   "buyPremium": "Obtener Premium",
   "restorePurchases": "Restaurar compras",
   "paywallLegal": "Premium se renueva automáticamente hasta que canceles. Puedes cancelar cuando quieras en los ajustes de {store}.",

@@ -134,7 +134,12 @@ class SessionNotifier extends AsyncNotifier<Session?> {
 
   void setEntitlement(Entitlement entitlement) {
     final current = state.value;
-    if (current != null) state = AsyncData(current.copyWith(entitlement: entitlement));
+    if (current == null) return;
+    final becamePremium = !current.entitlement.isPremium && entitlement.isPremium;
+    state = AsyncData(current.copyWith(entitlement: entitlement));
+    // Na een aankoop zet de server "AbonnementenBeheren Premium" in je lijst;
+    // lijst opnieuw ophalen zodat die er meteen tussen staat.
+    if (becamePremium) ref.invalidate(subscriptionsProvider);
   }
 
   Future<void> logout() => _clear();

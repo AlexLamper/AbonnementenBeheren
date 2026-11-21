@@ -1,7 +1,6 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -51,7 +50,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     if (!mounted) return;
     setState(() {
       _offering = offering;
-      _selected = offering?.annual ?? offering?.monthly ?? offering?.availablePackages.firstOrNull;
+      // Eén vast plan: Premium per maand.
+      _selected = offering?.monthly ?? offering?.availablePackages.firstOrNull;
       _loadingOffering = false;
     });
   }
@@ -262,44 +262,58 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         ),
       ];
     }
-    final packages = [
-      ?offering.annual,
-      ?offering.monthly,
-      ...offering.availablePackages.where((p) => p != offering.annual && p != offering.monthly),
-    ];
-    return [
-      for (final p in packages) ...[
-        _PlanOption(
-          title: switch (p.packageType) {
-            PackageType.annual => l.planYearly,
-            PackageType.monthly => l.planMonthly,
-            _ => p.storeProduct.title,
-          },
-          price: p.storeProduct.priceString,
-          suffix: switch (p.packageType) {
-            PackageType.annual => l.periodYearlyShort,
-            PackageType.monthly => l.periodMonthlyShort,
-            _ => null,
-          },
-          note: p.packageType == PackageType.annual && p.storeProduct.price > 0
-              ? l.paywallMonthlyPer(_monthlyEquivalent(p))
-              : null,
-          badge: p.packageType == PackageType.annual ? l.bestValue : null,
-          selected: _selected == p,
-          onTap: () => setState(() => _selected = p),
-        ),
-        const SizedBox(height: 10),
-      ],
-    ];
+    final pkg = _selected;
+    if (pkg == null) return const [];
+    return [_PriceHero(price: pkg.storeProduct.priceString)];
   }
+}
 
-  String _monthlyEquivalent(Package p) {
-    final perMonth = p.storeProduct.price / 12;
-    final lang = context.lang;
-    return NumberFormat.simpleCurrency(
-      locale: lang == 'nl' ? 'nl_NL' : lang,
-      name: p.storeProduct.currencyCode,
-    ).format(perMonth);
+/// Eén plan, met de nadruk op hoe goedkoop het is: "Maar €1,99 per maand".
+class _PriceHero extends StatelessWidget {
+  const _PriceHero({required this.price});
+  final String price;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+      decoration: BoxDecoration(
+        color: AppColors.mintWash,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.mint, width: 1.5),
+      ),
+      child: Column(
+        children: [
+          Text(
+            l.paywallOnly,
+            style: sans(15, color: AppColors.mintText, weight: FontWeight.w700),
+          ),
+          const SizedBox(height: 2),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(price, style: display(46, height: 1)),
+              const SizedBox(width: 6),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(
+                  l.periodMonthlyShort,
+                  style: sans(15, color: AppColors.slate600, weight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l.paywallCheap,
+            textAlign: TextAlign.center,
+            style: sans(13.5, color: AppColors.slate600, height: 1.4),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -331,104 +345,6 @@ class _Perks extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class _PlanOption extends StatelessWidget {
-  const _PlanOption({
-    required this.title,
-    required this.price,
-    required this.selected,
-    required this.onTap,
-    this.suffix,
-    this.note,
-    this.badge,
-  });
-
-  final String title;
-  final String price;
-  final String? suffix;
-  final String? note;
-  final String? badge;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      selected: selected,
-      button: true,
-      child: Material(
-        color: selected ? AppColors.mintWash : Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: selected ? AppColors.mint : AppColors.line, width: 1.5),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: selected ? AppColors.mint : Colors.transparent,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: selected ? AppColors.mint : AppColors.slate300, width: 2),
-                  ),
-                  child: selected ? const Icon(LucideIcons.check, size: 14, color: AppColors.mintInk) : null,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(title, style: sans(15, weight: FontWeight.w700)),
-                          if (badge != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(color: AppColors.navy, borderRadius: BorderRadius.circular(99)),
-                              child: Text(
-                                badge!.toUpperCase(),
-                                style: sans(
-                                  10.5,
-                                  color: AppColors.mintLight,
-                                  weight: FontWeight.w700,
-                                ).copyWith(letterSpacing: 0.4),
-                              ),
-                            ),
-                        ],
-                      ),
-                      if (note != null) ...[
-                        const SizedBox(height: 2),
-                        Text(note!, style: sans(12.5, color: AppColors.slate500)),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(price, style: display(18)),
-                    if (suffix != null) Text(suffix!, style: sans(12, color: AppColors.slate500)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

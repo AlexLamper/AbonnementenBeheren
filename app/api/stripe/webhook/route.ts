@@ -5,6 +5,8 @@ import { connectDB } from "@/lib/db";
 import { User } from "@/lib/models/User";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/models/WebhookEvent";
 import { stripe, stripeStatusGivesPremium } from "@/lib/stripe";
+import { isStorePremiumActive } from "@/lib/premium";
+import { addPremiumToList, resetPremiumListEntry, DEFAULT_PAID_PLAN } from "@/lib/premiumListEntry";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -87,7 +89,9 @@ async function applySubscription(sub: Stripe.Subscription, userIdHint?: string |
     return;
   }
 
-  const user = await User.findOne(filter).select("stripeSubscriptionId");
+  const user = await User.findOne(filter).select(
+    "stripeSubscriptionId premiumStripe premiumStore storePremiumExpiresAt"
+  );
   if (!user) {
     console.warn(`[stripe/webhook] Gebruiker niet gevonden voor ${sub.id}`);
     return;
@@ -108,4 +112,17 @@ async function applySubscription(sub: Stripe.Subscription, userIdHint?: string |
       },
     }
   );
+
+  // Net Premium gekocht: zet het in de lijst. Gestopt (en niet via de app):
+  // bij een volgende aankoop mag het er weer bij.
+  const userId = user._id.toString();
+  if (active && !user.premiumStripe) {
+    const price = sub.items?.data?.[0]?.price;
+    const yearly = price?.recurring?.interval === "year";
+    await addPremiumToList(userId, price?.unit_amount
+      ? { price: price.unit_amount / 100, billingPeriod: yearly ? "jaarlijks" : "maandelijks" }
+      : DEFAULT_PAID_PLAN);
+  } else if (!active && user.premiumStripe && !isStorePremiumActive(user)) {
+    await resetPremiumListEntry(userId);
+  }
 }

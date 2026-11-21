@@ -112,12 +112,13 @@ export default async function PremiumPage({
               <BadgeCheck className="h-3.5 w-3.5" strokeWidth={2.6} />
               Premium
             </p>
-            <p className="mt-2 font-display text-[2.125rem] font-bold tracking-tight text-slate-900">
-              {PREMIUM_PRICES.monthly}
+            <p className="mt-2 flex items-baseline gap-2">
+              <span className="text-base font-bold text-brand">Maar</span>
+              <span className="font-display text-[2.125rem] font-bold tracking-tight text-slate-900">
+                {PREMIUM_PRICES.monthly}
+              </span>
             </p>
-            <p className="text-sm text-slate-500">
-              per maand, of {PREMIUM_PRICES.yearly} per jaar
-            </p>
+            <p className="text-sm text-slate-500">per maand · minder dan een kop koffie</p>
             <div className="mt-6">
               <PerkList />
             </div>
