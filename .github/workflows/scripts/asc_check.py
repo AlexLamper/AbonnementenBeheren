@@ -605,8 +605,18 @@ def cmd_submit(client):
         log("Version added to the submission.")
 
     def send(submission_id):
-        client.request("PATCH", f"reviewSubmissions/{submission_id}", json={"data": {
-            "type": "reviewSubmissions", "id": submission_id, "attributes": {"submitted": True}}})
+        # Right after an upload (review attachment, build) Apple answers "not ready
+        # to be submitted yet, try again later" for a few minutes; wait it out.
+        for attempt in range(1, 31):
+            try:
+                client.request("PATCH", f"reviewSubmissions/{submission_id}", json={"data": {
+                    "type": "reviewSubmissions", "id": submission_id, "attributes": {"submitted": True}}})
+                return
+            except RuntimeError as exc:
+                if "try again later" not in str(exc) or attempt == 30:
+                    raise
+                log(f"Version not ready yet (attempt {attempt}); retrying in 20s.")
+                time.sleep(20)
 
     submit_subscriptions(client)
     try:
