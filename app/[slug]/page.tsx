@@ -147,7 +147,7 @@ export default async function ServicePage({
                 {preset.name} abonnement: prijzen en kosten
               </h1>
               {content?.tagline && (
-                <p className="mt-2 text-base text-haze sm:text-[17px]">{content.tagline}</p>
+                <p className="mt-2 text-base text-haze sm:text-[1.0625rem]">{content.tagline}</p>
               )}
             </div>
           </div>
@@ -210,7 +210,7 @@ export default async function ServicePage({
                         </span>
                       )}
                     </div>
-                    <p className="font-display text-[32px] font-bold leading-none tracking-tight text-slate-900">
+                    <p className="font-display text-[2rem] font-bold leading-none tracking-tight text-slate-900">
                       {formatEUR(plan.price)}
                       <span className="ml-1 font-sans text-sm font-medium tracking-normal text-slate-500">
                         {periodLabel(plan.billingPeriod).toLowerCase()}
@@ -232,7 +232,7 @@ export default async function ServicePage({
                 );
               })}
             </ul>
-            <p className="mt-3.5 text-[13px] text-slate-500">
+            <p className="mt-3.5 text-[0.8125rem] text-slate-500">
               Prijzen zijn indicatief en kunnen wijzigen. Controleer de actuele
               prijs op de officiële website.
             </p>
@@ -243,7 +243,7 @@ export default async function ServicePage({
             <section className="rounded-3xl border border-line bg-white p-5 sm:p-7">
               {content?.description && (
                 <>
-                  <h2 className="font-display text-[22px] font-bold text-slate-900">
+                  <h2 className="font-display text-[1.375rem] font-bold text-slate-900">
                     Wat is {preset.name}?
                   </h2>
                   <p className="mt-2.5 leading-[1.7] text-slate-600">{content.description}</p>
@@ -251,7 +251,7 @@ export default async function ServicePage({
               )}
               {content?.differences && (
                 <>
-                  <h2 className="mt-7 font-display text-[22px] font-bold text-slate-900">
+                  <h2 className="mt-7 font-display text-[1.375rem] font-bold text-slate-900">
                     Verschil tussen de {preset.name}-abonnementen
                   </h2>
                   <p className="mt-2.5 leading-[1.7] text-slate-600">{content.differences}</p>
@@ -259,7 +259,7 @@ export default async function ServicePage({
               )}
               {content?.website && (
                 <>
-                  <h2 className="mt-7 font-display text-[22px] font-bold text-slate-900">
+                  <h2 className="mt-7 font-display text-[1.375rem] font-bold text-slate-900">
                     Officiële website
                   </h2>
                   <a
@@ -280,7 +280,7 @@ export default async function ServicePage({
         <aside className="flex flex-col gap-5 lg:sticky lg:top-24">
           <div className="rounded-3xl bg-navy p-6 shadow-float">
             <LogoMark size={40} />
-            <h2 className="mt-3.5 font-display text-[22px] font-bold leading-tight text-white">
+            <h2 className="mt-3.5 font-display text-[1.375rem] font-bold leading-tight text-white">
               Houd {preset.name} en al je andere abonnementen bij
             </h2>
             <ul className="mt-3.5 flex flex-col gap-2 text-sm text-mist">

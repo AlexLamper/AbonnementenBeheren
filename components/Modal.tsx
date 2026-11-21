@@ -51,7 +51,7 @@ export function Modal({
             {icon}
             <h2
               id={titleId}
-              className="truncate font-display text-[22px] font-bold text-slate-900"
+              className="truncate font-display text-[1.375rem] font-bold text-slate-900"
             >
               {title}
             </h2>

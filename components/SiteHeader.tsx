@@ -38,7 +38,7 @@ export function SiteHeader({ active }: { active?: "diensten" }) {
           {loggedIn ? (
             <Link
               href="/overzicht"
-              className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-mint px-4 py-2.5 font-bold text-mint-ink transition hover:bg-mint-light"
+              className="ml-1 inline-flex whitespace-nowrap items-center gap-1.5 rounded-full bg-mint px-4 py-2.5 font-bold text-mint-ink transition hover:bg-mint-light"
             >
               <LayoutDashboard className="h-4 w-4" />
               Mijn overzicht
@@ -47,13 +47,13 @@ export function SiteHeader({ active }: { active?: "diensten" }) {
             <>
               <Link
                 href="/login"
-                className="rounded-full px-3 py-2 font-medium text-white transition hover:bg-white/10 sm:px-3.5"
+                className="whitespace-nowrap rounded-full px-3 py-2 font-medium text-white transition hover:bg-white/10 sm:px-3.5"
               >
                 Inloggen
               </Link>
               <Link
                 href="/login?modus=registreren"
-                className="rounded-full bg-mint px-4 py-2.5 font-bold text-mint-ink transition hover:bg-mint-light"
+                className="whitespace-nowrap rounded-full bg-mint px-4 py-2.5 font-bold text-mint-ink transition hover:bg-mint-light"
               >
                 Gratis beginnen
               </Link>

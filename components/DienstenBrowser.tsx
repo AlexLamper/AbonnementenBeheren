@@ -125,7 +125,7 @@ export function DienstenBrowser({
         )}
         {groups.map(({ cat, list }) => (
           <section key={cat} className="mt-9">
-            <h2 className="flex items-baseline gap-2.5 font-display text-[22px] font-bold text-slate-900">
+            <h2 className="flex items-baseline gap-2.5 font-display text-[1.375rem] font-bold text-slate-900">
               {cat}
               <span className="font-sans text-sm font-medium text-slate-500">
                 {list.length} {list.length === 1 ? "dienst" : "diensten"}

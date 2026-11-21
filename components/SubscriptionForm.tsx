@@ -11,7 +11,7 @@ import {
 } from "@/lib/money";
 
 const INPUT =
-  "h-12 w-full rounded-[14px] border border-slate-300 bg-white px-4 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-mint focus:ring-4 focus:ring-mint/20";
+  "h-12 w-full rounded-[14px] border border-slate-300 bg-white px-4 text-[0.9375rem] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-mint focus:ring-4 focus:ring-mint/20";
 
 export function SubscriptionForm({
   initial,

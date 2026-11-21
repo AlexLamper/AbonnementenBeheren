@@ -43,7 +43,7 @@ export function TotalsCards({
     <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-[1.3fr_1fr_1fr_1.7fr]">
       <div className="col-span-2 rounded-[22px] bg-mint px-5 py-4 sm:px-6 sm:py-5 lg:col-span-1">
         <p className="text-sm font-semibold text-[#0b4a44]">Per maand</p>
-        <p className="mt-1 font-display text-[38px] font-bold leading-tight tracking-tight text-mint-ink sm:text-[44px]">
+        <p className="mt-1 font-display text-[2.375rem] font-bold leading-tight tracking-tight text-mint-ink sm:text-[2.75rem]">
           {formatEUR(monthly)}
         </p>
       </div>
@@ -51,7 +51,7 @@ export function TotalsCards({
       <Stat label="Abonnementen" value={String(count)} />
       <div className="col-span-2 hidden items-center gap-5 rounded-[22px] border border-white/[0.12] bg-white/[0.06] px-5 py-4 sm:flex lg:col-span-1">
         <Donut slices={slices} total={monthly} />
-        <ul className="flex min-w-0 flex-col gap-1.5 text-[13px] text-mist">
+        <ul className="flex min-w-0 flex-col gap-1.5 text-[0.8125rem] text-mist">
           {slices.slice(0, 3).map((s, i) => (
             <li key={s.id} className="flex items-center gap-2">
               <span
@@ -101,8 +101,8 @@ function Donut({ slices, total }: { slices: Slice[]; total: number }) {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[22px] border border-white/[0.12] bg-white/[0.06] px-4 py-4 sm:px-6 sm:py-5">
-      <p className="text-[13px] text-haze sm:text-sm">{label}</p>
-      <p className="mt-1 font-display text-[22px] font-bold tracking-tight text-white sm:text-[32px]">
+      <p className="text-[0.8125rem] text-haze sm:text-sm">{label}</p>
+      <p className="mt-1 font-display text-[1.375rem] font-bold tracking-tight text-white sm:text-[2rem]">
         {value}
       </p>
     </div>
@@ -121,7 +121,7 @@ function EmptyStat({
   return (
     <div className={`rounded-[22px] border-[1.5px] border-dashed border-white/20 px-5 py-4 sm:px-6 sm:py-5 ${className}`}>
       <p className="text-sm text-haze">{label}</p>
-      <p className="mt-1 font-display text-[26px] font-bold text-navy-soft sm:text-[32px]">
+      <p className="mt-1 font-display text-[1.625rem] font-bold text-navy-soft sm:text-[2rem]">
         {value}
       </p>
     </div>

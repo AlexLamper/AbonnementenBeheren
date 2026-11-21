@@ -45,7 +45,7 @@ export function PresetResult({
         />
         <div className="min-w-0 flex-1">
           <p className="truncate font-bold text-slate-900">{preset.name}</p>
-          <p className="text-[13px] text-slate-500">
+          <p className="text-[0.8125rem] text-slate-500">
             {preset.category}
             {!single && ` · ${preset.plans.length} pakketten`}
           </p>
@@ -73,12 +73,12 @@ export function PresetResult({
                 onClick={() => onPick(preset, plan)}
                 className="group flex w-full items-center justify-between rounded-[14px] py-3 pl-[70px] pr-3.5 text-left transition hover:bg-surface"
               >
-                <span className="text-[15px] font-semibold text-slate-800">{plan.name}</span>
+                <span className="text-[0.9375rem] font-semibold text-slate-800">{plan.name}</span>
                 <span className="flex items-center gap-2.5">
-                  <span className="font-display text-[15px] font-bold text-slate-900">
+                  <span className="font-display text-[0.9375rem] font-bold text-slate-900">
                     {formatEUR(plan.price)}
                   </span>
-                  <span className="text-[13px] text-slate-500">
+                  <span className="text-[0.8125rem] text-slate-500">
                     {periodLabel(plan.billingPeriod).toLowerCase()}
                   </span>
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-mint-soft text-mint-ink transition group-hover:bg-mint">
@@ -99,7 +99,7 @@ export function PresetResult({
             href={preset.affiliateUrl}
             target="_blank"
             rel="noopener noreferrer sponsored"
-            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand hover:underline"
+            className="inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-brand hover:underline"
           >
             Bekijk aanbieding
             <ExternalLink className="h-3.5 w-3.5" />

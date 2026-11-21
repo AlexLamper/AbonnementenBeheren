@@ -39,7 +39,7 @@ export function SubscriptionItem({
         rounded="rounded-[13px]"
       />
       <div className="min-w-0 flex-1">
-        <p className="truncate font-bold text-slate-900 sm:text-[16px]">
+        <p className="truncate font-bold text-slate-900 sm:text-[1rem]">
           {item.name}
           {item.planName && (
             <span className="hidden font-normal text-slate-500 sm:inline">
@@ -47,7 +47,7 @@ export function SubscriptionItem({
             </span>
           )}
         </p>
-        <p className="truncate text-[13px] text-slate-500">
+        <p className="truncate text-[0.8125rem] text-slate-500">
           {item.planName && <span className="sm:hidden">{item.planName} · </span>}
           {formatEUR(item.price)} {periodLabel(item.billingPeriod).toLowerCase()}
           {!isMonthly && <span className="hidden sm:inline"> · omgerekend naar maand</span>}
@@ -61,7 +61,7 @@ export function SubscriptionItem({
         <span className="text-xs text-slate-500">{pct}% van je totaal</span>
       </div>
 
-      <p className="text-right font-display text-[17px] font-bold text-slate-900 sm:w-[110px] sm:text-lg">
+      <p className="text-right font-display text-[1.0625rem] font-bold text-slate-900 sm:w-[110px] sm:text-lg">
         {formatEUR(monthly)}
         <span className="hidden font-sans text-xs font-medium text-slate-500 sm:block">per maand</span>
       </p>
@@ -71,14 +71,14 @@ export function SubscriptionItem({
           <button
             type="button"
             onClick={onDelete}
-            className="rounded-full bg-red-600 px-3.5 py-2.5 text-[13px] font-bold text-white transition hover:bg-red-700"
+            className="rounded-full bg-red-600 px-3.5 py-2.5 text-[0.8125rem] font-bold text-white transition hover:bg-red-700"
           >
             Verwijderen
           </button>
           <button
             type="button"
             onClick={() => setConfirming(false)}
-            className="px-2 py-2.5 text-[13px] font-semibold text-slate-600 hover:text-slate-900"
+            className="px-2 py-2.5 text-[0.8125rem] font-semibold text-slate-600 hover:text-slate-900"
           >
             Annuleer
           </button>

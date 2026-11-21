@@ -49,7 +49,7 @@ export function UpgradeDialog({
         </span>
       }
     >
-      <p className="-mt-1 text-[15px] text-slate-600">{copy.body(limit)}</p>
+      <p className="-mt-1 text-[0.9375rem] text-slate-600">{copy.body(limit)}</p>
       <div className="my-5 rounded-[18px] bg-surface px-4 py-4">
         <PerkList />
       </div>
