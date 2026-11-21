@@ -17,8 +17,8 @@ export const CONTACT_EMAIL =
 export const IOS_APP_STORE_URL = "https://apps.apple.com/nl/app/id6833970151";
 
 /**
- * Pas op true zetten (NEXT_PUBLIC_IOS_APP_LIVE) zodra Apple de app heeft
- * goedgekeurd; tot dan zou de App Store-link nergens heen gaan.
+ * Optioneel: forceert de iPhone-downloadknop aan. Normaal is dit niet nodig,
+ * want lib/appStore.ts ziet zelf wanneer de app in de App Store staat.
  */
 export const IOS_APP_LIVE = process.env.NEXT_PUBLIC_IOS_APP_LIVE === "true";
 

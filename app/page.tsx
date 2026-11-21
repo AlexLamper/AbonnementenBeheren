@@ -39,8 +39,8 @@ import {
   SITE_NAME,
   SITE_TITLE,
   SITE_DESCRIPTION,
-  IOS_APP_LIVE,
 } from "@/lib/seo";
+import { isIosAppLive } from "@/lib/appStore";
 import { FREE_SUBSCRIPTION_LIMIT, PREMIUM_ENABLED } from "@/lib/premium";
 
 export const metadata: Metadata = {
@@ -154,10 +154,12 @@ export default async function Home() {
   if (session?.user) redirect("/overzicht");
 
   const [presets, device] = await Promise.all([getPresets(), getDevice()]);
+  // Alleen bij Apple navragen als het om een iPhone gaat.
+  const iosAppLive = device.isIPhone ? await isIosAppLive() : false;
   // Telefoon: eigen, compactere hero. Op een iPhone (zodra de app live is)
-  // is de App Store-download de hoofdknop.
+  // is de App Store-download de hoofdknop, zodra Apple de app toont.
   const { isPhone } = device;
-  const showAppDownload = device.isIPhone && IOS_APP_LIVE;
+  const showAppDownload = device.isIPhone && iosAppLive;
   const byId = (id: string) => presets.find((p) => p.id === id);
   const pick = (ids: string[]) =>
     ids.map(byId).filter((p): p is Preset => Boolean(p));
