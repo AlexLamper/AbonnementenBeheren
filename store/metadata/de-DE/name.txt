@@ -1,1 +1,1 @@
-AbonnementenBeheren: Overzicht
+Abos verwalten: Übersicht

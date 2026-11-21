@@ -1,1 +1,1 @@
-suscripciones,gestor,control,cancelar,gastos,presupuesto,streaming,netflix,spotify,mensual,facturas
+suscripción,gestionar,cancelar,gastos,presupuesto,streaming,netflix,spotify,mensual,facturas
