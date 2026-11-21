@@ -9,6 +9,8 @@ export interface SubscriptionDoc {
   price: number;
   billingPeriod: BillingPeriod;
   category?: string;
+  /** Eigen groep van de gebruiker, bijv. "Werk" of "Privé" (los van de dienstcategorie). */
+  group?: string;
   presetId?: string;
   logoUrl?: string;
   color?: string;
@@ -35,6 +37,7 @@ const SubscriptionSchema = new Schema<SubscriptionDoc>(
       default: "maandelijks",
     },
     category: { type: String, trim: true },
+    group: { type: String, trim: true, maxlength: 40 },
     presetId: { type: String },
     logoUrl: { type: String },
     color: { type: String },

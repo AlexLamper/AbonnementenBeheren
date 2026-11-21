@@ -13,6 +13,7 @@ import '../../state/providers.dart';
 import '../l10n_helpers.dart';
 import '../widgets/common.dart';
 import '../widgets/donut.dart';
+import '../widgets/group_picker.dart';
 import '../widgets/service_logo.dart';
 import 'add_subscription_sheet.dart';
 import 'paywall_screen.dart';
@@ -31,6 +32,17 @@ class OverviewScreen extends ConsumerStatefulWidget {
 class _OverviewScreenState extends ConsumerState<OverviewScreen> {
   var _sort = SortKey.mostExpensive;
 
+  /// Groepfilter: null = alles, '' = zonder groep, anders de groepsnaam.
+  String? _groupFilter;
+
+  /// Het filter dat echt geldt: verdwijnt de groep, dan weer alles.
+  String? _activeFilter(List<Subscription> items, List<String> groups) {
+    final f = _groupFilter;
+    if (f == null) return null;
+    if (f.isEmpty) return groups.isNotEmpty && items.any((s) => s.group == null) ? f : null;
+    return groups.contains(f) ? f : null;
+  }
+
   Session get _session => ref.read(sessionProvider).value!;
 
   Future<void> _openAdd({String? query}) async {
@@ -39,7 +51,13 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
       await openPaywall(context, reason: PaywallReason.limit);
       return;
     }
-    await showAddSubscriptionSheet(context, initialQuery: query);
+    final items = ref.read(subscriptionsProvider).value ?? const <Subscription>[];
+    final filter = _activeFilter(items, ref.read(groupsProvider));
+    await showAddSubscriptionSheet(
+      context,
+      initialQuery: query,
+      initialGroup: filter == null || filter.isEmpty ? null : filter,
+    );
   }
 
   Future<void> _exportCsv() async {
@@ -112,6 +130,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     final monthly = items.fold<double>(0, (s, i) => s + i.monthly);
     final yearly = items.fold<double>(0, (s, i) => s + i.yearly);
     final isEmpty = items.isEmpty;
+    final groups = ref.watch(groupsProvider);
+    final filter = _activeFilter(items, groups);
+    final visible = filter == null ? items : items.where((s) => (s.group ?? '') == filter).toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -191,8 +212,16 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                                   _SortButton(value: _sort, onChanged: (v) => setState(() => _sort = v)),
                                 ],
                               ),
+                              if (groups.isNotEmpty)
+                                _GroupFilter(
+                                  groups: groups,
+                                  hasUngrouped: items.any((s) => s.group == null),
+                                  value: filter,
+                                  monthly: visible.fold<double>(0, (s, i) => s + i.monthly),
+                                  onChanged: (v) => setState(() => _groupFilter = v),
+                                ),
                               const SizedBox(height: 12),
-                              for (final (i, s) in _sorted(items).indexed)
+                              for (final (i, s) in _sorted(visible).indexed)
                                 SubscriptionTile(
                                   key: ValueKey(s.id),
                                   item: s,
@@ -676,11 +705,18 @@ class _SubscriptionTileState extends State<SubscriptionTile> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  s.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: sans(15, weight: FontWeight.w700),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        s.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: sans(15, weight: FontWeight.w700),
+                      ),
+                    ),
+                    if (s.group != null) ...[const SizedBox(width: 6), _GroupTag(s.group!)],
+                  ],
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -731,6 +767,87 @@ class _SubscriptionTileState extends State<SubscriptionTile> {
               onTap: () => setState(() => _confirming = true),
               label: l.delete,
               danger: true,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Klein label met de groep van een abonnement.
+class _GroupTag extends StatelessWidget {
+  const _GroupTag(this.group);
+  final String group;
+
+  @override
+  Widget build(BuildContext context) => ConstrainedBox(
+    constraints: const BoxConstraints(maxWidth: 96),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(color: AppColors.mintSoft, borderRadius: BorderRadius.circular(999)),
+      child: Text(
+        group,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: sans(11, color: AppColors.brand, weight: FontWeight.w700),
+      ),
+    ),
+  );
+}
+
+/// Filter op groep ("Alles", "Werk", …) met het maandbedrag van die groep.
+class _GroupFilter extends StatelessWidget {
+  const _GroupFilter({
+    required this.groups,
+    required this.hasUngrouped,
+    required this.value,
+    required this.monthly,
+    required this.onChanged,
+  });
+
+  final List<String> groups;
+  final bool hasUngrouped;
+  final String? value;
+  final double monthly;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final options = <(String?, String)>[
+      (null, l.groupAll),
+      for (final g in groups) (g, g),
+      if (hasUngrouped) ('', l.groupNone),
+    ];
+    final active = value == null ? null : options.where((o) => o.$1 == value).firstOrNull?.$2;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
+            child: Row(
+              children: [
+                for (final (i, o) in options.indexed) ...[
+                  if (i > 0) const SizedBox(width: 8),
+                  GroupChip(label: o.$2, selected: o.$1 == value, dark: true, onTap: () => onChanged(o.$1)),
+                ],
+              ],
+            ),
+          ),
+          if (active != null) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(color: AppColors.mintWash, borderRadius: BorderRadius.circular(14)),
+              child: Text(
+                l.groupTotal(active, context.eur(monthly)),
+                style: sans(14, color: AppColors.mintText, weight: FontWeight.w600),
+              ),
             ),
           ],
         ],

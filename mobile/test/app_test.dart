@@ -6,6 +6,7 @@ import 'package:abonnementenbeheren/state/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -124,6 +125,46 @@ void main() {
     await tester.pumpAndSettle();
     expect(backend.subs.length, 6);
     expect(find.text('Apple TV+ toegevoegd'), findsOneWidget);
+  });
+
+  testWidgets('groepen: filteren met maandbedrag en groep kiezen bij bewerken', (tester) async {
+    final backend = FakeBackend(
+      premium: true,
+      subs: [
+        FakeBackend.sub('1', 'Basic-Fit', 'basicfit', 'Comfort', 29.99),
+        FakeBackend.sub('2', 'ChatGPT', 'chatgpt', 'Plus', 23, group: 'Werk'),
+        FakeBackend.sub('3', 'Netflix', 'netflix', 'Standaard', 13.99),
+        FakeBackend.sub('4', 'Spotify', 'spotify', 'Individual', 11.99, group: 'Werk'),
+        FakeBackend.sub('5', 'Disney+', 'disneyplus', 'Standard', 9.99),
+      ],
+    );
+    await pumpApp(tester, backend, token: 'tok');
+    expect(find.text('Alles'), findsOneWidget);
+    expect(find.text('Zonder groep'), findsOneWidget);
+
+    // Filter op Werk: alleen die abonnementen, met het maandbedrag van de groep.
+    await tester.tap(find.text('Werk').first);
+    await tester.pumpAndSettle();
+    expect(findText('Werk · € 34,99 per maand'), findsOneWidget);
+    expect(find.text('Spotify'), findsOneWidget);
+    expect(find.text('Disney+'), findsNothing);
+    // Het totaal bovenaan blijft voor alles.
+    expect(findText('€ 88,96'), findsOneWidget);
+
+    // Terug naar alles en Basic-Fit (duurste, bovenaan) bij Gezin zetten.
+    await tester.tap(find.text('Alles'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(LucideIcons.pencil).first);
+    await tester.pumpAndSettle();
+    final gezin = find.text('Gezin').last;
+    await tester.ensureVisible(gezin);
+    await tester.pumpAndSettle();
+    await tester.tap(gezin);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Opslaan'));
+    await tester.pumpAndSettle();
+    expect(backend.subs.firstWhere((s) => s['id'] == '1')['group'], 'Gezin');
+    expect(find.text('Gezin'), findsWidgets);
   });
 
   testWidgets('taal: Engels', (tester) async {

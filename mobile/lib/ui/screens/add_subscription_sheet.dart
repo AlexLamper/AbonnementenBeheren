@@ -9,12 +9,16 @@ import '../../data/models.dart';
 import '../../state/providers.dart';
 import '../l10n_helpers.dart';
 import '../widgets/common.dart';
+import '../widgets/group_picker.dart';
 import '../widgets/service_logo.dart';
 import 'paywall_screen.dart';
 import 'subscription_form.dart';
 
-Future<void> showAddSubscriptionSheet(BuildContext context, {String? initialQuery}) async {
-  final limitHit = await showAppSheet<bool>(context, (_) => AddSubscriptionSheet(initialQuery: initialQuery));
+Future<void> showAddSubscriptionSheet(BuildContext context, {String? initialQuery, String? initialGroup}) async {
+  final limitHit = await showAppSheet<bool>(
+    context,
+    (_) => AddSubscriptionSheet(initialQuery: initialQuery, initialGroup: initialGroup),
+  );
   // De server weigerde: gratis limiet bereikt. Toon dan de upgrade.
   if (limitHit == true && context.mounted) {
     await openPaywall(context, reason: PaywallReason.limit);
@@ -23,8 +27,11 @@ Future<void> showAddSubscriptionSheet(BuildContext context, {String? initialQuer
 
 /// Zoeken in de diensten of zelf toevoegen (AddSubscriptionDialog.tsx).
 class AddSubscriptionSheet extends ConsumerStatefulWidget {
-  const AddSubscriptionSheet({super.key, this.initialQuery});
+  const AddSubscriptionSheet({super.key, this.initialQuery, this.initialGroup});
   final String? initialQuery;
+
+  /// Voorgekozen groep, bijv. het filter dat in het overzicht openstaat.
+  final String? initialGroup;
 
   @override
   ConsumerState<AddSubscriptionSheet> createState() => _AddSubscriptionSheetState();
@@ -34,6 +41,8 @@ class _AddSubscriptionSheetState extends ConsumerState<AddSubscriptionSheet> {
   late final _query = TextEditingController(text: widget.initialQuery ?? '');
   var _custom = false;
   var _busy = false;
+  // Geldt voor een gekozen dienst én als startwaarde van het eigen formulier.
+  late var _group = widget.initialGroup ?? '';
 
   @override
   void dispose() {
@@ -75,6 +84,7 @@ class _AddSubscriptionSheetState extends ConsumerState<AddSubscriptionSheet> {
           presetId: preset.id,
           logoUrl: preset.logoUrl,
           color: preset.color,
+          group: _group,
         ),
       );
     } on ApiException catch (e) {
@@ -94,6 +104,7 @@ class _AddSubscriptionSheetState extends ConsumerState<AddSubscriptionSheet> {
         title: l.customTitle,
         submitLabel: l.add,
         initialName: q.isEmpty ? null : q,
+        initialGroup: _group,
         onSubmit: _add,
         footer: Padding(
           padding: const EdgeInsets.only(top: 12),
@@ -144,6 +155,8 @@ class _AddSubscriptionSheetState extends ConsumerState<AddSubscriptionSheet> {
                 ),
               ),
             ),
+            const SizedBox(height: 14),
+            GroupPicker(value: _group, onChanged: (g) => setState(() => _group = g), scroll: true),
             const SizedBox(height: 14),
             _CustomAddCard(query: q, onTap: () => setState(() => _custom = true)),
             const SizedBox(height: 14),

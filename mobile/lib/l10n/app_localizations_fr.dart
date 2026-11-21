@@ -333,6 +333,35 @@ class AppLocalizationsFr extends AppLocalizations {
   String get formCategoryHint => 'ex. Streaming';
 
   @override
+  String get formGroup => 'Groupe (facultatif)';
+
+  @override
+  String get groupPersonal => 'Perso';
+
+  @override
+  String get groupWork => 'Travail';
+
+  @override
+  String get groupFamily => 'Famille';
+
+  @override
+  String get groupNew => 'Nouveau groupe';
+
+  @override
+  String get groupNameHint => 'Nom du groupe';
+
+  @override
+  String get groupAll => 'Tout';
+
+  @override
+  String get groupNone => 'Sans groupe';
+
+  @override
+  String groupTotal(String group, String amount) {
+    return '$group · $amount par mois';
+  }
+
+  @override
   String get formPriceInvalid => 'Saisis un prix valide.';
 
   @override

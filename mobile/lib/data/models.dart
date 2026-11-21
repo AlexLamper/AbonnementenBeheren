@@ -26,6 +26,7 @@ class Subscription {
     required this.billingPeriod,
     this.planName,
     this.category,
+    this.group,
     this.presetId,
     this.logoUrl,
     this.color,
@@ -40,6 +41,9 @@ class Subscription {
   final double price;
   final BillingPeriod billingPeriod;
   final String? category;
+
+  /// Eigen groep van de gebruiker, bijv. "Werk" (los van de dienstcategorie).
+  final String? group;
   final String? presetId;
   final String? logoUrl;
   final String? color;
@@ -57,6 +61,7 @@ class Subscription {
     price: _num(j['price']),
     billingPeriod: BillingPeriod.parse(j['billingPeriod'] as String?),
     category: _str(j['category']),
+    group: _str(j['group']),
     presetId: _str(j['presetId']),
     logoUrl: _str(j['logoUrl']),
     color: _str(j['color']),
@@ -64,6 +69,28 @@ class Subscription {
     brand: BrandIcon.fromJson(j['brand']),
     createdAt: DateTime.tryParse(j['createdAt'] as String? ?? ''),
   );
+}
+
+/// Maximale lengte van een groepsnaam (gelijk aan de server).
+const groupMaxLength = 40;
+
+/// Alle groepen die de gebruiker al gebruikt, op alfabet (usedGroups in lib/groups.ts).
+List<String> usedGroups(Iterable<Subscription> items) {
+  final seen = <String, String>{};
+  for (final s in items) {
+    final g = s.group?.trim();
+    if (g != null && g.isNotEmpty) seen.putIfAbsent(g.toLowerCase(), () => g);
+  }
+  return seen.values.toList()..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+}
+
+/// Keuzes in het formulier: voorstellen plus eigen groepen, zonder dubbele.
+List<String> groupOptions(List<String> suggestions, List<String> used, [String? current]) {
+  final out = <String>[];
+  for (final g in [...suggestions, ...used, ?current]) {
+    if (!out.any((o) => o.toLowerCase() == g.toLowerCase())) out.add(g);
+  }
+  return out;
 }
 
 /// Wat je naar de server stuurt bij toevoegen of bewerken.
@@ -74,6 +101,7 @@ class SubscriptionInput {
     required this.billingPeriod,
     this.planName = '',
     this.category = '',
+    this.group = '',
     this.presetId,
     this.logoUrl,
     this.color,
@@ -84,6 +112,9 @@ class SubscriptionInput {
   final double price;
   final BillingPeriod billingPeriod;
   final String category;
+
+  /// Leeg = geen groep.
+  final String group;
   final String? presetId;
   final String? logoUrl;
   final String? color;
@@ -94,6 +125,7 @@ class SubscriptionInput {
     'price': price,
     'billingPeriod': billingPeriod.name,
     'category': category,
+    'group': group,
     'presetId': ?presetId,
     'logoUrl': ?logoUrl,
     'color': ?color,

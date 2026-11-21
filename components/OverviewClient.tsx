@@ -8,7 +8,8 @@ import { toast } from "sonner";
 import type { ClientSubscription } from "@/lib/types";
 import type { Preset } from "@/lib/presets/types";
 import type { SubscriptionInput } from "@/lib/validation";
-import { toMonthly, totals } from "@/lib/money";
+import { formatEUR, toMonthly, totals } from "@/lib/money";
+import { usedGroups } from "@/lib/groups";
 import { Logo } from "@/components/Logo";
 import { ShareButton } from "@/components/ShareButton";
 import { TotalsCards } from "@/components/TotalsCards";
@@ -95,6 +96,8 @@ export function OverviewClient({
   });
   const [editing, setEditing] = useState<ClientSubscription | null>(null);
   const [sort, setSort] = useState<SortKey>("duurste");
+  // Groepfilter: null = alles, "" = zonder groep, anders de groepsnaam.
+  const [groupFilter, setGroupFilter] = useState<string | null>(null);
 
   const { monthly, yearly } = useMemo(() => totals(items), [items]);
 
@@ -109,6 +112,23 @@ export function OverviewClient({
         .sort((a, b) => b.monthly - a.monthly),
     [items]
   );
+
+  const groups = useMemo(() => usedGroups(items), [items]);
+  const hasUngrouped = items.some((it) => !it.group);
+  // Verdwijnt de gekozen groep (laatste abonnement eruit), dan weer alles.
+  const activeFilter =
+    groupFilter === null ||
+    (groupFilter === "" ? hasUngrouped && groups.length > 0 : groups.includes(groupFilter))
+      ? groupFilter
+      : null;
+  const visible = useMemo(
+    () =>
+      activeFilter === null
+        ? items
+        : items.filter((it) => (it.group ?? "") === activeFilter),
+    [items, activeFilter]
+  );
+  const visibleMonthly = useMemo(() => totals(visible).monthly, [visible]);
 
   function openAdd(query?: string) {
     if (limitReached) {
@@ -328,8 +348,17 @@ export function OverviewClient({
                   </button>
                 </div>
               </div>
+              {groups.length > 0 && (
+                <GroupFilter
+                  groups={groups}
+                  hasUngrouped={hasUngrouped}
+                  value={activeFilter}
+                  onChange={setGroupFilter}
+                  monthly={visibleMonthly}
+                />
+              )}
               <SubscriptionList
-                items={items}
+                items={visible}
                 sort={sort}
                 totalMonthly={monthly}
                 onEdit={setEditing}
@@ -358,10 +387,13 @@ export function OverviewClient({
         onClose={() => setAdd((s) => ({ ...s, open: false }))}
         onAdd={addItem}
         presets={presets}
+        groups={groups}
         initialQuery={add.query}
+        initialGroup={activeFilter || undefined}
       />
       <EditSubscriptionDialog
         subscription={editing}
+        groups={groups}
         onClose={() => setEditing(null)}
         onSave={updateItem}
       />
@@ -373,6 +405,63 @@ export function OverviewClient({
           limit={plan.freeLimit}
           prices={plan.prices}
         />
+      )}
+    </div>
+  );
+}
+
+/** Filter op groep ("Alles", "Werk", …) met het maandbedrag van die groep. */
+function GroupFilter({
+  groups,
+  hasUngrouped,
+  value,
+  onChange,
+  monthly,
+}: {
+  groups: string[];
+  hasUngrouped: boolean;
+  value: string | null;
+  onChange: (value: string | null) => void;
+  monthly: number;
+}) {
+  const options: { value: string | null; label: string }[] = [
+    { value: null, label: "Alles" },
+    ...groups.map((g) => ({ value: g, label: g })),
+    ...(hasUngrouped ? [{ value: "", label: "Zonder groep" }] : []),
+  ];
+  const activeLabel = options.find((o) => o.value === value)?.label;
+
+  return (
+    <div className="mt-4">
+      <div
+        role="group"
+        aria-label="Filter op groep"
+        className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {options.map((o) => {
+          const active = o.value === value;
+          return (
+            <button
+              key={o.value ?? "__alles"}
+              type="button"
+              aria-pressed={active}
+              onClick={() => onChange(o.value)}
+              className={`h-9 shrink-0 whitespace-nowrap rounded-full border px-4 text-sm font-semibold transition ${
+                active
+                  ? "border-navy bg-navy text-white"
+                  : "border-line bg-white text-slate-700 hover:border-mint hover:text-brand"
+              }`}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+      {value !== null && activeLabel && (
+        <p className="mt-2 rounded-[14px] bg-mint-wash px-4 py-2.5 text-sm text-[#0b4a44]">
+          <b className="font-semibold">{activeLabel}</b> ·{" "}
+          <b className="font-display">{formatEUR(monthly)}</b> per maand
+        </p>
       )}
     </div>
   );

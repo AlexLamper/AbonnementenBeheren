@@ -178,6 +178,25 @@
   "formPeriod": "Periode",
   "formCategory": "Categorie (optioneel)",
   "formCategoryHint": "bijv. Streaming",
+  "formGroup": "Groep (optioneel)",
+  "groupPersonal": "Privé",
+  "groupWork": "Werk",
+  "groupFamily": "Gezin",
+  "groupNew": "Nieuwe groep",
+  "groupNameHint": "Naam van de groep",
+  "groupAll": "Alles",
+  "groupNone": "Zonder groep",
+  "groupTotal": "{group} · {amount} per maand",
+  "@groupTotal": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "formPriceInvalid": "Vul een geldige prijs in.",
   "save": "Opslaan",
   "premium": "Premium",

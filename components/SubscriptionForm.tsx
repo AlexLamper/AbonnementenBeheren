@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { SubscriptionInput } from "@/lib/validation";
+import { GroupPicker } from "@/components/GroupPicker";
 import {
   BILLING_PERIODS,
   formatEUR,
@@ -15,10 +16,13 @@ const INPUT =
 
 export function SubscriptionForm({
   initial,
+  groups,
   submitLabel,
   onSubmit,
 }: {
   initial?: Partial<SubscriptionInput>;
+  /** Groepen die de gebruiker al gebruikt. */
+  groups: string[];
   submitLabel: string;
   onSubmit: (input: SubscriptionInput) => Promise<boolean>;
 }) {
@@ -31,6 +35,7 @@ export function SubscriptionForm({
     (initial?.billingPeriod as BillingPeriod) ?? "maandelijks"
   );
   const [category, setCategory] = useState(initial?.category ?? "");
+  const [group, setGroup] = useState(initial?.group ?? "");
   const [loading, setLoading] = useState(false);
 
   // Laat direct zien wat het bedrag per jaar (of per maand) betekent.
@@ -52,6 +57,7 @@ export function SubscriptionForm({
         price: Number(price.replace(",", ".")),
         billingPeriod,
         category: category.trim(),
+        group: group.trim(),
         presetId: initial?.presetId,
         logoUrl: initial?.logoUrl,
         color: initial?.color,
@@ -108,6 +114,7 @@ export function SubscriptionForm({
         onChange={setCategory}
         placeholder="bijv. Streaming"
       />
+      <GroupPicker value={group} onChange={setGroup} used={groups} />
       {yearlyPreview !== null && (
         <div className="flex justify-between rounded-[14px] bg-mint-wash px-4 py-3 text-sm text-[#0b4a44]">
           <span>{billingPeriod === "maandelijks" ? "Per jaar" : "Per maand"}</span>

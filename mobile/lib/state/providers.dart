@@ -215,6 +215,11 @@ class SubscriptionsNotifier extends AsyncNotifier<List<Subscription>> {
   }
 }
 
+/// Groepen die de gebruiker al gebruikt (bijv. "Werk", "Privé").
+final groupsProvider = Provider<List<String>>(
+  (ref) => usedGroups(ref.watch(subscriptionsProvider).value ?? const <Subscription>[]),
+);
+
 // ── Presets ──────────────────────────────────────────────────────────────
 
 final presetsProvider = FutureProvider<PresetCatalog>((ref) async {

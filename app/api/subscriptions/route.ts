@@ -58,6 +58,8 @@ export async function POST(req: Request) {
   await connectDB();
   const doc = await Subscription.create({
     ...parsed.data,
+    // Lege groep = geen groep; niets opslaan.
+    group: parsed.data.group || undefined,
     userId: user.id,
   });
   return NextResponse.json(serializeFor(user.mobile)(doc), { status: 201 });

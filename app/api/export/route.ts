@@ -37,11 +37,12 @@ export async function GET(req: Request) {
     .sort({ name: 1 })
     .lean<SubscriptionDoc[]>();
 
-  const header = ["Naam", "Pakket", "Categorie", "Prijs", "Periode", "Per maand", "Per jaar", "Notities"];
+  const header = ["Naam", "Pakket", "Categorie", "Groep", "Prijs", "Periode", "Per maand", "Per jaar", "Notities"];
   const rows = docs.map((d) => [
     d.name,
     d.planName,
     d.category,
+    d.group,
     amount(d.price),
     periodLabel(d.billingPeriod),
     amount(toMonthly(d.price, d.billingPeriod)),

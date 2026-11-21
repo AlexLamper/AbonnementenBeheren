@@ -7,6 +7,7 @@ import '../../data/api_client.dart';
 import '../../data/models.dart';
 import '../l10n_helpers.dart';
 import '../widgets/common.dart';
+import '../widgets/group_picker.dart';
 
 /// Formulier voor een eigen abonnement of bewerken (SubscriptionForm.tsx).
 class SubscriptionFormSheet extends StatelessWidget {
@@ -17,6 +18,7 @@ class SubscriptionFormSheet extends StatelessWidget {
     required this.onSubmit,
     this.initial,
     this.initialName,
+    this.initialGroup,
     this.footer,
   });
 
@@ -25,6 +27,7 @@ class SubscriptionFormSheet extends StatelessWidget {
   final Future<void> Function(SubscriptionInput input) onSubmit;
   final Subscription? initial;
   final String? initialName;
+  final String? initialGroup;
   final Widget? footer;
 
   @override
@@ -35,7 +38,13 @@ class SubscriptionFormSheet extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SheetHeader(title: title),
-        SubscriptionForm(initial: initial, initialName: initialName, submitLabel: submitLabel, onSubmit: onSubmit),
+        SubscriptionForm(
+          initial: initial,
+          initialName: initialName,
+          initialGroup: initialGroup,
+          submitLabel: submitLabel,
+          onSubmit: onSubmit,
+        ),
         ?footer,
       ],
     ),
@@ -49,12 +58,16 @@ class SubscriptionForm extends ConsumerStatefulWidget {
     required this.onSubmit,
     this.initial,
     this.initialName,
+    this.initialGroup,
   });
 
   final String submitLabel;
   final Future<void> Function(SubscriptionInput input) onSubmit;
   final Subscription? initial;
   final String? initialName;
+
+  /// Startgroep bij een nieuw abonnement (bij bewerken telt de eigen groep).
+  final String? initialGroup;
 
   @override
   ConsumerState<SubscriptionForm> createState() => _SubscriptionFormState();
@@ -67,6 +80,7 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
   var _priceInitialized = false;
   late final _category = TextEditingController(text: widget.initial?.category ?? '');
   late var _period = widget.initial?.billingPeriod ?? BillingPeriod.maandelijks;
+  late var _group = widget.initial?.group ?? widget.initialGroup ?? '';
   String? _nameError, _priceError;
   var _loading = false;
 
@@ -108,6 +122,7 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
           price: price,
           billingPeriod: _period,
           category: _category.text.trim(),
+          group: _group.trim(),
           presetId: widget.initial?.presetId,
           logoUrl: widget.initial?.logoUrl,
           color: widget.initial?.color,
@@ -194,6 +209,8 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
           controller: _category,
           textCapitalization: TextCapitalization.sentences,
         ),
+        const SizedBox(height: 16),
+        GroupPicker(value: _group, onChanged: (g) => setState(() => _group = g)),
         if (preview != null) ...[
           const SizedBox(height: 16),
           Container(

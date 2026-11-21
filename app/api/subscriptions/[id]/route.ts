@@ -29,12 +29,16 @@ export async function PATCH(req: Request, { params }: Params) {
     );
   }
 
+  // Lege groep = groep weghalen.
+  const { group, ...rest } = parsed.data;
+  const update = group === "" ? { ...rest, $unset: { group: 1 } } : parsed.data;
+
   await connectDB();
   // Ownership-check: alleen het eigen abonnement mag aangepast worden.
   // Aanpassen en verwijderen mag altijd, ook boven de gratis limiet.
   const doc = await Subscription.findOneAndUpdate(
     { _id: id, userId: user.id },
-    parsed.data,
+    update,
     { new: true }
   ).catch(() => null);
   if (!doc) {

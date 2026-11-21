@@ -674,6 +674,60 @@ abstract class AppLocalizations {
   /// **'bijv. Streaming'**
   String get formCategoryHint;
 
+  /// No description provided for @formGroup.
+  ///
+  /// In nl, this message translates to:
+  /// **'Groep (optioneel)'**
+  String get formGroup;
+
+  /// No description provided for @groupPersonal.
+  ///
+  /// In nl, this message translates to:
+  /// **'Privé'**
+  String get groupPersonal;
+
+  /// No description provided for @groupWork.
+  ///
+  /// In nl, this message translates to:
+  /// **'Werk'**
+  String get groupWork;
+
+  /// No description provided for @groupFamily.
+  ///
+  /// In nl, this message translates to:
+  /// **'Gezin'**
+  String get groupFamily;
+
+  /// No description provided for @groupNew.
+  ///
+  /// In nl, this message translates to:
+  /// **'Nieuwe groep'**
+  String get groupNew;
+
+  /// No description provided for @groupNameHint.
+  ///
+  /// In nl, this message translates to:
+  /// **'Naam van de groep'**
+  String get groupNameHint;
+
+  /// No description provided for @groupAll.
+  ///
+  /// In nl, this message translates to:
+  /// **'Alles'**
+  String get groupAll;
+
+  /// No description provided for @groupNone.
+  ///
+  /// In nl, this message translates to:
+  /// **'Zonder groep'**
+  String get groupNone;
+
+  /// No description provided for @groupTotal.
+  ///
+  /// In nl, this message translates to:
+  /// **'{group} · {amount} per maand'**
+  String groupTotal(String group, String amount);
+
   /// No description provided for @formPriceInvalid.
   ///
   /// In nl, this message translates to:

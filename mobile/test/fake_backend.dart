@@ -69,6 +69,15 @@ class FakeBackend {
       subs.insert(0, created);
       return json(created, 201);
     }
+    if (path.startsWith('/api/subscriptions/') && req.method == 'PATCH') {
+      final i = subs.indexWhere((s) => s['id'] == path.split('/').last);
+      if (i < 0) return json({'error': 'Niet gevonden'}, 404);
+      final body = jsonDecode(req.body) as Map<String, dynamic>;
+      // Lege groep = groep weghalen, zoals de server.
+      final updated = {...subs[i], ...body}..removeWhere((k, v) => k == 'group' && v == '');
+      subs[i] = updated;
+      return json(updated);
+    }
     if (path.startsWith('/api/subscriptions/') && req.method == 'DELETE') {
       subs.removeWhere((s) => s['id'] == path.split('/').last);
       return json({'ok': true});
@@ -83,6 +92,7 @@ class FakeBackend {
     String plan,
     double price, {
     String period = 'maandelijks',
+    String? group,
   }) {
     final presets = (jsonDecode(presetsJson)['presets'] as List).cast<Map<String, dynamic>>();
     final preset = presets.firstWhere((p) => p['id'] == presetId, orElse: () => {});
@@ -96,6 +106,7 @@ class FakeBackend {
       'logoUrl': preset['logoUrl'],
       'color': preset['color'],
       'brand': preset['brand'],
+      'group': ?group,
     };
   }
 

@@ -10,6 +10,7 @@ export function toClient(doc: SubscriptionDoc): ClientSubscription {
     price: doc.price,
     billingPeriod: doc.billingPeriod,
     category: doc.category || undefined,
+    group: doc.group || undefined,
     presetId: doc.presetId || undefined,
     logoUrl: doc.logoUrl || undefined,
     color: doc.color || undefined,

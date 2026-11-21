@@ -8,24 +8,33 @@ import { searchPresets, popularPresets } from "@/lib/presets";
 import { Modal } from "@/components/Modal";
 import { PresetResult } from "@/components/PresetResult";
 import { SubscriptionForm } from "@/components/SubscriptionForm";
+import { GroupPicker } from "@/components/GroupPicker";
 
 export function AddSubscriptionDialog({
   open,
   onClose,
   onAdd,
   presets,
+  groups,
   initialQuery,
+  initialGroup,
 }: {
   open: boolean;
   onClose: () => void;
   onAdd: (input: SubscriptionInput) => Promise<boolean>;
   presets: Preset[];
+  /** Groepen die de gebruiker al gebruikt. */
+  groups: string[];
   initialQuery?: string;
+  /** Voorgekozen groep, bijv. het filter dat in het overzicht openstaat. */
+  initialGroup?: string;
 }) {
   // Vul de zoekbalk voor met de dienst wanneer de dialog daarmee geopend
   // wordt (bijv. vanaf een openbare dienstpagina via ?add=<id>).
   const [query, setQuery] = useState(initialQuery ?? "");
   const [custom, setCustom] = useState(false);
+  // Geldt voor een gekozen dienst én als startwaarde van het eigen formulier.
+  const [group, setGroup] = useState(initialGroup ?? "");
 
   const hasQuery = query.trim().length > 0;
   const results = useMemo(
@@ -36,6 +45,7 @@ export function AddSubscriptionDialog({
   function reset() {
     setQuery("");
     setCustom(false);
+    setGroup(initialGroup ?? "");
   }
 
   function close() {
@@ -53,6 +63,7 @@ export function AddSubscriptionDialog({
       presetId: preset.id,
       logoUrl: preset.logoUrl,
       color: preset.color,
+      group,
     });
     if (ok) close();
   }
@@ -66,7 +77,8 @@ export function AddSubscriptionDialog({
       {custom ? (
         <div className="space-y-4">
           <SubscriptionForm
-            initial={hasQuery ? { name: query.trim() } : undefined}
+            initial={{ ...(hasQuery ? { name: query.trim() } : {}), group }}
+            groups={groups}
             submitLabel="Toevoegen"
             onSubmit={async (input) => {
               const ok = await onAdd(input);
@@ -100,6 +112,8 @@ export function AddSubscriptionDialog({
               className="min-w-0 flex-1 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-400"
             />
           </div>
+
+          <GroupPicker value={group} onChange={setGroup} used={groups} />
 
           {/* Altijd bovenaan, zodat je niet door de hele lijst hoeft te
               scrollen om zelf een abonnement toe te voegen. */}

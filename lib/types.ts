@@ -8,6 +8,8 @@ export interface ClientSubscription {
   price: number;
   billingPeriod: BillingPeriod;
   category?: string;
+  /** Eigen groep, bijv. "Werk" of "Privé". */
+  group?: string;
   presetId?: string;
   logoUrl?: string;
   color?: string;

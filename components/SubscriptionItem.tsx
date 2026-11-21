@@ -39,14 +39,21 @@ export function SubscriptionItem({
         rounded="rounded-[13px]"
       />
       <div className="min-w-0 flex-1">
-        <p className="truncate font-bold text-slate-900 sm:text-[1rem]">
-          {item.name}
-          {item.planName && (
-            <span className="hidden font-normal text-slate-500 sm:inline">
-              {" "}· {item.planName}
+        <div className="flex min-w-0 items-center gap-2">
+          <p className="truncate font-bold text-slate-900 sm:text-[1rem]">
+            {item.name}
+            {item.planName && (
+              <span className="hidden font-normal text-slate-500 sm:inline">
+                {" "}· {item.planName}
+              </span>
+            )}
+          </p>
+          {item.group && (
+            <span className="max-w-[45%] shrink-0 truncate rounded-full bg-mint-soft px-2 py-0.5 text-[0.6875rem] font-bold text-brand">
+              {item.group}
             </span>
           )}
-        </p>
+        </div>
         <p className="truncate text-[0.8125rem] text-slate-500">
           {item.planName && <span className="sm:hidden">{item.planName} · </span>}
           {formatEUR(item.price)} {periodLabel(item.billingPeriod).toLowerCase()}

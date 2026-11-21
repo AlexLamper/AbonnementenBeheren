@@ -19,6 +19,13 @@ export const subscriptionInputSchema = z.object({
   price: z.coerce.number().min(0, "Prijs mag niet negatief zijn").max(100000),
   billingPeriod: billingPeriodSchema,
   category: z.string().trim().max(60).optional().or(z.literal("")),
+  // Eigen groep (bijv. "Werk"); lege string = geen groep.
+  group: z
+    .string()
+    .trim()
+    .max(40, "Groepsnaam mag maximaal 40 tekens zijn")
+    .optional()
+    .or(z.literal("")),
   presetId: z.string().trim().max(60).optional(),
   logoUrl: z.string().trim().max(500).optional(),
   color: z.string().trim().max(20).optional(),

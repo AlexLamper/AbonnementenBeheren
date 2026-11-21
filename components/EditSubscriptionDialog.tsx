@@ -8,10 +8,12 @@ import { ServiceLogo } from "@/components/ServiceLogo";
 
 export function EditSubscriptionDialog({
   subscription,
+  groups,
   onClose,
   onSave,
 }: {
   subscription: ClientSubscription | null;
+  groups: string[];
   onClose: () => void;
   onSave: (id: string, input: SubscriptionInput) => Promise<boolean>;
 }) {
@@ -35,6 +37,7 @@ export function EditSubscriptionDialog({
       {subscription && (
         <SubscriptionForm
           initial={subscription}
+          groups={groups}
           submitLabel="Opslaan"
           onSubmit={async (input) => {
             const ok = await onSave(subscription.id, input);
