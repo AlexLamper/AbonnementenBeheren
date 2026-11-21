@@ -154,12 +154,17 @@ void main() {
     // Terug naar alles en Basic-Fit (duurste, bovenaan) bij Gezin zetten.
     await tester.tap(find.text('Alles'));
     await tester.pumpAndSettle();
+    // Lijst omhoog schuiven, zodat de knop niet onder de zwevende knop valt.
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -400));
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(LucideIcons.pencil).first);
     await tester.pumpAndSettle();
     final gezin = find.text('Gezin').last;
     await tester.ensureVisible(gezin);
     await tester.pumpAndSettle();
     await tester.tap(gezin);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Opslaan'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Opslaan'));
     await tester.pumpAndSettle();
