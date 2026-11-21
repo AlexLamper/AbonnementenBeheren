@@ -268,7 +268,8 @@ jobs:
             --force true
             --precheck_include_in_app_purchases false
             --run_precheck_before_submit false
-            --automatic_release false
+            --automatic_release true
+            --app_review_attachment_file store/review/app_review_recording.mp4
             --submit_for_review false
           )
           if [ "$UPLOAD_SCREENSHOTS" = "true" ]; then
