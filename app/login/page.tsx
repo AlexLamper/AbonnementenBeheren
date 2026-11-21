@@ -34,12 +34,12 @@ export default async function LoginPage({
       <aside className="hidden flex-col justify-between overflow-hidden bg-navy px-14 py-10 lg:flex">
         <Logo />
         <div>
-          <p className="font-display text-[46px] font-bold leading-[1.05] tracking-tight text-white">
+          <p className="font-display text-[2.875rem] font-bold leading-[1.05] tracking-tight text-white">
             Binnen een minuut
             <br />
             <span className="text-mint">overzicht.</span>
           </p>
-          <p className="mt-4 max-w-sm text-[17px] leading-relaxed text-haze">
+          <p className="mt-4 max-w-sm text-[1.0625rem] leading-relaxed text-haze">
             Zet al je abonnementen op één plek en zie wat je per maand en per
             jaar kwijt bent.
           </p>
@@ -47,7 +47,7 @@ export default async function LoginPage({
             <LogoMark size={72} />
             <div>
               <p className="text-sm text-haze">Voorbeeld · per maand</p>
-              <p className="font-display text-[34px] font-bold tracking-tight text-white">
+              <p className="font-display text-[2.125rem] font-bold tracking-tight text-white">
                 € 50,95
               </p>
               <p className="text-sm text-mint-light">5 abonnementen · € 611,40 per jaar</p>

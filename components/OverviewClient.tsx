@@ -250,7 +250,7 @@ export function OverviewClient({
         </header>
 
         <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-11">
-          <h1 className="animate-fade-in-up font-display text-[28px] font-bold tracking-tight text-white sm:text-[40px]">
+          <h1 className="animate-fade-in-up font-display text-[1.75rem] font-bold tracking-tight text-white sm:text-[2.5rem]">
             {isEmpty ? `Welkom${firstName ? `, ${firstName}` : ""}` : title}
           </h1>
           <p className="mt-1.5 animate-fade-in-up text-haze [animation-delay:60ms]">
@@ -393,7 +393,7 @@ function UsageMeter({
   return (
     <div className="mt-4 flex max-w-md animate-fade-in-up items-center gap-3 rounded-full border border-white/[0.12] bg-white/[0.06] py-1.5 pl-4 pr-1.5 [animation-delay:90ms]">
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[13px] font-semibold text-mist">
+        <p className="truncate text-[0.8125rem] font-semibold text-mist">
           {full
             ? `Alle ${limit} gratis plekken gebruikt`
             : `${used} van ${limit} gratis abonnementen`}
@@ -408,7 +408,7 @@ function UsageMeter({
       <button
         type="button"
         onClick={onUpgrade}
-        className="shrink-0 rounded-full bg-mint px-3.5 py-2 text-[13px] font-bold text-mint-ink transition hover:bg-mint-light"
+        className="shrink-0 rounded-full bg-mint px-3.5 py-2 text-[0.8125rem] font-bold text-mint-ink transition hover:bg-mint-light"
       >
         Onbeperkt
       </button>

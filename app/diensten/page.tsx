@@ -44,10 +44,10 @@ export default async function DienstenPage() {
             <span className="text-navy-soft">/</span>{" "}
             <span className="text-white">Diensten</span>
           </nav>
-          <h1 className="mt-3.5 max-w-3xl font-display text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-[52px]">
+          <h1 className="mt-3.5 max-w-3xl font-display text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-[3.25rem]">
             Alle diensten en abonnementsprijzen
           </h1>
-          <p className="mt-3.5 max-w-2xl text-[17px] leading-relaxed text-haze">
+          <p className="mt-3.5 max-w-2xl text-[1.0625rem] leading-relaxed text-haze">
             Bekijk per dienst de actuele abonnementen en kosten. Klik door voor
             uitleg en verschillen, of voeg een abonnement met één klik toe aan
             je overzicht.

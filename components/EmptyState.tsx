@@ -22,7 +22,7 @@ export function EmptyState({
           <circle cx="24" cy="24" r="16" stroke="#2DD4BF" strokeWidth="9" strokeDasharray="14 100.5" />
         </g>
       </svg>
-      <h2 className="mt-4 font-display text-2xl font-bold text-slate-900 sm:text-[26px]">
+      <h2 className="mt-4 font-display text-2xl font-bold text-slate-900 sm:text-[1.625rem]">
         Nog geen abonnementen
       </h2>
       <p className="mt-2 max-w-md text-slate-500">

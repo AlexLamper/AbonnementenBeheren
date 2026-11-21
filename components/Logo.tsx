@@ -53,8 +53,8 @@ export function Logo({
     >
       <LogoMark size={size} />
       <span
-        className={`font-display text-lg font-bold tracking-tight sm:text-[19px] ${base} ${
-          hideWordmarkOnMobile ? "hidden xs:inline" : ""
+        className={`font-display text-lg font-bold tracking-tight sm:text-[1.1875rem] ${base} ${
+          hideWordmarkOnMobile ? "hidden sm:inline" : ""
         }`}
       >
         Abonnementen<span className={accent}>Beheren</span>

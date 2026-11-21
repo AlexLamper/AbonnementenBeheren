@@ -37,6 +37,24 @@
   --breakpoint-xs: 400px;
 }
 
+/*
+ * Iets kleinere basis (15px i.p.v. 16px). Alle tekst- en ruimtematen zijn in
+ * rem, dus de hele site schaalt evenredig mee. Als percentage, zodat een
+ * grotere lettergrootte in de browserinstellingen gewoon blijft werken.
+ */
+html {
+  font-size: 93.75%;
+}
+
+/* iOS zoomt in op velden met tekst kleiner dan 16px; dat voorkomen we. */
+@supports (-webkit-touch-callout: none) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em);
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

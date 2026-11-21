@@ -117,7 +117,7 @@ export function AddSubscriptionDialog({
                   ? `“${query.trim()}” zelf toevoegen`
                   : "Eigen abonnement toevoegen"}
               </span>
-              <span className="block text-[13px] text-slate-500">
+              <span className="block text-[0.8125rem] text-slate-500">
                 Staat je dienst er niet bij? Vul naam en prijs zelf in.
               </span>
             </span>

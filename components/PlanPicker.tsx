@@ -67,7 +67,7 @@ export function PlanPicker({
         {submitting ? "Even geduld…" : "Neem Premium"}
       </button>
       {!compact && (
-        <p className="text-center text-[13px] text-slate-500">
+        <p className="text-center text-[0.8125rem] text-slate-500">
           Veilig betalen via Stripe met iDEAL, creditcard en meer. Op elk
           moment opzegbaar.
         </p>
@@ -114,7 +114,7 @@ function PlanOption({
         <span className="flex items-center gap-2 font-bold text-slate-900">
           {title}
           {badge && (
-            <span className="rounded-full bg-navy px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-mint-light">
+            <span className="rounded-full bg-navy px-2 py-0.5 text-[0.6875rem] font-bold uppercase tracking-wide text-mint-light">
               {badge}
             </span>
           )}
@@ -134,7 +134,7 @@ export function PerkList({ tone = "light" }: { tone?: "light" | "dark" }) {
       {PREMIUM_PERKS.map((perk) => (
         <li
           key={perk}
-          className={`flex items-start gap-2.5 text-[15px] ${
+          className={`flex items-start gap-2.5 text-[0.9375rem] ${
             tone === "dark" ? "text-mist" : "text-slate-700"
           }`}
         >

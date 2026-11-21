@@ -87,10 +87,10 @@ export function AuthForm({
 
   return (
     <div className="mt-5">
-      <h1 className="font-display text-[32px] font-bold leading-tight tracking-tight text-slate-900 sm:text-[34px]">
+      <h1 className="font-display text-[2rem] font-bold leading-tight tracking-tight text-slate-900 sm:text-[2.125rem]">
         {isRegister ? "Maak je gratis account" : "Welkom terug"}
       </h1>
-      <p className="mt-2 text-[15px] text-slate-500">
+      <p className="mt-2 text-[0.9375rem] text-slate-500">
         {isRegister
           ? "Al een account? Kies hieronder Inloggen."
           : "Nog geen account? Kies hieronder Registreren."}
@@ -226,7 +226,7 @@ function Field({
         placeholder={placeholder}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-fout` : undefined}
-        className={`h-12 w-full rounded-[14px] border bg-white px-4 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-4 ${
+        className={`h-12 w-full rounded-[14px] border bg-white px-4 text-[0.9375rem] text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-4 ${
           error
             ? "border-red-600 focus:ring-red-500/15"
             : "border-slate-300 focus:border-mint focus:ring-mint/20"

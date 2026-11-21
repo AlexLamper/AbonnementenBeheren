@@ -15,7 +15,13 @@ import { getPresets } from "@/lib/presets/store";
 import type { Preset } from "@/lib/presets/types";
 import { ServiceLogo } from "@/components/ServiceLogo";
 import { ShareButton } from "@/components/ShareButton";
-import { IosAppButton } from "@/components/IosAppButton";
+import {
+  AppStoreButton,
+  AppPerks,
+  StickyAppBar,
+  APP_DOWNLOAD_ID,
+} from "@/components/AppDownload";
+import { getDevice } from "@/lib/device";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Reveal } from "@/components/Reveal";
@@ -28,7 +34,13 @@ import {
   totals,
   type BillingPeriod,
 } from "@/lib/money";
-import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/seo";
+import {
+  SITE_URL,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_DESCRIPTION,
+  IOS_APP_LIVE,
+} from "@/lib/seo";
 import { FREE_SUBSCRIPTION_LIMIT, PREMIUM_ENABLED } from "@/lib/premium";
 
 export const metadata: Metadata = {
@@ -130,7 +142,7 @@ function StepPin({ n, className = "" }: { n: number; className?: string }) {
   return (
     <span
       aria-hidden
-      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-mint font-display text-[13px] font-bold text-mint-ink ${className}`}
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-mint font-display text-[0.8125rem] font-bold text-mint-ink ${className}`}
     >
       {n}
     </span>
@@ -141,7 +153,11 @@ export default async function Home() {
   const session = await getServerSession(authOptions);
   if (session?.user) redirect("/overzicht");
 
-  const presets = await getPresets();
+  const [presets, device] = await Promise.all([getPresets(), getDevice()]);
+  // Telefoon: eigen, compactere hero. Op een iPhone (zodra de app live is)
+  // is de App Store-download de hoofdknop.
+  const { isPhone } = device;
+  const showAppDownload = device.isIPhone && IOS_APP_LIVE;
   const byId = (id: string) => presets.find((p) => p.id === id);
   const pick = (ids: string[]) =>
     ids.map(byId).filter((p): p is Preset => Boolean(p));
@@ -273,7 +289,7 @@ export default async function Home() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className={`min-h-screen ${showAppDownload ? "pb-24" : ""}`}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -282,11 +298,11 @@ export default async function Home() {
       />
 
       {/* Hero */}
-      <div className="bg-navy pb-28 sm:pb-32">
+      <div className="bg-navy pb-28 sm:pb-28">
         <SiteHeader />
-        <section className="mx-auto flex max-w-4xl flex-col items-center px-5 pt-14 text-center sm:pt-20">
+        <section className="mx-auto flex max-w-4xl flex-col items-center px-5 pt-10 text-center sm:pt-16">
           <h1
-            className="animate-fade-in-up font-display text-[2.6rem] font-bold leading-[1.02] tracking-[-0.035em] text-white sm:text-6xl lg:text-[66px]"
+            className="animate-fade-in-up font-display text-[2.3rem] font-bold leading-[1.04] tracking-[-0.035em] text-white sm:text-5xl lg:text-[3.6rem]"
             style={{ animationDelay: "0ms" }}
           >
             Al je abonnementen.
@@ -294,13 +310,41 @@ export default async function Home() {
             <span className="text-mint">Eén helder totaal.</span>
           </h1>
           <p
-            className="mt-5 max-w-xl animate-fade-in-up text-pretty text-base leading-relaxed text-haze sm:text-lg"
+            className="mt-4 max-w-lg animate-fade-in-up text-pretty text-base leading-relaxed text-haze sm:text-[1.0625rem]"
             style={{ animationDelay: "80ms" }}
           >
             Zoek een dienst, kies je pakket en de prijs staat er al. Zo zie je
             meteen wat je per maand en per jaar kwijt bent.
           </p>
 
+          {isPhone ? (
+            <div
+              className="mt-7 flex w-full max-w-sm animate-fade-in-up flex-col gap-3"
+              style={{ animationDelay: "160ms" }}
+            >
+              {showAppDownload ? (
+                <>
+                  <AppStoreButton id={APP_DOWNLOAD_ID} />
+                  <AppPerks />
+                  <Link
+                    href="/login?modus=registreren"
+                    className="mt-1 inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-white underline-offset-4 hover:underline"
+                  >
+                    Liever in je browser? Maak gratis je account
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  href="/login?modus=registreren"
+                  className="flex w-full items-center justify-center gap-2 rounded-[1.25rem] bg-mint px-5 py-4 font-display text-lg font-bold text-mint-ink transition active:scale-[0.98]"
+                >
+                  Maak gratis je account
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              )}
+            </div>
+          ) : (
           <form
             action="/diensten"
             method="get"
@@ -326,13 +370,16 @@ export default async function Home() {
               Zoeken
             </button>
           </form>
+          )}
 
           <div
-            className="mt-5 flex animate-fade-in-up flex-wrap items-center justify-center gap-2"
+            className={`flex animate-fade-in-up flex-wrap items-center justify-center gap-2 ${
+              isPhone ? "mt-7" : "mt-5"
+            }`}
             style={{ animationDelay: "220ms" }}
           >
             <span className="text-sm text-haze">Populair:</span>
-            {chips.map((p) => (
+            {(isPhone ? chips.slice(0, 3) : chips).map((p) => (
               <Link
                 key={p.id}
                 href={`/${p.id}`}
@@ -351,19 +398,20 @@ export default async function Home() {
             ))}
           </div>
 
-          <div
-            className="mt-8 flex animate-fade-in-up flex-wrap items-center justify-center gap-3"
-            style={{ animationDelay: "280ms" }}
-          >
-            <Link
-              href="/login?modus=registreren"
-              className="inline-flex items-center gap-2 rounded-full bg-mint px-6 py-3.5 font-bold text-mint-ink transition hover:bg-mint-light"
+          {!isPhone && (
+            <div
+              className="mt-7 flex animate-fade-in-up flex-wrap items-center justify-center gap-3"
+              style={{ animationDelay: "280ms" }}
             >
-              Maak gratis je account
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <IosAppButton />
-          </div>
+              <Link
+                href="/login?modus=registreren"
+                className="inline-flex items-center gap-2 rounded-full bg-mint px-6 py-3 font-bold text-mint-ink transition hover:bg-mint-light"
+              >
+                Maak gratis je account
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
         </section>
       </div>
 
@@ -376,7 +424,7 @@ export default async function Home() {
           <div className="flex flex-col gap-4 rounded-[20px] bg-navy p-6">
             <div>
               <p className="text-sm text-haze">Per maand</p>
-              <p className="mt-1 font-display text-[44px] font-bold leading-none tracking-tight text-white">
+              <p className="mt-1 font-display text-[2.75rem] font-bold leading-none tracking-tight text-white">
                 {formatEUR(monthly)}
               </p>
             </div>
@@ -432,7 +480,7 @@ export default async function Home() {
                     <p className="truncate font-bold text-slate-900">{preset.name}</p>
                     <p className="text-sm text-slate-500">{plan.name} · maandelijks</p>
                   </div>
-                  <span className="font-display text-[17px] font-semibold text-slate-900">
+                  <span className="font-display text-[1.0625rem] font-semibold text-slate-900">
                     {formatEUR(plan.price)}
                   </span>
                 </li>
@@ -452,13 +500,13 @@ export default async function Home() {
           <div>
             <h2
               id="hoe-het-werkt-titel"
-              className="max-w-md text-balance font-display text-3xl font-bold leading-[1.08] tracking-tight text-slate-900 sm:text-[40px]"
+              className="max-w-md text-balance font-display text-3xl font-bold leading-[1.08] tracking-tight text-slate-900 sm:text-[2.5rem]"
             >
               {demo
                 ? `Zo zet je ${demo.name} in je overzicht`
                 : "Zo zet je een abonnement in je overzicht"}
             </h2>
-            <p className="mt-4 max-w-md text-pretty text-[17px] leading-relaxed text-slate-600">
+            <p className="mt-4 max-w-md text-pretty text-[1.0625rem] leading-relaxed text-slate-600">
               Bij elke dienst uit de lijst gaat het zo. Staat jouw abonnement er
               niet bij, dan vul je zelf de naam, prijs en periode in.
             </p>
@@ -471,7 +519,7 @@ export default async function Home() {
                     <h3 className="font-display text-lg font-bold text-slate-900">
                       {step.title}
                     </h3>
-                    <p className="mt-1 text-[15px] leading-relaxed text-slate-600">
+                    <p className="mt-1 text-[0.9375rem] leading-relaxed text-slate-600">
                       {step.text}
                     </p>
                   </div>
@@ -480,7 +528,7 @@ export default async function Home() {
             </ol>
 
             <div className="mt-9 max-w-md border-t border-line pt-6">
-              <p className="text-[15px] leading-relaxed text-slate-600">
+              <p className="text-[0.9375rem] leading-relaxed text-slate-600">
                 Je hebt alleen een gratis account nodig, met je e-mailadres of
                 Google. Geen creditcard.
               </p>
@@ -511,7 +559,7 @@ export default async function Home() {
                   {/* Nagebouwde "Abonnement toevoegen"-dialog */}
                   <div className="rounded-[28px] border border-line bg-white p-5 pb-20 shadow-float sm:p-6 sm:pb-20">
                     <div className="flex items-center justify-between gap-3">
-                      <p className="font-display text-[22px] font-bold text-slate-900">
+                      <p className="font-display text-[1.375rem] font-bold text-slate-900">
                         Abonnement toevoegen
                       </p>
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface text-slate-600">
@@ -542,7 +590,7 @@ export default async function Home() {
                         <span className="block truncate font-semibold text-slate-900">
                           Eigen abonnement toevoegen
                         </span>
-                        <span className="block text-[13px] text-slate-500">
+                        <span className="block text-[0.8125rem] text-slate-500">
                           Staat je dienst er niet bij? Vul naam en prijs zelf in.
                         </span>
                       </span>
@@ -559,7 +607,7 @@ export default async function Home() {
                         />
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-bold text-slate-900">{demo.name}</p>
-                          <p className="text-[13px] text-slate-500">
+                          <p className="text-[0.8125rem] text-slate-500">
                             {demo.category}
                             {demo.plans.length > 1 && ` · ${demo.plans.length} pakketten`}
                           </p>
@@ -582,15 +630,15 @@ export default async function Home() {
                                   className="absolute -left-[42px] top-1/2 -translate-y-1/2 ring-4 ring-white sm:-left-[46px]"
                                 />
                               )}
-                              <span className="text-[15px] font-semibold leading-snug text-slate-800">
+                              <span className="text-[0.9375rem] font-semibold leading-snug text-slate-800">
                                 {plan.name}
                               </span>
                               <span className="flex shrink-0 items-center gap-2.5">
                                 <span className="flex flex-col items-end sm:flex-row sm:items-baseline sm:gap-2.5">
-                                  <span className="font-display text-[15px] font-bold tabular-nums text-slate-900">
+                                  <span className="font-display text-[0.9375rem] font-bold tabular-nums text-slate-900">
                                     {formatEUR(plan.price)}
                                   </span>
-                                  <span className="text-xs text-slate-500 sm:text-[13px]">
+                                  <span className="text-xs text-slate-500 sm:text-[0.8125rem]">
                                     {periodLabel(plan.billingPeriod).toLowerCase()}
                                   </span>
                                 </span>
@@ -625,7 +673,7 @@ export default async function Home() {
                     <p className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-display font-bold leading-none tracking-tight tabular-nums">
                       <span className="text-lg text-haze">{formatEUR(monthly)}</span>
                       <ArrowRight className="h-4 w-4 text-haze" />
-                      <span className="text-[34px] text-white sm:text-[38px]">
+                      <span className="text-[2.125rem] text-white sm:text-[2.375rem]">
                         {formatEUR(demoAfter.monthly)}
                       </span>
                     </p>
@@ -658,12 +706,12 @@ export default async function Home() {
       >
         <h2
           id="per-jaar-titel"
-          className="text-balance font-display text-[2.4rem] font-bold leading-[1.02] tracking-[-0.035em] text-slate-900 sm:text-5xl lg:text-[56px]"
+          className="text-balance font-display text-[2.1rem] font-bold leading-[1.04] tracking-[-0.035em] text-slate-900 sm:text-[2.75rem] lg:text-5xl"
         >
           <span className="block">Per maand valt het mee.</span>
           <span className="block">Per jaar niet altijd.</span>
         </h2>
-        <p className="mt-5 max-w-md text-pretty text-[17px] leading-relaxed text-slate-600 lg:ml-auto lg:mt-3">
+        <p className="mt-5 max-w-md text-pretty text-[1.0625rem] leading-relaxed text-slate-600 lg:ml-auto lg:mt-3">
           Je overzicht rekent alles om naar één maandbedrag en één jaarbedrag,
           ook wat je per week, per kwartaal of per jaar betaalt. Hieronder een
           voorbeeld met prijzen uit de lijst en één eigen abonnement.
@@ -677,7 +725,7 @@ export default async function Home() {
                 jaar kosten
               </caption>
               <thead>
-                <tr className="text-[13px] text-slate-500">
+                <tr className="text-[0.8125rem] text-slate-500">
                   <th scope="col" className="py-4 pl-4 pr-2 font-medium sm:pl-7">
                     Abonnement
                   </th>
@@ -718,12 +766,12 @@ export default async function Home() {
                           <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 font-bold leading-snug text-slate-900">
                             {r.name}
                             {r.custom && (
-                              <span className="rounded-full bg-surface px-2 py-0.5 text-[11px] font-semibold leading-normal text-slate-600">
+                              <span className="rounded-full bg-surface px-2 py-0.5 text-[0.6875rem] font-semibold leading-normal text-slate-600">
                                 zelf toegevoegd
                               </span>
                             )}
                           </p>
-                          <p className="text-[13px] text-slate-500">
+                          <p className="text-[0.8125rem] text-slate-500">
                             <span className="md:hidden">
                               {formatEUR(r.price)}{" "}
                               {periodLabel(r.billingPeriod).toLowerCase()}
@@ -733,16 +781,16 @@ export default async function Home() {
                         </div>
                       </div>
                     </th>
-                    <td className="hidden px-3 py-3.5 text-[15px] text-slate-600 md:table-cell">
+                    <td className="hidden px-3 py-3.5 text-[0.9375rem] text-slate-600 md:table-cell">
                       <span className="font-display font-semibold tabular-nums text-slate-900">
                         {formatEUR(r.price)}
                       </span>{" "}
                       {periodLabel(r.billingPeriod).toLowerCase()}
                     </td>
-                    <td className="hidden px-3 py-3.5 text-right font-display text-[17px] tabular-nums text-slate-700 sm:table-cell">
+                    <td className="hidden px-3 py-3.5 text-right font-display text-[1.0625rem] tabular-nums text-slate-700 sm:table-cell">
                       {formatEUR(r.monthly)}
                     </td>
-                    <td className="bg-mint-wash py-3.5 pl-3 pr-4 text-right font-display text-[17px] font-bold tabular-nums text-slate-900 sm:pr-7 sm:text-lg">
+                    <td className="bg-mint-wash py-3.5 pl-3 pr-4 text-right font-display text-[1.0625rem] font-bold tabular-nums text-slate-900 sm:pr-7 sm:text-lg">
                       {formatEUR(r.yearly)}
                     </td>
                   </tr>
@@ -757,10 +805,10 @@ export default async function Home() {
                     <span className="block font-display text-lg font-bold text-white">
                       Samen
                     </span>
-                    <span className="block text-[13px] text-haze sm:hidden">
+                    <span className="block text-[0.8125rem] text-haze sm:hidden">
                       {formatEUR(yearTotals.monthly)} per maand
                     </span>
-                    <span className="hidden text-[13px] text-haze sm:block">
+                    <span className="hidden text-[0.8125rem] text-haze sm:block">
                       {yearRows.length} abonnementen
                     </span>
                   </th>
@@ -768,7 +816,7 @@ export default async function Home() {
                   <td className="hidden px-3 py-5 text-right align-bottom font-display text-lg font-bold tabular-nums text-white sm:table-cell sm:py-6 sm:text-xl">
                     {formatEUR(yearTotals.monthly)}
                   </td>
-                  <td className="py-5 pl-3 pr-4 text-right align-bottom font-display text-[22px] font-bold leading-none tracking-tight tabular-nums text-mint sm:py-6 sm:pr-7 sm:text-[34px] lg:text-[40px]">
+                  <td className="py-5 pl-3 pr-4 text-right align-bottom font-display text-[1.375rem] font-bold leading-none tracking-tight tabular-nums text-mint sm:py-6 sm:pr-7 sm:text-[2.125rem] lg:text-[2.5rem]">
                     {formatEUR(yearTotals.yearly)}
                   </td>
                 </tr>
@@ -782,7 +830,7 @@ export default async function Home() {
       <section className="mt-24 border-y border-line bg-white">
         <div className="mx-auto max-w-5xl px-6 py-14">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <h2 className="font-display text-2xl font-bold text-slate-900 sm:text-[26px]">
+            <h2 className="font-display text-2xl font-bold text-slate-900 sm:text-[1.625rem]">
               Werkt met je favoriete diensten
             </h2>
             <Link
@@ -824,21 +872,26 @@ export default async function Home() {
         <Reveal>
           <div className="grid items-center gap-8 overflow-hidden rounded-[32px] bg-navy px-7 py-12 sm:p-14 md:grid-cols-[minmax(0,1fr)_220px]">
             <div>
-              <h2 className="font-display text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-[44px]">
+              <h2 className="font-display text-3xl font-bold leading-[1.05] tracking-tight text-white sm:text-[2.5rem]">
                 Klaar voor overzicht?
               </h2>
-              <p className="mt-4 max-w-lg text-[17px] leading-relaxed text-haze">
+              <p className="mt-4 max-w-lg text-[1.0625rem] leading-relaxed text-haze">
                 Maak gratis je account en zie binnen een minuut wat je
                 abonnementen kosten. Geen creditcard, geen verborgen kosten.
               </p>
+              {showAppDownload && (
+                <AppStoreButton className="mt-7 max-w-sm" />
+              )}
               <div className="mt-7 flex flex-wrap gap-3">
-                <Link
-                  href="/login?modus=registreren"
-                  className="inline-flex items-center gap-2 rounded-full bg-mint px-6 py-3.5 font-bold text-mint-ink transition hover:bg-mint-light"
-                >
-                  Maak gratis je account
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+                {!showAppDownload && (
+                  <Link
+                    href="/login?modus=registreren"
+                    className="inline-flex items-center gap-2 rounded-full bg-mint px-6 py-3.5 font-bold text-mint-ink transition hover:bg-mint-light"
+                  >
+                    Maak gratis je account
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                )}
                 <ShareButton tone="dark" className="px-5 py-3.5 text-base" />
               </div>
             </div>
@@ -852,7 +905,7 @@ export default async function Home() {
         <p className="text-center text-xs font-bold uppercase tracking-[0.14em] text-brand">
           Veelgestelde vragen
         </p>
-        <h2 className="mt-2 text-center font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-[38px]">
+        <h2 className="mt-2 text-center font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-[2.375rem]">
           Vragen over abonnementen beheren
         </h2>
         <div className="mt-9 flex flex-col gap-3">
@@ -862,13 +915,13 @@ export default async function Home() {
                 className="group rounded-[18px] border border-line bg-white px-6 py-5"
                 open={i === 0}
               >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[17px] font-bold text-slate-900">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[1.0625rem] font-bold text-slate-900">
                   {item.q}
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface text-brand transition group-open:rotate-45 group-open:bg-mint-soft">
                     <Plus className="h-4 w-4" />
                   </span>
                 </summary>
-                <p className="mt-3 text-[15px] leading-relaxed text-slate-600">{item.a}</p>
+                <p className="mt-3 text-[0.9375rem] leading-relaxed text-slate-600">{item.a}</p>
               </details>
             </Reveal>
           ))}
@@ -876,6 +929,7 @@ export default async function Home() {
       </section>
 
       <SiteFooter />
+      {showAppDownload && <StickyAppBar />}
     </div>
   );
 }

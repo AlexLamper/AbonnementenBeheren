@@ -57,7 +57,7 @@ export default async function PremiumPage({
             <Sparkles className="h-4 w-4" strokeWidth={2.4} />
             Premium
           </span>
-          <h1 className="mt-5 animate-fade-in-up font-display text-[2.4rem] font-bold leading-[1.04] tracking-[-0.03em] text-white [animation-delay:60ms] sm:text-[56px]">
+          <h1 className="mt-5 animate-fade-in-up font-display text-[2.4rem] font-bold leading-[1.04] tracking-[-0.03em] text-white [animation-delay:60ms] sm:text-[3.5rem]">
             Gratis beginnen.
             <br />
             <span className="text-mint">Onbeperkt met Premium.</span>
@@ -73,7 +73,7 @@ export default async function PremiumPage({
         {notice && (
           <div
             role="status"
-            className={`mb-4 flex items-start gap-3 rounded-[18px] px-4 py-3.5 text-[15px] shadow-float ${
+            className={`mb-4 flex items-start gap-3 rounded-[18px] px-4 py-3.5 text-[0.9375rem] shadow-float ${
               notice.tone === "ok"
                 ? "bg-mint-soft text-[#0b4a44]"
                 : "bg-white text-slate-700"
@@ -92,11 +92,11 @@ export default async function PremiumPage({
           {/* Gratis */}
           <div className="rounded-[28px] border border-line bg-white p-6 shadow-float sm:p-7">
             <p className="text-xs font-bold uppercase tracking-[0.12em] text-brand">Gratis</p>
-            <p className="mt-2 font-display text-[34px] font-bold tracking-tight text-slate-900">
+            <p className="mt-2 font-display text-[2.125rem] font-bold tracking-tight text-slate-900">
               € 0
             </p>
             <p className="text-sm text-slate-500">voor altijd</p>
-            <ul className="mt-6 space-y-2.5 text-[15px] text-slate-700">
+            <ul className="mt-6 space-y-2.5 text-[0.9375rem] text-slate-700">
               <Row ok>Tot {FREE_SUBSCRIPTION_LIMIT} abonnementen bijhouden</Row>
               <Row ok>Totaal per maand en per jaar</Row>
               <Row ok>Alle diensten met actuele prijzen</Row>
@@ -112,7 +112,7 @@ export default async function PremiumPage({
               <Sparkles className="h-3.5 w-3.5" strokeWidth={2.6} />
               Premium
             </p>
-            <p className="mt-2 font-display text-[34px] font-bold tracking-tight text-slate-900">
+            <p className="mt-2 font-display text-[2.125rem] font-bold tracking-tight text-slate-900">
               {PREMIUM_PRICES.monthly}
             </p>
             <p className="text-sm text-slate-500">
@@ -243,7 +243,7 @@ function Faq({ q, children }: { q: string; children: React.ReactNode }) {
         {q}
         <span className="text-brand transition group-open:rotate-45">+</span>
       </summary>
-      <p className="mt-2.5 text-[15px] leading-relaxed text-slate-600">{children}</p>
+      <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-slate-600">{children}</p>
     </details>
   );
 }
