@@ -20,6 +20,10 @@ on:
         description: "Submit the version for App Review after uploading"
         type: boolean
         default: false
+      cancel_pending_review:
+        description: "First withdraw a submission that is waiting for review (to submit a newer build)"
+        type: boolean
+        default: false
       app_version:
         description: "App Store version string. Leave blank to use the editable version in App Store Connect (or create one)."
         required: false
@@ -114,6 +118,10 @@ jobs:
 
       - name: App Store Connect state (before)
         run: $ASC_PY .github/workflows/scripts/asc_check.py status
+
+      - name: Withdraw pending review
+        if: github.event_name == 'workflow_dispatch' && inputs.cancel_pending_review
+        run: $ASC_PY .github/workflows/scripts/asc_check.py cancel
 
       # Uses the editable version (1.0 today) or creates one, attaches the newest
       # VALID build of that train, and exports APP_VERSION / BUILD_NUMBER.

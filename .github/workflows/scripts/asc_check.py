@@ -12,6 +12,8 @@ Commands:
            contact/notes, and primary locale (warning only if it fails).
   submit   Submit the editable version (and any subscriptions waiting to be
            submitted) for App Review, reusing a rejected submission when there is one.
+  cancel   Withdraw a submission that is waiting for (or in) App Review, so a newer
+           build can be submitted. Waits until the version is editable again.
   locale   Set the app's primary locale (default nl-NL). Run after deliver, because
            Apple only accepts a primary locale that already has a localization.
 
@@ -645,6 +647,26 @@ def cmd_submit(client):
     log(f"Submitted for App Review: submission state {after}.")
 
 
+def cmd_cancel(client):
+    subs = client.get("reviewSubmissions", params={
+        "filter[app]": APP_ID, "filter[platform]": "IOS", "limit": 50})["data"]
+    pending = [s for s in subs if s["attributes"]["state"] in
+               ("WAITING_FOR_REVIEW", "IN_REVIEW", "READY_FOR_REVIEW")]
+    if not pending:
+        log("No pending review submission; nothing to cancel.")
+        return
+    for sub in pending:
+        log(f"Cancelling review submission {sub['id']} ({sub['attributes']['state']}).")
+        client.request("PATCH", f"reviewSubmissions/{sub['id']}", json={"data": {
+            "type": "reviewSubmissions", "id": sub["id"], "attributes": {"canceled": True}}})
+    for _ in range(36):
+        if editable_version(client):
+            log("Version is editable again.")
+            return
+        time.sleep(5)
+    log("::warning::Version not editable yet after cancelling; continuing.")
+
+
 def cmd_locale(client):
     set_primary_locale(client)
 
@@ -652,7 +674,8 @@ def cmd_locale(client):
 def main():
     command = sys.argv[1] if len(sys.argv) > 1 else "status"
     handlers = {"status": cmd_status, "prepare": cmd_prepare,
-                "configure": cmd_configure, "locale": cmd_locale, "submit": cmd_submit}
+                "configure": cmd_configure, "locale": cmd_locale, "submit": cmd_submit,
+                "cancel": cmd_cancel}
     if command not in handlers:
         sys.exit(f"Unknown command {command}; use one of {', '.join(handlers)}.")
     handlers[command](Client())
