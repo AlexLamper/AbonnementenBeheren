@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
+import { BadgeCheck } from "lucide-react";
 import { Modal } from "@/components/Modal";
 import { PerkList, PlanPicker, type PlanPrices } from "@/components/PlanPicker";
 
@@ -45,7 +45,7 @@ export function UpgradeDialog({
       title={copy.title}
       icon={
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mint text-mint-ink">
-          <Sparkles className="h-[18px] w-[18px]" strokeWidth={2.4} />
+          <BadgeCheck className="h-[18px] w-[18px]" strokeWidth={2.4} />
         </span>
       }
     >

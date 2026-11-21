@@ -151,7 +151,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(LucideIcons.sparkles, size: 16, color: AppColors.mintLight),
+                                const Icon(LucideIcons.badgeCheck, size: 16, color: AppColors.mintLight),
                                 const SizedBox(width: 6),
                                 Text(
                                   title ?? l.premium,
@@ -207,7 +207,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                             const SizedBox(height: 14),
                             MintButton(
                               label: _busy ? l.busy : l.buyPremium,
-                              icon: LucideIcons.sparkles,
+                              icon: LucideIcons.badgeCheck,
                               loading: _busy,
                               onPressed: _selected == null ? null : _buy,
                             ),

@@ -329,7 +329,7 @@ class _PremiumPill extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(LucideIcons.sparkles, size: 16, color: isPremium ? AppColors.mintLight : AppColors.mintInk),
+              Icon(LucideIcons.badgeCheck, size: 16, color: isPremium ? AppColors.mintLight : AppColors.mintInk),
               const SizedBox(width: 6),
               Text(
                 l.premium,

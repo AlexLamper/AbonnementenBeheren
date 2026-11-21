@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { ArrowRight, Check, CircleAlert, PartyPopper, Sparkles, X } from "lucide-react";
+import { ArrowRight, Check, CircleAlert, PartyPopper, BadgeCheck, X } from "lucide-react";
 import { authOptions } from "@/lib/authOptions";
 import {
   FREE_SUBSCRIPTION_LIMIT,
@@ -54,7 +54,7 @@ export default async function PremiumPage({
         <SiteHeader />
         <section className="mx-auto flex max-w-3xl flex-col items-center px-5 pt-14 text-center sm:pt-20">
           <span className="inline-flex animate-fade-in-up items-center gap-1.5 rounded-full bg-mint/15 px-3.5 py-1.5 text-sm font-bold text-mint-light">
-            <Sparkles className="h-4 w-4" strokeWidth={2.4} />
+            <BadgeCheck className="h-4 w-4" strokeWidth={2.4} />
             Premium
           </span>
           <h1 className="mt-5 animate-fade-in-up font-display text-[2.4rem] font-bold leading-[1.04] tracking-[-0.03em] text-white [animation-delay:60ms] sm:text-[3.5rem]">
@@ -109,7 +109,7 @@ export default async function PremiumPage({
           {/* Premium */}
           <div className="rounded-[28px] border-2 border-mint bg-white p-6 shadow-float sm:p-7">
             <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-brand">
-              <Sparkles className="h-3.5 w-3.5" strokeWidth={2.6} />
+              <BadgeCheck className="h-3.5 w-3.5" strokeWidth={2.6} />
               Premium
             </p>
             <p className="mt-2 font-display text-[2.125rem] font-bold tracking-tight text-slate-900">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Sparkles } from "lucide-react";
+import { Check, BadgeCheck } from "lucide-react";
 
 export type PlanKey = "monthly" | "yearly";
 
@@ -63,7 +63,7 @@ export function PlanPicker({
         disabled={submitting}
         className="inline-flex h-[50px] w-full items-center justify-center gap-2 rounded-full bg-mint font-bold text-mint-ink transition hover:bg-mint-light disabled:opacity-50"
       >
-        <Sparkles className="h-4 w-4" strokeWidth={2.4} />
+        <BadgeCheck className="h-4 w-4" strokeWidth={2.4} />
         {submitting ? "Even geduld…" : "Neem Premium"}
       </button>
       {!compact && (

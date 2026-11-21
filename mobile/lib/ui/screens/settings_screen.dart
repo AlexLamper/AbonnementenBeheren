@@ -113,10 +113,10 @@ class SettingsScreen extends ConsumerWidget {
             _Card(
               children: [
                 _Row(
-                  icon: LucideIcons.sparkles,
+                  icon: LucideIcons.badgeCheck,
                   title: e.isPremium ? l.premium : l.planFree,
                   trailing: e.isPremium
-                      ? const Icon(LucideIcons.badgeCheck, size: 20, color: AppColors.brand)
+                      ? const Icon(LucideIcons.check, size: 20, color: AppColors.brand)
                       : Text(
                           l.usageCount(e.count.clamp(0, e.limit ?? e.count), e.limit ?? 0),
                           style: sans(13, color: AppColors.slate500),

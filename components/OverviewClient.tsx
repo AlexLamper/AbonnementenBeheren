@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { signOut } from "next-auth/react";
-import { Plus, LogOut, Sparkles, Download } from "lucide-react";
+import { Plus, LogOut, BadgeCheck, Download } from "lucide-react";
 import { toast } from "sonner";
 import type { ClientSubscription } from "@/lib/types";
 import type { Preset } from "@/lib/presets/types";
@@ -215,7 +215,7 @@ export function OverviewClient({
                     href="/premium"
                     className="hidden items-center gap-1.5 rounded-full bg-mint/15 px-3.5 py-2 text-sm font-bold text-mint-light transition hover:bg-mint/25 sm:inline-flex"
                   >
-                    <Sparkles className="h-4 w-4" strokeWidth={2.4} />
+                    <BadgeCheck className="h-4 w-4" strokeWidth={2.4} />
                     Premium
                   </Link>
                 ) : (
@@ -224,7 +224,7 @@ export function OverviewClient({
                     onClick={() => setUpgrade({ open: true, reason: "manual" })}
                     className="inline-flex items-center gap-1.5 rounded-full bg-mint px-3.5 py-2 text-sm font-bold text-mint-ink transition hover:bg-mint-light"
                   >
-                    <Sparkles className="h-4 w-4" strokeWidth={2.4} />
+                    <BadgeCheck className="h-4 w-4" strokeWidth={2.4} />
                     <span className="hidden xs:inline">Premium</span>
                   </button>
                 ))}
