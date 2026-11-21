@@ -171,14 +171,33 @@ jobs:
           DEMO_ACCOUNT_PASSWORD: ${{ secrets.APP_REVIEW_DEMO_PASSWORD }}
           REVIEW_FIRST_NAME: Alex
           REVIEW_LAST_NAME: Lamper
-          REVIEW_NOTES: >-
-            Sign in with the demo account. The app tracks the user's own
-            subscriptions (Netflix, Spotify, etc.) and shows the monthly and
-            yearly total. Free accounts can track up to 5 subscriptions; adding
-            more opens the Premium screen (auto-renewable subscription, monthly
-            or yearly), which can be tested in sandbox. The same account also
-            works on the website abonnementenbeheren.com. Account deletion is in
-            Settings > Delete account.
+          REVIEW_NOTES: |-
+            1. SCREEN RECORDING
+            Attached to this App Review Information section (app_review_recording.mp4), recorded on a physical iPhone on the latest iOS.
+
+            2. PURPOSE AND AUDIENCE
+            AbonnementenBeheren ("manage subscriptions") is for consumers in the Netherlands and Belgium who lose track of their recurring subscriptions (streaming, music, phone, internet, gym, news, software). People often pay for services they forgot about. The app gives one overview of all subscriptions with the total cost per month and per year, so users can see what they spend and decide what to cancel. Users enter their subscriptions themselves; the app never charges or cancels anything on their behalf.
+
+            3. HOW TO USE THE APP
+            - Sign in with the demo account in the Sign-In Information fields. It already contains a few sample subscriptions. You can also create a new account on the first screen (name, email, password).
+            - Overview: monthly and yearly total, number of subscriptions, cost breakdown chart and the list of subscriptions.
+            - Add: tap "Toevoegen" (Add), search a service (e.g. Netflix), tap a plan to add it with its price, or add a custom one with your own name and price.
+            - Edit or delete a subscription with the pencil and trash icons.
+            - Premium: free accounts can track up to 5 subscriptions. Adding a 6th opens the Premium screen with an auto-renewable subscription (monthly or yearly) via Apple In-App Purchase; it can be tested in the sandbox. Restore purchases is on the same screen. Premium is also reachable from Settings > Premium.
+            - Account deletion: Settings (gear icon) > "Account verwijderen" (Delete account). This permanently deletes the account and all its data.
+            - The language can be changed in Settings (Dutch, English, German, French, Spanish).
+
+            4. EXTERNAL SERVICES
+            - Our own backend at https://www.abonnementenbeheren.com (Next.js hosted on Vercel) for sign-in and for storing the user's subscriptions; data is stored in MongoDB Atlas. Sign-in is our own email and password account system; no third-party login.
+            - Apple In-App Purchase through RevenueCat for the Premium subscription. No other payment processor is used in the app.
+            - Service logos are loaded from Google's public favicon service.
+            - No AI services, no bank connections, no advertising or tracking SDKs.
+
+            5. REGIONAL DIFFERENCES
+            The app works the same in every region. The catalogue of services and their prices is focused on the Netherlands and Belgium (prices in euro), but every user can add any service with their own price.
+
+            6. REGULATED INDUSTRY / THIRD-PARTY MATERIAL
+            The app does not operate in a regulated industry: it is a personal budgeting overview that does not move money, give financial advice or connect to bank accounts. Names and logos of services (Netflix, Spotify, etc.) are shown only to identify the service the user pays for; the app is not affiliated with or endorsed by these companies, and it does not provide or stream any of their content.
         run: $ASC_PY .github/workflows/scripts/asc_check.py configure
 
       # deliver detects the device slot from the pixel size, so only PNGs with a
@@ -250,21 +269,12 @@ jobs:
             --precheck_include_in_app_purchases false
             --run_precheck_before_submit false
             --automatic_release false
-            --submit_for_review "$SUBMIT_FOR_REVIEW"
+            --submit_for_review false
           )
           if [ "$UPLOAD_SCREENSHOTS" = "true" ]; then
             ARGS+=(--screenshots_path "$SCREENSHOTS_PATH" --overwrite_screenshots true)
           else
             ARGS+=(--skip_screenshots true)
-          fi
-          if [ "$SUBMIT_FOR_REVIEW" = "true" ]; then
-            if [ -z "${BUILD_NUMBER:-}" ]; then
-              echo "::error::No VALID build found for version $APP_VERSION; cannot submit."; exit 1
-            fi
-            ARGS+=(
-              --build_number "$BUILD_NUMBER"
-              --submission_information '{"export_compliance_uses_encryption": false, "add_id_info_uses_idfa": false, "content_rights_contains_third_party_content": false}'
-            )
           fi
           # Without a Deliverfile, deliver asks interactively whether to set one
           # up and crashes in CI; all options come from the command line.
@@ -278,6 +288,16 @@ jobs:
         env:
           PRIMARY_LOCALE: nl-NL
         run: $ASC_PY .github/workflows/scripts/asc_check.py locale || echo "::warning::Could not set primary locale"
+
+      # Submitting is done by asc_check.py instead of deliver, so a submission that
+      # Apple sent back (Information Needed / rejected) is resubmitted correctly.
+      - name: Submit for App Review
+        if: env.SUBMIT_FOR_REVIEW == 'true'
+        run: |
+          if [ -z "${BUILD_NUMBER:-}" ]; then
+            echo "::error::No VALID build found for version $APP_VERSION; cannot submit."; exit 1
+          fi
+          $ASC_PY .github/workflows/scripts/asc_check.py submit
 
       - name: App Store Connect state (after)
         if: always() && env.ASC_PY != ''

@@ -10,6 +10,8 @@ Commands:
   configure  Content rights (DOES_NOT_USE_THIRD_PARTY_CONTENT), age rating from
            store/age_rating.json, free price (base territory NLD), App Review
            contact/notes, and primary locale (warning only if it fails).
+  submit   Submit the editable version (and any subscriptions waiting to be
+           submitted) for App Review, reusing a rejected submission when there is one.
   locale   Set the app's primary locale (default nl-NL). Run after deliver, because
            Apple only accepts a primary locale that already has a localization.
 
@@ -418,14 +420,14 @@ def set_review_details(client):
 REVIEW_SHOT = os.path.join(os.path.dirname(__file__), "..", "..", "..", "store", "review", "paywall_review.png")
 
 
-def upload_asset(client, create_type, rel_name, parent_id, path):
-    """Reserve, upload and commit an image asset (App Store Connect asset flow)."""
+def upload_asset(client, create_type, rel_name, parent_id, path, parent_type="subscriptions"):
+    """Reserve, upload and commit an asset (App Store Connect asset flow)."""
     import hashlib
     data = open(path, "rb").read()
     res = client.request("POST", create_type, json={"data": {
         "type": create_type,
         "attributes": {"fileName": os.path.basename(path), "fileSize": len(data)},
-        "relationships": {rel_name: {"data": {"type": "subscriptions", "id": parent_id}}},
+        "relationships": {rel_name: {"data": {"type": parent_type, "id": parent_id}}},
     }})["data"]
     for op in res["attributes"]["uploadOperations"]:
         chunk = data[op["offset"]:op["offset"] + op["length"]]
@@ -437,6 +439,54 @@ def upload_asset(client, create_type, rel_name, parent_id, path):
         "attributes": {"uploaded": True, "sourceFileChecksum": hashlib.md5(data).hexdigest()},
     }})
     return res["id"]
+
+
+REVIEW_RECORDING = os.path.join(os.path.dirname(__file__), "..", "..", "..", "store", "review",
+                                "app_review_recording.mp4")
+
+
+def set_review_attachment(client):
+    """Attach store/review/app_review_recording.mp4 to App Review Information.
+
+    App Review asked for a screen recording on a physical device. Replaces any
+    other attachment; skips the upload when the same file is already there.
+    """
+    import hashlib
+    path = os.path.abspath(REVIEW_RECORDING)
+    if not os.path.exists(path):
+        log("::warning::store/review/app_review_recording.mp4 missing; no review attachment.")
+        return
+    version = editable_version(client)
+    if not version:
+        log("::warning::No editable version; review attachment not set.")
+        return
+    detail = client.get(f"appStoreVersions/{version['id']}/appStoreReviewDetail").get("data")
+    if not detail:
+        log("::warning::No App Review details yet; attachment skipped.")
+        return
+    checksum = hashlib.md5(open(path, "rb").read()).hexdigest()
+    existing = client.get(f"appStoreReviewDetails/{detail['id']}/appStoreReviewAttachments",
+                          params={"limit": 50})["data"]
+    for att in existing:
+        a = att["attributes"]
+        state = (a.get("assetDeliveryState") or {}).get("state")
+        if a.get("sourceFileChecksum") == checksum and state != "FAILED":
+            log(f"Review attachment {a.get('fileName')} already present ({state}).")
+            return
+    for att in existing:
+        client.request("DELETE", f"appStoreReviewAttachments/{att['id']}")
+        log(f"Removed old review attachment {att['attributes'].get('fileName')}.")
+    upload_asset(client, "appStoreReviewAttachments", "appStoreReviewDetail", detail["id"], path,
+                 parent_type="appStoreReviewDetails")
+    for _ in range(30):
+        att = client.get(f"appStoreReviewDetails/{detail['id']}/appStoreReviewAttachments")["data"]
+        state = att and (att[0]["attributes"].get("assetDeliveryState") or {}).get("state")
+        if state in ("COMPLETE", "FAILED"):
+            break
+        time.sleep(5)
+    if state == "FAILED":
+        raise RuntimeError(f"review attachment processing failed: {att[0]['attributes']}")
+    log(f"Review attachment uploaded ({state}).")
 
 
 def set_subscription_review_shots(client):
@@ -465,6 +515,7 @@ def cmd_configure(client):
         ("review details", set_review_details, False),
         ("primary locale", set_primary_locale, False),
         ("subscription review screenshots", set_subscription_review_shots, False),
+        ("review attachment", set_review_attachment, True),
     ]:
         try:
             func(client)
@@ -477,6 +528,113 @@ def cmd_configure(client):
         sys.exit(f"Failed: {', '.join(failures)}")
 
 
+OPEN_SUBMISSION_STATES = ("READY_FOR_REVIEW", "UNRESOLVED_ISSUES")
+BUSY_SUBMISSION_STATES = ("WAITING_FOR_REVIEW", "IN_REVIEW", "COMPLETING")
+
+
+def submit_subscriptions(client):
+    """Subscriptions that were never approved go to review with the app version."""
+    groups = client.get(f"apps/{APP_ID}/subscriptionGroups", params={"include": "subscriptions"})
+    for sub in [i for i in groups.get("included", []) if i["type"] == "subscriptions"]:
+        a = sub["attributes"]
+        if a.get("state") != "READY_TO_SUBMIT":
+            log(f"{a.get('productId')}: state {a.get('state')}, nothing to submit.")
+            continue
+        try:
+            client.request("POST", "subscriptionSubmissions", json={"data": {
+                "type": "subscriptionSubmissions",
+                "relationships": {"subscription": {"data": {"type": "subscriptions", "id": sub["id"]}}},
+            }})
+            log(f"{a.get('productId')}: submitted with the next app version.")
+        except RuntimeError as exc:
+            log(f"::warning::{a.get('productId')}: {exc}")
+
+
+def cmd_submit(client):
+    version = editable_version(client)
+    if not version:
+        log("::error::No editable version to submit.")
+        sys.exit(1)
+    vid = version["id"]
+    build = client.get(f"appStoreVersions/{vid}/build").get("data")
+    if not build:
+        log("::error::No build attached to the version; cannot submit.")
+        sys.exit(1)
+    if build["attributes"].get("usesNonExemptEncryption") is None:
+        client.request("PATCH", f"builds/{build['id']}", json={"data": {
+            "type": "builds", "id": build["id"], "attributes": {"usesNonExemptEncryption": False}}})
+        log("Export compliance set: no non-exempt encryption.")
+    log(f"Submitting {version['attributes']['versionString']} with build "
+        f"{build['attributes']['version']} ({version_state(version)}).")
+
+    subs = client.get("reviewSubmissions", params={
+        "filter[app]": APP_ID, "filter[platform]": "IOS", "limit": 50,
+        "include": "items"})
+    by_state = {}
+    for sub in subs["data"]:
+        by_state.setdefault(sub["attributes"]["state"], []).append(sub)
+    for state in BUSY_SUBMISSION_STATES:
+        if by_state.get(state):
+            log(f"A submission is already {state}; nothing to do.")
+            return
+    submission = next((by_state[s][0] for s in OPEN_SUBMISSION_STATES if by_state.get(s)), None)
+    if submission:
+        log(f"Reusing review submission {submission['id']} ({submission['attributes']['state']}).")
+    else:
+        submission = client.request("POST", "reviewSubmissions", json={"data": {
+            "type": "reviewSubmissions", "attributes": {"platform": "IOS"},
+            "relationships": {"app": {"data": {"type": "apps", "id": APP_ID}}},
+        }})["data"]
+        log(f"Created review submission {submission['id']}.")
+
+    def ensure_version_item(submission_id):
+        items = client.get(f"reviewSubmissions/{submission_id}/items",
+                           params={"include": "appStoreVersion"})["data"]
+        def item_version(i):
+            rel = ((i.get("relationships") or {}).get("appStoreVersion") or {}).get("data") or {}
+            return rel.get("id")
+        if any(item_version(i) == vid for i in items):
+            return
+        client.request("POST", "reviewSubmissionItems", json={"data": {
+            "type": "reviewSubmissionItems",
+            "relationships": {
+                "reviewSubmission": {"data": {"type": "reviewSubmissions", "id": submission_id}},
+                "appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}},
+            },
+        }})
+        log("Version added to the submission.")
+
+    def send(submission_id):
+        client.request("PATCH", f"reviewSubmissions/{submission_id}", json={"data": {
+            "type": "reviewSubmissions", "id": submission_id, "attributes": {"submitted": True}}})
+
+    submit_subscriptions(client)
+    try:
+        ensure_version_item(submission["id"])
+        send(submission["id"])
+    except RuntimeError as exc:
+        # A rejected submission that won't resubmit as-is: cancel it and start a new one.
+        log(f"::warning::Resubmitting {submission['id']} failed ({exc}); starting a new submission.")
+        try:
+            client.request("PATCH", f"reviewSubmissions/{submission['id']}", json={"data": {
+                "type": "reviewSubmissions", "id": submission["id"], "attributes": {"canceled": True}}})
+        except RuntimeError as cancel_exc:
+            log(f"::warning::Cancel failed: {cancel_exc}")
+        for _ in range(12):
+            st = client.get(f"reviewSubmissions/{submission['id']}")["data"]["attributes"]["state"]
+            if st not in ("CANCELING",):
+                break
+            time.sleep(5)
+        submission = client.request("POST", "reviewSubmissions", json={"data": {
+            "type": "reviewSubmissions", "attributes": {"platform": "IOS"},
+            "relationships": {"app": {"data": {"type": "apps", "id": APP_ID}}},
+        }})["data"]
+        ensure_version_item(submission["id"])
+        send(submission["id"])
+    after = client.get(f"reviewSubmissions/{submission['id']}")["data"]["attributes"]["state"]
+    log(f"Submitted for App Review: submission state {after}.")
+
+
 def cmd_locale(client):
     set_primary_locale(client)
 
@@ -484,7 +642,7 @@ def cmd_locale(client):
 def main():
     command = sys.argv[1] if len(sys.argv) > 1 else "status"
     handlers = {"status": cmd_status, "prepare": cmd_prepare,
-                "configure": cmd_configure, "locale": cmd_locale}
+                "configure": cmd_configure, "locale": cmd_locale, "submit": cmd_submit}
     if command not in handlers:
         sys.exit(f"Unknown command {command}; use one of {', '.join(handlers)}.")
     handlers[command](Client())
