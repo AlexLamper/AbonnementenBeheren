@@ -156,6 +156,31 @@ def cmd_status(client):
         except RuntimeError as exc:
             log(f"    categories: lookup failed ({exc})")
     try:
+        subs = client.get("reviewSubmissions", params={
+            "filter[app]": APP_ID, "filter[platform]": "IOS", "limit": 10})["data"]
+        for sub in subs:
+            a = sub["attributes"]
+            log(f"reviewSubmission {sub['id']}: state={a.get('state')} submitted={a.get('submittedDate')}")
+    except RuntimeError as exc:
+        log(f"reviewSubmissions: lookup failed ({exc})")
+    try:
+        avail = client.get(f"apps/{APP_ID}/appAvailabilityV2").get("data")
+        if not avail:
+            log("availability: NONE SET (app is in no territory)")
+        else:
+            log(f"availability: availableInNewTerritories={avail['attributes'].get('availableInNewTerritories')}")
+            terr = client.get(f"appAvailabilities/{avail['id']}/territoryAvailabilities",
+                              params={"limit": 200})["data"]
+            on = [t for t in terr if t["attributes"].get("available")]
+            states = {}
+            for t in terr:
+                st = t["attributes"].get("contentStatuses") or []
+                for x in st:
+                    states[x] = states.get(x, 0) + 1
+            log(f"  territories: {len(on)} available of {len(terr)} listed; contentStatuses={states}")
+    except RuntimeError as exc:
+        log(f"availability: lookup failed ({exc})")
+    try:
         trains = client.get("preReleaseVersions",
                             params={"limit": 50, "filter[app]": APP_ID, "filter[platform]": "IOS"})["data"]
         log("TestFlight trains: " + (", ".join(t["attributes"]["version"] for t in trains) or "none"))

@@ -12,6 +12,10 @@ on:
       - "store/**"
   workflow_dispatch:
     inputs:
+      status_only:
+        description: "Only show the App Store Connect state; change nothing"
+        type: boolean
+        default: false
       upload_screenshots:
         description: "Upload screenshots (replaces the existing ones)"
         type: boolean
@@ -120,12 +124,13 @@ jobs:
         run: $ASC_PY .github/workflows/scripts/asc_check.py status
 
       - name: Withdraw pending review
-        if: github.event_name == 'workflow_dispatch' && inputs.cancel_pending_review
+        if: (github.event_name == 'workflow_dispatch' && inputs.cancel_pending_review) && !inputs.status_only
         run: $ASC_PY .github/workflows/scripts/asc_check.py cancel
 
       # Uses the editable version (1.0 today) or creates one, attaches the newest
       # VALID build of that train, and exports APP_VERSION / BUILD_NUMBER.
       - name: Ensure editable App Store version
+        if: ${{ !inputs.status_only }}
         env:
           INPUT_APP_VERSION: ${{ inputs.app_version }}
           DEFAULT_APP_VERSION: "1.0.0"
@@ -135,6 +140,7 @@ jobs:
       # Maakt het aan (of controleert het) via de API van de site en zet er
       # een paar voorbeeldabonnementen in.
       - name: Ensure App Review demo account
+        if: ${{ !inputs.status_only }}
         env:
           DEMO_ACCOUNT_PASSWORD: ${{ secrets.APP_REVIEW_DEMO_PASSWORD }}
         run: |
@@ -170,6 +176,7 @@ jobs:
           PY
 
       - name: Configure app (content rights, age rating, price, review info)
+        if: ${{ !inputs.status_only }}
         env:
           AGE_RATING_PATH: store/age_rating.json
           BASE_TERRITORY: NLD
@@ -211,7 +218,7 @@ jobs:
       # deliver detects the device slot from the pixel size, so only PNGs with a
       # known App Store size are copied (no .DS_Store, README, etc.).
       - name: Stage screenshots
-        if: env.UPLOAD_SCREENSHOTS == 'true'
+        if: (env.UPLOAD_SCREENSHOTS == 'true') && !inputs.status_only
         run: |
           set -euo pipefail
           python3 - store/screenshots "$RUNNER_TEMP/screenshots" <<'PY'
@@ -247,11 +254,13 @@ jobs:
           echo "SCREENSHOTS_PATH=$RUNNER_TEMP/screenshots" >> "$GITHUB_ENV"
 
       - name: Set up Ruby
+        if: ${{ !inputs.status_only }}
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.3"
 
       - name: Install fastlane
+        if: ${{ !inputs.status_only }}
         run: |
           # 2064x2752 (iPad 13") screenshots need a fastlane release from late 2025
           # or newer (fastlane PR #29760), so always install the latest.
@@ -260,6 +269,7 @@ jobs:
           ruby -e 'v = Gem.loaded_specs["fastlane"]&.version || Gem::Specification.find_by_name("fastlane").version; abort("fastlane #{v} is too old for 13-inch iPad screenshots") if v < Gem::Version.new("2.230.0"); puts "fastlane #{v} OK"'
 
       - name: Upload with fastlane deliver
+        if: ${{ !inputs.status_only }}
         env:
           FASTLANE_SKIP_UPDATE_CHECK: "1"
           FASTLANE_HIDE_CHANGELOG: "1"
@@ -294,6 +304,7 @@ jobs:
       # Apple only accepts a primary locale that already has a localization,
       # which deliver has created by now.
       - name: Set primary locale to nl-NL
+        if: ${{ !inputs.status_only }}
         env:
           PRIMARY_LOCALE: nl-NL
         run: $ASC_PY .github/workflows/scripts/asc_check.py locale || echo "::warning::Could not set primary locale"
@@ -301,7 +312,7 @@ jobs:
       # Submitting is done by asc_check.py instead of deliver, so a submission that
       # Apple sent back (Information Needed / rejected) is resubmitted correctly.
       - name: Submit for App Review
-        if: env.SUBMIT_FOR_REVIEW == 'true'
+        if: (env.SUBMIT_FOR_REVIEW == 'true') && !inputs.status_only
         run: |
           if [ -z "${BUILD_NUMBER:-}" ]; then
             echo "::error::No VALID build found for version $APP_VERSION; cannot submit."; exit 1
@@ -309,7 +320,7 @@ jobs:
           $ASC_PY .github/workflows/scripts/asc_check.py submit
 
       - name: App Store Connect state (after)
-        if: always() && env.ASC_PY != ''
+        if: (always() && env.ASC_PY != '') && !inputs.status_only
         run: $ASC_PY .github/workflows/scripts/asc_check.py status
 
       - name: Remove API key
