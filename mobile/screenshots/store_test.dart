@@ -134,7 +134,7 @@ void main() {
     testWidgets('store paywall $lang', (tester) async {
       // 5. Gratis gebruiker: Premium-scherm.
       await _pump(tester, FakeBackend(subs: _subs().take(5).toList()), lang);
-      await tester.tap(find.byIcon(LucideIcons.sparkles).first);
+      await tester.tap(find.byIcon(LucideIcons.badgeCheck).first);
       await tester.pumpAndSettle();
       await _shot(lang, '5');
     });

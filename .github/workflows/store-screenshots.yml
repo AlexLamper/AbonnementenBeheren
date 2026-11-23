@@ -1,0 +1,37 @@
+name: App Store-screenshots maken
+
+# Maakt de App Store-screenshots opnieuw uit de app zelf (golden test
+# mobile/screenshots/store_test.dart + mobile/tool/store_screenshots.py) en
+# zet ze als artifact klaar. Daarna in store/screenshots committen; de
+# metadata-workflow uploadt ze.
+on:
+  workflow_dispatch:
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.50.0"
+          channel: stable
+          cache: true
+      - name: Afhankelijkheden
+        working-directory: mobile
+        run: flutter pub get
+      - name: Ruwe schermen
+        working-directory: mobile
+        run: flutter test screenshots/store_test.dart --update-goldens
+      - name: Screenshots samenstellen
+        working-directory: mobile
+        run: |
+          python3 -m pip install --quiet --break-system-packages pillow || python3 -m pip install --quiet pillow
+          python3 tool/store_screenshots.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store-screenshots
+          path: |
+            store/screenshots
+            store/review/paywall_review.png
+            mobile/screenshots/store_raw
