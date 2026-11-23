@@ -137,14 +137,17 @@ jobs:
         if: (github.event_name == 'workflow_dispatch' && inputs.cancel_pending_review) && !inputs.status_only
         run: $ASC_PY .github/workflows/scripts/asc_check.py cancel
 
-      # Uses the editable version (1.0 today) or creates one, attaches the newest
+      # Uses the editable version or creates one (version from pubspec.yaml), attaches the newest
       # VALID build of that train, and exports APP_VERSION / BUILD_NUMBER.
       - name: Ensure editable App Store version
         if: ${{ !inputs.status_only }}
         env:
           INPUT_APP_VERSION: ${{ inputs.app_version }}
-          DEFAULT_APP_VERSION: "1.0.0"
-        run: $ASC_PY .github/workflows/scripts/asc_check.py prepare
+        run: |
+          # Standaard de versie uit de app zelf (mobile/pubspec.yaml, zonder +build).
+          export DEFAULT_APP_VERSION=$(sed -n 's/^version: *\([0-9.]*\).*/\1/p' mobile/pubspec.yaml)
+          echo "Version from pubspec: $DEFAULT_APP_VERSION"
+          $ASC_PY .github/workflows/scripts/asc_check.py prepare
 
       # De app vraagt om in te loggen, dus App Review heeft een account nodig.
       # Maakt het aan (of controleert het) via de API van de site en zet er
