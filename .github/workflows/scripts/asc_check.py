@@ -100,7 +100,8 @@ class Client:
         self.session.headers["Authorization"] = f"Bearer {make_token()}"
 
     def request(self, method, path, **kwargs):
-        resp = self.session.request(method, f"{API}/{path}", timeout=60, **kwargs)
+        url = path if path.startswith("https://") else f"{API}/{path}"
+        resp = self.session.request(method, url, timeout=60, **kwargs)
         if resp.status_code >= 400:
             raise RuntimeError(f"{method} {path} -> HTTP {resp.status_code}: {resp.text[:800]}")
         return resp.json() if resp.content else {}
@@ -164,7 +165,7 @@ def cmd_status(client):
     except RuntimeError as exc:
         log(f"reviewSubmissions: lookup failed ({exc})")
     try:
-        avail = client.get(f"apps/{APP_ID}/appAvailabilityV2").get("data")
+        avail = get_availability(client)
         if not avail:
             log("availability: NONE SET (app is in no territory)")
         else:
@@ -692,6 +693,48 @@ def cmd_cancel(client):
     log("::warning::Version not editable yet after cancelling; continuing.")
 
 
+def get_availability(client):
+    try:
+        return client.get(f"apps/{APP_ID}/appAvailabilityV2").get("data")
+    except RuntimeError as exc:
+        if "HTTP 404" in str(exc):
+            return None
+        raise
+
+
+def cmd_availability(client):
+    """Make the app available in every App Store territory (and future ones).
+
+    Without an availability record a (released) app is in no country at all and
+    App Store Connect shows it as "Removed from App Store".
+    """
+    if get_availability(client):
+        log("App availability already set.")
+        return
+    territories = client.get("territories", params={"limit": 200})["data"]
+    refs, included = [], []
+    for t in territories:
+        local = "${t-" + t["id"] + "}"
+        refs.append({"type": "territoryAvailabilities", "id": local})
+        included.append({
+            "type": "territoryAvailabilities", "id": local,
+            "attributes": {"available": True, "preOrderEnabled": False},
+            "relationships": {"territory": {"data": {"type": "territories", "id": t["id"]}}},
+        })
+    client.request("POST", "https://api.appstoreconnect.apple.com/v2/appAvailabilities", json={
+        "data": {
+            "type": "appAvailabilities",
+            "attributes": {"availableInNewTerritories": True},
+            "relationships": {
+                "app": {"data": {"type": "apps", "id": APP_ID}},
+                "territoryAvailabilities": {"data": refs},
+            },
+        },
+        "included": included,
+    })
+    log(f"App made available in {len(territories)} territories (and new ones).")
+
+
 def cmd_locale(client):
     set_primary_locale(client)
 
@@ -700,7 +743,7 @@ def main():
     command = sys.argv[1] if len(sys.argv) > 1 else "status"
     handlers = {"status": cmd_status, "prepare": cmd_prepare,
                 "configure": cmd_configure, "locale": cmd_locale, "submit": cmd_submit,
-                "cancel": cmd_cancel}
+                "cancel": cmd_cancel, "availability": cmd_availability}
     if command not in handlers:
         sys.exit(f"Unknown command {command}; use one of {', '.join(handlers)}.")
     handlers[command](Client())

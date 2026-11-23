@@ -12,6 +12,10 @@ on:
       - "store/**"
   workflow_dispatch:
     inputs:
+      make_available:
+        description: "Make the app available in all countries (only needed once)"
+        type: boolean
+        default: false
       status_only:
         description: "Only show the App Store Connect state; change nothing"
         type: boolean
@@ -122,6 +126,12 @@ jobs:
 
       - name: App Store Connect state (before)
         run: $ASC_PY .github/workflows/scripts/asc_check.py status
+
+      - name: Make app available in all countries
+        if: github.event_name == 'workflow_dispatch' && inputs.make_available
+        run: |
+          $ASC_PY .github/workflows/scripts/asc_check.py availability
+          $ASC_PY .github/workflows/scripts/asc_check.py status
 
       - name: Withdraw pending review
         if: (github.event_name == 'workflow_dispatch' && inputs.cancel_pending_review) && !inputs.status_only
