@@ -170,7 +170,7 @@ def cmd_status(client):
             log("availability: NONE SET (app is in no territory)")
         else:
             log(f"availability: availableInNewTerritories={avail['attributes'].get('availableInNewTerritories')}")
-            terr = client.get(f"appAvailabilities/{avail['id']}/territoryAvailabilities",
+            terr = client.get(f"https://api.appstoreconnect.apple.com/v2/appAvailabilities/{avail['id']}/territoryAvailabilities",
                               params={"limit": 200})["data"]
             on = [t for t in terr if t["attributes"].get("available")]
             states = {}
